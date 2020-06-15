@@ -6,6 +6,8 @@ import de.gleyder.admiral.node.NodeKey;
 import de.gleyder.admiral.node.NodeKeyType;
 import de.gleyder.admiral.parser.InputArgument;
 import de.gleyder.admiral.parser.InputParser;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +21,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CommandSolver {
 
-  private final CommandNode rootNode = new CommandNode(NodeKey.ofString("root"));
+  @Getter(AccessLevel.PACKAGE)
+  private final CommandNode rootNode = new CommandNode(NodeKey.ofStatic("root"));
   private final InputParser parser;
 
   public CommandSolver(@Nullable InputParser parser) {
@@ -76,6 +79,16 @@ public class CommandSolver {
       node.getExecutor().ifPresent(executor -> executor.execute(context));
       index++;
     }
+  }
+
+  public CommandRoute findRoute(@NonNull Deque<InputArgument> argumentDeque) {
+    CommandRoute commandRoute = new CommandRoute();
+    route(rootNode, commandRoute, argumentDeque);
+    return commandRoute;
+  }
+
+  public CommandRoute findRoute(@NonNull String command) {
+    return findRoute(new ArrayDeque<>(parser.parseCommand(command.split("\\s+"))));
   }
 
   private void route(@NonNull CommandNode node, @NonNull CommandRoute route,

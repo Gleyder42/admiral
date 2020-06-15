@@ -53,7 +53,7 @@ public class InputParserTest {
     List<InputArgument> actual = parseCommand("hello world (this is cool) ((now this) (is epic)) ok boys");
     List<InputArgument> expected = new ArrayList<>();
     expected.addAll(singleLineArguments("hello", "world"));
-    expected.add(new InputArgument("this is cool"));
+    expected.add(singleInputArgument("this", "is", "cool"));
     expected.add(singleInputArgument("now this", "is epic"));
     expected.addAll(singleLineArguments("ok", "boys"));
 
@@ -94,5 +94,4 @@ public class InputParserTest {
     inputArgument.getInputs().addAll(Arrays.asList(stingArray));
     return inputArgument;
   }
-
 }

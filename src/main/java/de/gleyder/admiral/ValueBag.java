@@ -36,6 +36,21 @@ public final class ValueBag {
     return Optional.of((List<T>) getMap(key));
   }
 
+  public List<Object> getAll() {
+    List<Object> objectList = new ArrayList<>();
+    map.forEach((key, value) -> {
+      if (value.isEmpty()) {
+        return;
+      }
+      if (value.size() == 1) {
+        objectList.add(value.get(0));
+      } else {
+        objectList.add(value);
+      }
+    });
+    return objectList;
+  }
+
   private List<Object> getMap(String key) {
     return map.computeIfAbsent(key, ignored -> new ArrayList<>());
   }

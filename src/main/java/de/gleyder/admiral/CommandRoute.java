@@ -1,19 +1,21 @@
 package de.gleyder.admiral;
 
 import de.gleyder.admiral.node.CommandNode;
-import lombok.NonNull;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode
 @ToString
 public class CommandRoute {
 
   private final List<Throwable> errorMessages = new ArrayList<>();
+
+  @Getter(AccessLevel.PACKAGE)
   private final List<CommandNode> nodeList;
 
-  private CommandRoute(@NonNull List<CommandNode> nodeList) {
+  public CommandRoute(@NonNull List<CommandNode> nodeList) {
     this.nodeList = nodeList;
   }
 

@@ -3,6 +3,7 @@ package de.gleyder.admiral;
 import de.gleyder.admiral.interpreter.IntegerInterpreter;
 import de.gleyder.admiral.interpreter.strategy.SingleStrategy;
 import de.gleyder.admiral.node.CommandNode;
+import de.gleyder.admiral.node.NodeKey;
 import de.gleyder.admiral.node.StringNodeKey;
 import de.gleyder.admiral.node.TypeNoteKey;
 import de.gleyder.admiral.parser.InputArgument;

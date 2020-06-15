@@ -6,7 +6,6 @@ import de.gleyder.admiral.interpreter.Interpreter;
 import de.gleyder.admiral.interpreter.StringInterpreter;
 import de.gleyder.admiral.interpreter.strategy.InterpreterStrategy;
 import de.gleyder.admiral.interpreter.strategy.MergedStrategy;
-import de.gleyder.admiral.parser.InputArgument;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
