@@ -8,5 +8,4 @@ public class StaticNodeBuilder extends CommandNodeBuilder<StaticNodeBuilder, Sta
   public StaticNodeBuilder(@NonNull String key) {
     super(new StaticNode(key));
   }
-
 }

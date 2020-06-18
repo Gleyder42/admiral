@@ -23,5 +23,4 @@ public class MethodExecutor implements Executor {
       log.error("An error occurred while executing a command", e);
     }
   }
-
 }

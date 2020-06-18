@@ -69,5 +69,4 @@ public abstract class CommandNode<K extends NodeKey> {
   public String toString() {
     return key.get();
   }
-
 }

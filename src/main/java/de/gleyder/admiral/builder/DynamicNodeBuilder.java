@@ -20,5 +20,4 @@ public class DynamicNodeBuilder extends CommandNodeBuilder<DynamicNodeBuilder, D
     node.setInterpreter(interpreter);
     return this;
   }
-
 }

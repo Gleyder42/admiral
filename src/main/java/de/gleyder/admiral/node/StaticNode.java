@@ -9,5 +9,4 @@ public class StaticNode extends CommandNode<StringNodeKey> {
   public StaticNode(@NonNull String string) {
     super(NodeKey.ofStatic(string));
   }
-
 }
