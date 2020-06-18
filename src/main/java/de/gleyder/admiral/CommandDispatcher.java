@@ -13,10 +13,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,24 +35,24 @@ public class CommandDispatcher {
     rootNode.addNode(node);
   }
 
-  public void resolve(@NonNull String command, @NonNull Object source) {
+  public void dispatch(@NonNull String command, @NonNull Object source, @NonNull Map<String, Object> interpreterMap) {
     CommandRoute commandRoute = new CommandRoute();
     ArrayDeque<InputArgument> argumentDeque = new ArrayDeque<>(parser.parse(command));
 
     try {
-      route(rootNode, commandRoute, new ArrayDeque<>(argumentDeque));
+      route(rootNode, commandRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
     } catch (CommandDispatcherException exception) {
       log.error("Ambiguous routes found: {}", exception.getRouteList());
       return;
     }
 
     if (commandRoute.isInvalid()) {
-      log.error("No route found!");
+      log.error("No route found");
       commandRoute.getErrors().forEach(Throwable::printStackTrace);
       return;
     }
 
-    log.info("Route found!: {}", commandRoute);
+    log.debug("Route found '{}'", commandRoute);
 
     ValueBag valueBag = new ValueBag();
     CommandContext<Object> context = new CommandContext<>(source, valueBag);
@@ -68,7 +65,7 @@ public class CommandDispatcher {
         throw new CommandDispatcherException("Node's '{}' required test failed", List.of(commandRoute));
       }
 
-      node.onCommandCycle(context, argument);
+      node.onCommandProcess(context, interpreterMap, argument);
 
       node.getExecutor().ifPresent(executor -> executor.execute(context));
       index++;
@@ -77,7 +74,7 @@ public class CommandDispatcher {
 
   public CommandRoute findRoute(@NonNull Deque<InputArgument> argumentDeque) {
     CommandRoute commandRoute = new CommandRoute();
-    route(rootNode, commandRoute, argumentDeque);
+    route(rootNode, commandRoute, argumentDeque, new HashMap<>());
     return commandRoute;
   }
 
@@ -86,7 +83,7 @@ public class CommandDispatcher {
   }
 
   private void route(@NonNull CommandNode<?> node, @NonNull CommandRoute route,
-                     @NonNull Deque<InputArgument> argumentDeque) {
+                     @NonNull Deque<InputArgument> argumentDeque, @NonNull Map<String, Object> interpreterMap) {
     route.add(node);
     if (node.isLeaf()) {
       if (!argumentDeque.isEmpty()) {
@@ -106,15 +103,15 @@ public class CommandDispatcher {
     if (inputArgument.isSingle()) {
       Optional<CommandNode<NodeKey>> nextNodeOptional = node.getNextNode(inputArgument.getMerged());
       if (nextNodeOptional.isPresent()) {
-        route(nextNodeOptional.get(), route, argumentDeque);
+        route(nextNodeOptional.get(), route, argumentDeque, interpreterMap);
         return;
       }
     }
 
-    List<DynamicNode> undeterminedNodes = node.getDynamicNodes().stream()
+    List<DynamicNode> dynamicNodeList = node.getDynamicNodes().stream()
         .filter(filterNode -> {
           List<InterpreterResult<Object>> interpreterResults =
-              filterNode.getInterpreterStrategy().test(filterNode.getInterpreter(), inputArgument);
+              filterNode.getInterpreterStrategy().test(filterNode.getInterpreter(), inputArgument, interpreterMap);
           interpreterResults.stream()
               .filter(InterpreterResult::failed)
               .forEach(result -> route.addError(result.getError().orElseThrow()));
@@ -122,13 +119,13 @@ public class CommandDispatcher {
         })
         .collect(Collectors.toUnmodifiableList());
 
-    if (undeterminedNodes.size() == 1) {
-      route(undeterminedNodes.get(0), route, argumentDeque);
+    if (dynamicNodeList.size() == 1) {
+      route(dynamicNodeList.get(0), route, argumentDeque, interpreterMap);
     } else {
-      List<CommandRoute> alternateRoutes = undeterminedNodes.stream()
+      List<CommandRoute> alternateRoutes = dynamicNodeList.stream()
           .map(undeterminedNode -> {
             CommandRoute copyRoute = route.duplicate();
-            route(undeterminedNode, copyRoute, new ArrayDeque<>(argumentDeque));
+            route(undeterminedNode, copyRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
             return copyRoute;
           })
           .filter(CommandRoute::isValid)

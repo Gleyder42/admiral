@@ -2,7 +2,7 @@ package de.gleyder.admiral.interpreter;
 
 import lombok.NonNull;
 
-public class IntegerInterpreter implements Interpreter<Integer> {
+public class IntegerInterpreter implements SimpleInterpreter<Integer> {
 
   @Override
   public InterpreterResult<Integer> interpret(@NonNull String argument) {

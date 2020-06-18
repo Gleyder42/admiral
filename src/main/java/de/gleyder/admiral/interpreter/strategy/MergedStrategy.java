@@ -6,13 +6,13 @@ import de.gleyder.admiral.parser.InputArgument;
 import lombok.NonNull;
 
 import java.util.List;
+import java.util.Map;
 
 public class MergedStrategy implements InterpreterStrategy {
 
   @Override
-  public List<InterpreterResult<Object>> test(@NonNull Interpreter<?> interpreter, @NonNull InputArgument inputArgument) {
-    @SuppressWarnings("unchecked") InterpreterResult<Object> result =
-        (InterpreterResult<Object>) interpreter.interpret(inputArgument.getMerged());
-    return List.of(result);
+  public List<InterpreterResult<Object>> test(@NonNull Interpreter<?> interpreter, @NonNull InputArgument inputArgument, @NonNull Map<String, Object> map) {
+    //noinspection unchecked
+    return List.of( (InterpreterResult<Object>) interpreter.interpret(map, inputArgument.getMerged()));
   }
 }

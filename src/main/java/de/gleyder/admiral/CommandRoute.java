@@ -32,10 +32,6 @@ public class CommandRoute {
     errorMessages.add(error);
   }
 
-  public void addErrors(@NonNull List<Throwable> throwableList) {
-    errorMessages.addAll(throwableList);
-  }
-
   public void addAll(@NonNull CommandRoute route) {
     this.nodeList.addAll(route.nodeList);
   }

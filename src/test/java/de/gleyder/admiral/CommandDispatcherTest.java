@@ -10,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -140,12 +137,12 @@ public class CommandDispatcherTest {
 
   @Test
   void shouldThrowExceptionIfRequiredNegative() {
-    assertThrows(CommandDispatcherException.class, () -> dispatcher.resolve("test echo required", new Object()));
+    assertThrows(CommandDispatcherException.class, () -> dispatcher.dispatch("test echo required", new Object(), new HashMap<>()));
   }
 
   @Test
   void shouldNotThrowExceptionIfRequiredPositive() {
-    assertDoesNotThrow(() -> dispatcher.resolve("test echo 10 required", new Object()));
+    assertDoesNotThrow(() -> dispatcher.dispatch("test echo 10 required", new Object(), new HashMap<>()));
   }
 
   @SafeVarargs

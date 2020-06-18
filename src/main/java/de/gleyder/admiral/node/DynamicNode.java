@@ -14,6 +14,7 @@ import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 public class DynamicNode extends CommandNode<TypeNodeKey<?>> {
 
@@ -30,8 +31,9 @@ public class DynamicNode extends CommandNode<TypeNodeKey<?>> {
   }
 
   @Override
-  public void onCommandCycle(@NonNull CommandContext<?> context, @NonNull InputArgument argument) {
-    List<InterpreterResult<Object>> results = interpreterStrategy.test(interpreter, argument);
+  public void onCommandProcess(@NonNull CommandContext<?> context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) {
+    List<InterpreterResult<Object>> results = interpreterStrategy.test(interpreter, inputArgument, interpreterMap);
+
     results.forEach(result -> {
       if (result.succeeded()) {
         context.getBag().add(getKey().get(), result.getValue().orElseThrow());

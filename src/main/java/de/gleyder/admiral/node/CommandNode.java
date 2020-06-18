@@ -35,7 +35,7 @@ public abstract class CommandNode<K extends NodeKey> {
     this.key = key;
   }
 
-  public void onCommandCycle(@NonNull CommandContext<?> context, @NonNull InputArgument inputArgument) { }
+  public void onCommandProcess(@NonNull CommandContext<?> context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) { }
 
   public void addNode(@NonNull CommandNode<?> node) {
     this.nodeMap.put(node.getKey(), node);

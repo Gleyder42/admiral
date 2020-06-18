@@ -2,11 +2,8 @@ package de.gleyder.admiral;
 
 import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public class ValueBag {
 
@@ -53,5 +50,17 @@ public class ValueBag {
 
   private List<Object> getMap(String key) {
     return map.computeIfAbsent(key, ignored -> new ArrayList<>());
+  }
+
+  public Set<String> keySet() {
+    return map.keySet();
+  }
+
+  public void forEach(@NonNull BiConsumer<String, List<Object>> consumer) {
+    map.forEach(consumer);
+  }
+
+  public Set<Map.Entry<String, List<Object>>> entrySet() {
+    return map.entrySet();
   }
 }
