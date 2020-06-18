@@ -1,8 +1,7 @@
 package de.gleyder.admiral;
 
 import de.gleyder.admiral.interpreter.IntegerInterpreter;
-import de.gleyder.admiral.node.CommandNode;
-import de.gleyder.admiral.node.NodeKey;
+import de.gleyder.admiral.node.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,25 +20,29 @@ public class AdmiralTest {
 
   private final CommandSolver solver = new CommandSolver();
 
-  private final CommandNode testNode = new CommandNode(NodeKey.ofStatic("test"));
-  private final CommandNode echoNode = new CommandNode(NodeKey.ofStatic("echo"))
-          .setExecutor(context -> log.info("This echo node has an executor but not a value!"));
-  private final CommandNode createNode = new CommandNode(NodeKey.ofStatic("create"));
+  private final StaticNode testNode = new StaticNode("test");
+  private final StaticNode echoNode = new StaticNodeBuilder("echo")
+          .setExecutor(context -> log.info("This echo node has an executor but not a value!"))
+          .build();
+  private final StaticNode createNode = new StaticNode("create");
 
-  private final CommandNode stringLogNode = new CommandNode(NodeKey.ofDynamic(String.class, "string"))
-          .setExecutor(context -> log.info("Echo {}", context.getBag().get("string").orElseThrow()));
+  private final DynamicNode stringLogNode = new DynamicNodeBuilder(String.class, "string")
+          .setExecutor(context -> log.info("Echo {}", context.getBag().get("string").orElseThrow()))
+          .build();
 
-  private final CommandNode integerLogNode = new CommandNode(NodeKey.ofDynamic(Integer.class, "int"))
+  private final DynamicNode integerLogNode = new DynamicNodeBuilder(Integer.class, "int")
           .setExecutor(context -> log.info("Int Echo: {}", context.getBag().get("int").orElseThrow()))
-          .setInterpreter(new IntegerInterpreter());
+          .setInterpreter(new IntegerInterpreter())
+          .build();
 
-  private final CommandNode optionalNode = new CommandNode(NodeKey.ofStatic("optional"))
+  private final StaticNode optionalNode = new StaticNodeBuilder("optional")
           .setExecutor(context -> {
             Optional<Integer> anInt = context.getBag().get("int");
             Optional<String> string = context.getBag().get("string");
 
             log.info("Echo Int: {} String: {}", anInt.orElse(-1), string.orElse("haus"));
-          });
+          })
+          .build();
 
   @BeforeEach
   void setup() {

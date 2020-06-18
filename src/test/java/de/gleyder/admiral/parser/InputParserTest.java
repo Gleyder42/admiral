@@ -61,7 +61,7 @@ public class InputParserTest {
   }
 
   private List<InputArgument> parseCommand(String command) {
-    return inputParser.parseCommand(command(command));
+    return inputParser.parse(command);
   }
 
   private String[] command(String command) {

@@ -3,7 +3,7 @@ package de.gleyder.admiral;
 import de.gleyder.admiral.interpreter.InterpreterResult;
 import de.gleyder.admiral.node.CommandNode;
 import de.gleyder.admiral.node.NodeKey;
-import de.gleyder.admiral.node.NodeKeyType;
+import de.gleyder.admiral.node.StaticNode;
 import de.gleyder.admiral.parser.InputArgument;
 import de.gleyder.admiral.parser.InputParser;
 import lombok.AccessLevel;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class CommandSolver {
 
   @Getter(AccessLevel.PACKAGE)
-  private final CommandNode rootNode = new CommandNode(NodeKey.ofStatic("root"));
+  private final StaticNode rootNode = new StaticNode("root");
   private final InputParser parser;
 
   public CommandSolver(@Nullable InputParser parser) {
@@ -39,7 +39,7 @@ public class CommandSolver {
 
   public void resolve(@NonNull String command, @NonNull Object source) {
     CommandRoute commandRoute = new CommandRoute();
-    ArrayDeque<InputArgument> argumentDeque = new ArrayDeque<>(parser.parseCommand(command.split("\\s+")));
+    ArrayDeque<InputArgument> argumentDeque = new ArrayDeque<>(parser.parse(command));
 
     try {
       route(rootNode, commandRoute, new ArrayDeque<>(argumentDeque));
@@ -61,20 +61,13 @@ public class CommandSolver {
     int index = 1;
     while (!argumentDeque.isEmpty()) {
       InputArgument argument = argumentDeque.pop();
-      CommandNode node = commandRoute.get(index);
+      CommandNode<?> node = commandRoute.get(index);
 
       if (node.getRequired().isPresent() && !node.getRequired().get().test(context)) {
         continue;
       }
 
-      List<InterpreterResult<Object>> results = node.getInterpreterStrategy().test(node.getInterpreter(), argument);
-      results.forEach(result -> {
-        if (result.succeeded()) {
-          context.getBag().add(node.getKey().get(), result.getValue().orElseThrow());
-        } else {
-          result.getError().ifPresent(Throwable::printStackTrace);
-        }
-      });
+      node.onCommandCycle(context, argument);
 
       node.getExecutor().ifPresent(executor -> executor.execute(context));
       index++;
@@ -88,10 +81,10 @@ public class CommandSolver {
   }
 
   public CommandRoute findRoute(@NonNull String command) {
-    return findRoute(new ArrayDeque<>(parser.parseCommand(command.split("\\s+"))));
+    return findRoute(new ArrayDeque<>(parser.parse(command)));
   }
 
-  private void route(@NonNull CommandNode node, @NonNull CommandRoute route,
+  private void route(@NonNull CommandNode<?> node, @NonNull CommandRoute route,
                      @NonNull Deque<InputArgument> argumentDeque) {
     route.add(node);
     if (node.isLeaf()) {
@@ -110,14 +103,14 @@ public class CommandSolver {
 
     InputArgument inputArgument = argumentDeque.pop();
     if (inputArgument.isSingle()) {
-      Optional<CommandNode> nextNodeOptional = node.getNextNode(inputArgument.getMerged());
+      Optional<CommandNode<NodeKey>> nextNodeOptional = node.getNextNode(inputArgument.getMerged());
       if (nextNodeOptional.isPresent()) {
         route(nextNodeOptional.get(), route, argumentDeque);
         return;
       }
     }
 
-    List<CommandNode> undeterminedNodes = node.getNodes(NodeKeyType.UNDETERMINED).stream()
+    List<CommandNode> undeterminedNodes = node.getDynamicNodes().stream()
         .filter(filterNode -> {
           List<InterpreterResult<Object>> interpreterResults =
               filterNode.getInterpreterStrategy().test(filterNode.getInterpreter(), inputArgument);

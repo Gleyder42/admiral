@@ -12,11 +12,6 @@ public class StringNodeKey implements NodeKey {
     this.key = key;
   }
 
-  @Override
-  public NodeKeyType getType() {
-    return NodeKeyType.DETERMINED;
-  }
-
   public String get() {
     return key;
   }

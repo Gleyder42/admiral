@@ -19,11 +19,6 @@ public class TypeNoteKey<T> implements NodeKey {
   }
 
   @Override
-  public NodeKeyType getType() {
-    return NodeKeyType.UNDETERMINED;
-  }
-
-  @Override
   public String get() {
     return name;
   }

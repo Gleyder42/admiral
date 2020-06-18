@@ -2,14 +2,13 @@ package de.gleyder.admiral.node;
 
 import de.gleyder.admiral.CommandContext;
 import de.gleyder.admiral.Executor;
-import de.gleyder.admiral.interpreter.Interpreter;
-import de.gleyder.admiral.interpreter.StringInterpreter;
-import de.gleyder.admiral.interpreter.strategy.InterpreterStrategy;
-import de.gleyder.admiral.interpreter.strategy.MergedStrategy;
+import de.gleyder.admiral.parser.InputArgument;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +18,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Accessors(chain = true)
-public class CommandNode {
+public abstract class CommandNode<K extends NodeKey> {
 
-  private final Map<NodeKey, CommandNode> nodeMap = new HashMap<>();
+  private final Map<NodeKey, CommandNode<?>> nodeMap = new HashMap<>();
 
   @Getter
-  private final NodeKey key;
+  private final K key;
 
   @Setter
   private Predicate<CommandContext<? super Object>> required;
@@ -32,19 +31,13 @@ public class CommandNode {
   @Setter
   private Executor executor;
 
-  @Setter
-  @Getter
-  private InterpreterStrategy interpreterStrategy = new MergedStrategy();
-
-  @Setter
-  @Getter
-  private Interpreter<?> interpreter = new StringInterpreter();
-
-  public CommandNode(@NonNull NodeKey key) {
+  public CommandNode(@NonNull K key) {
     this.key = key;
   }
 
-  public void addNode(@NonNull CommandNode node) {
+  public void onCommandCycle(@NonNull CommandContext<?> context, @NonNull InputArgument inputArgument) { }
+
+  public void addNode(@NonNull CommandNode<?> node) {
     this.nodeMap.put(node.getKey(), node);
   }
 
@@ -60,18 +53,21 @@ public class CommandNode {
     return Optional.ofNullable(executor);
   }
 
-  public List<CommandNode> getNodes(@NonNull NodeKeyType type) {
+  public List<DynamicNode> getDynamicNodes() {
     return nodeMap.values().stream()
-        .filter(node -> node.getKey().getType() == type)
-        .collect(Collectors.toUnmodifiableList());
+            .filter(node -> node instanceof DynamicNode)
+            .map(node -> (DynamicNode) node)
+            .collect(Collectors.toUnmodifiableList());
   }
 
-  public Optional<CommandNode> getNextNode(@NonNull String key) {
-    return Optional.ofNullable(nodeMap.get(new StringNodeKey(key)));
+  public Optional<CommandNode<NodeKey>> getNextNode(@NonNull String key) {
+    //noinspection unchecked
+    return Optional.ofNullable((CommandNode<NodeKey>) nodeMap.get(new StringNodeKey(key)));
   }
 
   @Override
   public String toString() {
     return key.get();
   }
+
 }
