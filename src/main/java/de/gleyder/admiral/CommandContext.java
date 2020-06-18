@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 
 @Getter
-public final class CommandContext<T> {
+public class CommandContext<T> {
 
   private final T source;
   private final ValueBag bag;

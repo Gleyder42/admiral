@@ -1,4 +1,4 @@
-package de.gleyder.admiral.node;
+package de.gleyder.admiral.node.key;
 
 import lombok.NonNull;
 
@@ -10,7 +10,7 @@ public interface NodeKey {
     return new StringNodeKey(key);
   }
 
-  static <T> TypeNoteKey<T> ofDynamic(@NonNull Class<T> aClass, @NonNull String key) {
-    return new TypeNoteKey<>(aClass, key);
+  static <T> TypeNodeKey<T> ofDynamic(@NonNull Class<T> aClass, @NonNull String key) {
+    return new TypeNodeKey<>(aClass, key);
   }
 }

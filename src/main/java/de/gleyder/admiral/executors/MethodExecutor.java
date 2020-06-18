@@ -1,7 +1,6 @@
 package de.gleyder.admiral.executors;
 
 import de.gleyder.admiral.CommandContext;
-import de.gleyder.admiral.Executor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-/**
- * @author Eric
- * @version 15.06.2020
- */
 @Slf4j
 @RequiredArgsConstructor
 public class MethodExecutor implements Executor {

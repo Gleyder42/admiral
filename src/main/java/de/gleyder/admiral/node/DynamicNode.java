@@ -6,6 +6,8 @@ import de.gleyder.admiral.interpreter.InterpreterResult;
 import de.gleyder.admiral.interpreter.StringInterpreter;
 import de.gleyder.admiral.interpreter.strategy.InterpreterStrategy;
 import de.gleyder.admiral.interpreter.strategy.MergedStrategy;
+import de.gleyder.admiral.node.key.NodeKey;
+import de.gleyder.admiral.node.key.TypeNodeKey;
 import de.gleyder.admiral.parser.InputArgument;
 import lombok.Getter;
 import lombok.NonNull;
@@ -13,11 +15,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * @author Eric
- * @version 18.06.2020
- */
-public class DynamicNode extends CommandNode<TypeNoteKey<?>> {
+public class DynamicNode extends CommandNode<TypeNodeKey<?>> {
 
   @Setter
   @Getter

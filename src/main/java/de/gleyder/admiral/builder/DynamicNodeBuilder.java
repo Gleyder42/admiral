@@ -1,13 +1,10 @@
-package de.gleyder.admiral.node;
+package de.gleyder.admiral.builder;
 
 import de.gleyder.admiral.interpreter.Interpreter;
 import de.gleyder.admiral.interpreter.strategy.InterpreterStrategy;
+import de.gleyder.admiral.node.DynamicNode;
 import lombok.NonNull;
 
-/**
- * @author Eric
- * @version 18.06.2020
- */
 public class DynamicNodeBuilder extends CommandNodeBuilder<DynamicNodeBuilder, DynamicNode> {
 
   public DynamicNodeBuilder(@NonNull Class<?> aClass, @NonNull String key) {

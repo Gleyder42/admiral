@@ -1,6 +1,8 @@
 package de.gleyder.admiral.parser;
 
+import de.gleyder.admiral.AdmiralCommon;
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -17,9 +19,19 @@ import java.util.stream.Collectors;
  */
 public class InputParser {
 
-  private final char start = '(';
-  private final char end = ')';
-  private final char divide = ' ';
+  private final char start;
+  private final char end;
+  private final char divider;
+
+  public InputParser(@Nullable Character start, @Nullable Character end, @Nullable Character divider) {
+    this.start = AdmiralCommon.standard(start, '(');
+    this.end = AdmiralCommon.standard(end, ')');
+    this.divider = AdmiralCommon.standard(divider, ' ');
+  }
+
+  public InputParser() {
+    this(null, null, null);
+  }
 
   public List<InputArgument> parse(@NonNull String command) {
     ArrayDeque<Character> collect = command.chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(ArrayDeque::new));
@@ -34,11 +46,11 @@ public class InputParser {
     while (!characterDeque.isEmpty()) {
       Character currentChar = characterDeque.pop();
 
-      if (currentChar != divide && currentChar != start && currentChar != end) {
+      if (currentChar != divider && currentChar != start && currentChar != end) {
         builder.append(currentChar);
       }
 
-      if (currentChar == divide || characterDeque.isEmpty() || currentChar == end) {
+      if (currentChar == divider || characterDeque.isEmpty() || currentChar == end) {
         String input = builder.toString();
         if (!input.isEmpty()) {
           argumentLinkedList.add(new InputArgument(input));

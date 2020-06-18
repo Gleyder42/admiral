@@ -2,7 +2,8 @@ package de.gleyder.admiral;
 
 import de.gleyder.admiral.interpreter.InterpreterResult;
 import de.gleyder.admiral.node.CommandNode;
-import de.gleyder.admiral.node.NodeKey;
+import de.gleyder.admiral.node.DynamicNode;
+import de.gleyder.admiral.node.key.NodeKey;
 import de.gleyder.admiral.node.StaticNode;
 import de.gleyder.admiral.parser.InputArgument;
 import de.gleyder.admiral.parser.InputParser;
@@ -19,21 +20,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class CommandSolver {
+public class CommandDispatcher {
 
   @Getter(AccessLevel.PACKAGE)
   private final StaticNode rootNode = new StaticNode("root");
   private final InputParser parser;
 
-  public CommandSolver(@Nullable InputParser parser) {
+  public CommandDispatcher(@Nullable InputParser parser) {
     this.parser = AdmiralCommon.standard(parser, new InputParser());
   }
 
-  public CommandSolver() {
+  public CommandDispatcher() {
     this(null);
   }
 
-  public void registerCommand(@NonNull CommandNode node) {
+  public void registerCommand(@NonNull CommandNode<? extends NodeKey> node) {
     rootNode.addNode(node);
   }
 
@@ -43,7 +44,7 @@ public class CommandSolver {
 
     try {
       route(rootNode, commandRoute, new ArrayDeque<>(argumentDeque));
-    } catch (CommandSolverException exception) {
+    } catch (CommandDispatcherException exception) {
       log.error("Ambiguous routes found: {}", exception.getRouteList());
       return;
     }
@@ -64,7 +65,7 @@ public class CommandSolver {
       CommandNode<?> node = commandRoute.get(index);
 
       if (node.getRequired().isPresent() && !node.getRequired().get().test(context)) {
-        continue;
+        throw new CommandDispatcherException("Node's '{}' required test failed", List.of(commandRoute));
       }
 
       node.onCommandCycle(context, argument);
@@ -110,7 +111,7 @@ public class CommandSolver {
       }
     }
 
-    List<CommandNode> undeterminedNodes = node.getDynamicNodes().stream()
+    List<DynamicNode> undeterminedNodes = node.getDynamicNodes().stream()
         .filter(filterNode -> {
           List<InterpreterResult<Object>> interpreterResults =
               filterNode.getInterpreterStrategy().test(filterNode.getInterpreter(), inputArgument);
@@ -137,7 +138,7 @@ public class CommandSolver {
       if (alternateRoutes.size() == 1) {
         route.addAll(alternateRoutes.get(0));
       } else if (alternateRoutes.size() > 1) {
-        throw new CommandSolverException("Multiple command routes found", alternateRoutes);
+        throw new CommandDispatcherException("Multiple command routes found", alternateRoutes);
       }
     }
   }

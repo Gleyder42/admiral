@@ -9,10 +9,6 @@ import java.util.List;
 
 /**
  * Represents a sender input
- *
- * @author Gleyder
- * @version 1.0
- * @since 1.0
  */
 @ToString
 @EqualsAndHashCode

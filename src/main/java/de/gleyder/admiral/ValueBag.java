@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ValueBag {
+public class ValueBag {
 
   private final Map<String, List<Object>> map = new HashMap<>();
 

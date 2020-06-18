@@ -14,10 +14,8 @@ public class SingleStrategy implements InterpreterStrategy {
   public List<InterpreterResult<Object>> test(@NonNull Interpreter<?> interpreter,
                                               @NonNull InputArgument inputArgument) {
     List<InterpreterResult<Object>> resultList = new ArrayList<>();
-    inputArgument.getInputs().forEach(argument -> {
-      //noinspection unchecked
-      resultList.add((InterpreterResult<Object>) interpreter.interpret(argument));
-    });
+    //noinspection unchecked
+    inputArgument.getInputs().forEach(argument -> resultList.add((InterpreterResult<Object>) interpreter.interpret(argument)));
     return resultList;
   }
 }

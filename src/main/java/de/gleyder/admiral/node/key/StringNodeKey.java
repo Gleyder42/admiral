@@ -1,4 +1,4 @@
-package de.gleyder.admiral.node;
+package de.gleyder.admiral.node.key;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;

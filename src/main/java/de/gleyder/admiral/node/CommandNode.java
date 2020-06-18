@@ -1,14 +1,14 @@
 package de.gleyder.admiral.node;
 
 import de.gleyder.admiral.CommandContext;
-import de.gleyder.admiral.Executor;
+import de.gleyder.admiral.executors.Executor;
+import de.gleyder.admiral.node.key.NodeKey;
+import de.gleyder.admiral.node.key.StringNodeKey;
 import de.gleyder.admiral.parser.InputArgument;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
 
 import java.util.HashMap;
 import java.util.List;

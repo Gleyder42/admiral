@@ -1,7 +1,11 @@
 package de.gleyder.admiral;
 
+import de.gleyder.admiral.builder.DynamicNodeBuilder;
+import de.gleyder.admiral.builder.StaticNodeBuilder;
 import de.gleyder.admiral.interpreter.IntegerInterpreter;
+import de.gleyder.admiral.interpreter.strategy.MergedStrategy;
 import de.gleyder.admiral.node.*;
+import de.gleyder.admiral.node.key.NodeKey;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,17 +20,21 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-public class AdmiralTest {
+public class CommandDispatcherTest {
 
-  private final CommandSolver solver = new CommandSolver();
+  private final CommandDispatcher dispatcher = new CommandDispatcher();
 
   private final StaticNode testNode = new StaticNode("test");
   private final StaticNode echoNode = new StaticNodeBuilder("echo")
           .setExecutor(context -> log.info("This echo node has an executor but not a value!"))
           .build();
   private final StaticNode createNode = new StaticNode("create");
+  private final StaticNode requireNode = new StaticNodeBuilder("required")
+          .setRequired(context -> context.getBag().get("int").isPresent())
+          .build();
 
   private final DynamicNode stringLogNode = new DynamicNodeBuilder(String.class, "string")
+          .setInterpreterStrategy(new MergedStrategy())
           .setExecutor(context -> log.info("Echo {}", context.getBag().get("string").orElseThrow()))
           .build();
 
@@ -48,36 +56,41 @@ public class AdmiralTest {
   void setup() {
     echoNode.addNode(integerLogNode);
     echoNode.addNode(stringLogNode);
+    echoNode.addNode(requireNode);
 
     testNode.addNode(echoNode);
     testNode.addNode(createNode);
 
     createNode.addNode(optionalNode);
     createNode.addNode(integerLogNode);
+
     integerLogNode.addNode(stringLogNode);
+    integerLogNode.addNode(requireNode);
+
     stringLogNode.addNode(optionalNode);
 
-    solver.registerCommand(testNode);
+    dispatcher.registerCommand(testNode);
   }
 
   @Test
   void shouldFindOptionalNodeWithValue() {
-    CommandRoute actual = solver.findRoute("test create 10 test optional");
+    CommandRoute actual = dispatcher.findRoute("test create 10 test optional");
 
     assertEqualsRoute(actual, testNode, createNode, integerLogNode, stringLogNode, optionalNode);
   }
 
   @Test
   void shouldFindOptionalNodeWithoutValues() {
-    CommandRoute actual = solver.findRoute("test create optional");
+    CommandRoute actual = dispatcher.findRoute("test create optional");
 
     assertEqualsRoute(actual, testNode, createNode, optionalNode);
   }
 
   @Test
   void shouldFindEchoRoute() {
-    CommandRoute actual = solver.findRoute("test echo (Hallo Welt)");
+    CommandRoute actual = dispatcher.findRoute("test echo (Hallo Welt)");
     Exception exception = assertThrows(NumberFormatException.class, () -> {
+      //noinspection ResultOfMethodCallIgnored
       Integer.parseInt("Hallo Welt");
     });
 
@@ -87,34 +100,59 @@ public class AdmiralTest {
     );
 
     assertIterableEquals(
-            List.of(solver.getRootNode(), testNode, echoNode, stringLogNode),
+            List.of(dispatcher.getRootNode(), testNode, echoNode, stringLogNode),
             actual.getNodeList()
     );
   }
 
   @Test
   void shouldNotFindTestRoute() {
-    CommandRoute actual = solver.findRoute("test");
+    CommandRoute actual = dispatcher.findRoute("test");
 
     assertEqualsRoute(actual);
   }
 
   @Test
   void shouldFindEchoNode() {
-    CommandRoute actual = solver.findRoute("test echo");
+    CommandRoute actual = dispatcher.findRoute("test echo");
 
     assertEqualsRoute(actual, testNode, echoNode);
   }
 
   @Test
   void shouldThrowCommandSolverException() {
-    assertThrows(CommandSolverException.class, () -> solver.findRoute("test echo 10"));
+    assertThrows(CommandDispatcherException.class, () -> dispatcher.findRoute("test echo 10"));
   }
 
-  private void assertEqualsRoute(CommandRoute actual, CommandNode... nodes) {
-    List<CommandNode> nodeList = new ArrayList<>(nodes.length + 1);
+  @Test
+  void shoutRouteWithRequired() {
+    CommandRoute actual = dispatcher.findRoute("test echo 10 required");
+
+    assertEqualsRoute(actual, testNode, echoNode, integerLogNode, requireNode);
+  }
+
+  @Test
+  void shoutRouteWithoutRequired() {
+    CommandRoute actual = dispatcher.findRoute("test echo required");
+
+    assertEqualsRoute(actual, testNode, echoNode, requireNode);
+  }
+
+  @Test
+  void shouldThrowExceptionIfRequiredNegative() {
+    assertThrows(CommandDispatcherException.class, () -> dispatcher.resolve("test echo required", new Object()));
+  }
+
+  @Test
+  void shouldNotThrowExceptionIfRequiredPositive() {
+    assertDoesNotThrow(() -> dispatcher.resolve("test echo 10 required", new Object()));
+  }
+
+  @SafeVarargs
+  private void assertEqualsRoute(CommandRoute actual, CommandNode<? extends NodeKey>... nodes) {
+    List<CommandNode<? extends NodeKey>> nodeList = new ArrayList<>(nodes.length + 1);
     if (nodes.length > 0) {
-      nodeList.add(solver.getRootNode());
+      nodeList.add(dispatcher.getRootNode());
     }
     nodeList.addAll(Arrays.asList(nodes));
     assertEquals(new CommandRoute(nodeList), actual);
