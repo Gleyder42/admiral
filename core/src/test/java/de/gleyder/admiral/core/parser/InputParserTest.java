@@ -64,10 +64,6 @@ public class InputParserTest {
     return inputParser.parse(command);
   }
 
-  private String[] command(String command) {
-    return command.split("\\s+");
-  }
-
   @SafeVarargs
   private List<InputArgument> multiLineArguments(List<String>... stringList) {
     return Arrays.stream(stringList)
