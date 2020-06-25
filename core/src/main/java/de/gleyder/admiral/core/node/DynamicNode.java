@@ -3,8 +3,6 @@ package de.gleyder.admiral.core.node;
 import de.gleyder.admiral.core.CommandContext;
 import de.gleyder.admiral.core.interpreter.Interpreter;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
-import de.gleyder.admiral.core.node.key.NodeKey;
-import de.gleyder.admiral.core.node.key.TypeNodeKey;
 import de.gleyder.admiral.core.interpreter.StringInterpreter;
 import de.gleyder.admiral.core.interpreter.strategy.InterpreterStrategy;
 import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
@@ -16,7 +14,7 @@ import lombok.Setter;
 import java.util.List;
 import java.util.Map;
 
-public class DynamicNode extends CommandNode<TypeNodeKey<?>> {
+public class DynamicNode extends CommandNode {
 
   @Setter
   @Getter
@@ -26,8 +24,8 @@ public class DynamicNode extends CommandNode<TypeNodeKey<?>> {
   @Getter
   private Interpreter<?> interpreter = new StringInterpreter();
 
-  public DynamicNode(@NonNull Class<?> aClass, @NonNull String key) {
-    super(NodeKey.ofDynamic(aClass, key));
+  public DynamicNode(@NonNull String key) {
+    super(key);
   }
 
   @Override
@@ -36,7 +34,7 @@ public class DynamicNode extends CommandNode<TypeNodeKey<?>> {
 
     results.forEach(result -> {
       if (result.succeeded()) {
-        context.getBag().add(getKey().get(), result.getValue().orElseThrow());
+        context.getBag().add(getKey(), result.getValue().orElseThrow());
       } else {
         result.getError().ifPresent(Throwable::printStackTrace);
       }

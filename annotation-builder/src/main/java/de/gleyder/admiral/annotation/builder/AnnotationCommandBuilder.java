@@ -2,25 +2,24 @@ package de.gleyder.admiral.annotation.builder;
 
 import de.gleyder.admiral.annotation.*;
 import de.gleyder.admiral.annotation.builder.producer.*;
-import de.gleyder.admiral.annotation.executor.MethodExecutor;
-import de.gleyder.admiral.annotation.executor.MethodRequired;
+import de.gleyder.admiral.core.CommandContext;
 import de.gleyder.admiral.core.CommandDispatcher;
-import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
-import de.gleyder.admiral.core.interpreter.Interpreter;
+import de.gleyder.admiral.core.executor.Executor;
+import de.gleyder.admiral.core.interpreter.*;
 import de.gleyder.admiral.core.interpreter.strategy.InterpreterStrategy;
 import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
 import de.gleyder.admiral.core.interpreter.strategy.SingleStrategy;
 import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.node.StaticNode;
-import de.gleyder.admiral.core.node.key.NodeKey;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AnnotationCommandBuilder {
@@ -33,23 +32,30 @@ public class AnnotationCommandBuilder {
   );
 
   private final Set<Object> registeredClasses = new HashSet<>();
-  private final Map<Class<?>, Interpreter<?>> registeredInterpreters = new HashMap<>();
+  private final Map<String, Interpreter<?>> registeredInterpreters = new HashMap<>();
   private final Map<String, InterpreterStrategy> registeredInterpreterStrategies = new HashMap<>();
 
   public AnnotationCommandBuilder() {
-    registeredInterpreters.put(Integer.class, new IntegerInterpreter());
+    registeredInterpreters.put(Byte.class.getSimpleName(), new ByteInterpreter());
+    registeredInterpreters.put(Short.class.getSimpleName(), new ShortInterpreter());
+    registeredInterpreters.put(Integer.class.getSimpleName(), new IntegerInterpreter());
+    registeredInterpreters.put(Long.class.getSimpleName(), new LongInterpreter());
+    registeredInterpreters.put(Float.class.getSimpleName(), new FloatInterpreter());
+    registeredInterpreters.put(Double.class.getSimpleName(), new DoubleInterpreter());
+    registeredInterpreters.put(Character.class.getSimpleName(), new CharacterInterpreter());
+    registeredInterpreters.put(Boolean.class.getSimpleName(), new BooleanInterpreter());
 
     registeredInterpreterStrategies.put(SingleStrategy.class.getSimpleName(), new SingleStrategy());
     registeredInterpreterStrategies.put(MergedStrategy.class.getSimpleName(), new MergedStrategy());
   }
 
-  public AnnotationCommandBuilder registerInterpreter(@NonNull Class<?> aClass, @NonNull Interpreter<?> interpreter) {
-    registeredInterpreters.put(aClass, interpreter);
+  public AnnotationCommandBuilder registerInterpreter(@NonNull String key, @NonNull Interpreter<?> interpreter) {
+    registeredInterpreters.put(key, interpreter);
     return this;
   }
 
-  public AnnotationCommandBuilder registerInterpreterStrategy(@NonNull String name, @NonNull InterpreterStrategy strategy) {
-    registeredInterpreterStrategies.put(name, strategy);
+  public AnnotationCommandBuilder registerInterpreterStrategy(@NonNull String key, @NonNull InterpreterStrategy strategy) {
+    registeredInterpreterStrategies.put(key, strategy);
     return this;
   }
 
@@ -65,70 +71,105 @@ public class AnnotationCommandBuilder {
             .forEach(dispatcher::registerCommand);
   }
 
+  @SuppressWarnings("unchecked")
   @SneakyThrows
   private StaticNode toNode(Object instance) {
     Class<?> aClass = instance.getClass();
-    StaticNode commandNode = new StaticNode(aClass.getAnnotation(Command.class).value());
+    StaticNode rootNode = new StaticNode(aClass.getAnnotation(Command.class).value());
     Map<String, Object> nodeMap = new HashMap<>();
 
-    Arrays.stream(aClass.getMethods()).forEach(method -> Arrays.stream(method.getDeclaredAnnotations())
-            .filter(annotation -> method.isAnnotationPresent(annotation.annotationType()))
-            .filter(annotation -> PRODUCER_MAP.containsKey(annotation.annotationType()))
-            .forEach(annotation -> {
-              //noinspection unchecked
-              NodeProducer<Annotation> producer = (NodeProducer<Annotation>) PRODUCER_MAP.get(annotation.annotationType());
-              nodeMap.put(producer.getKey(annotation), producer.produce(instance, method));
-            })
-    );
-
-    for (Method method : aClass.getMethods()) {
-      if (method.isAnnotationPresent(Route.class)) {
-        CommandNode<? extends NodeKey> lastNode = null;
-        ArrayDeque<Node> nodeDeque = new ArrayDeque<>(Arrays.asList(method.getAnnotation(Route.class).value()));
-
-        while (!nodeDeque.isEmpty()) {
-          Node node = nodeDeque.pop();
-          CommandNode<? extends NodeKey> currentNode;
-          if (node.type().isAssignableFrom(NoType.class)) {
-            currentNode = new StaticNode(node.name());
-          } else {
-            currentNode = new DynamicNode(node.type(), node.name());
-            DynamicNode dynamicNode = (DynamicNode) currentNode;
-
-            if (registeredInterpreters.containsKey(node.type())) {
-              dynamicNode.setInterpreter(registeredInterpreters.get(node.type()));
-            }
-
-            if (registeredInterpreterStrategies.containsKey(node.strategy())) {
-              dynamicNode.setInterpreterStrategy(registeredInterpreterStrategies.get(node.strategy()));
-            }
-          }
-
-          if (!node.required().isEmpty()) {
-            currentNode.setRequired((MethodRequired) nodeMap.get(node.required()));
-          }
-
-          if (currentNode instanceof DynamicNode) {
-            DynamicNode dynamicNode = (DynamicNode) currentNode;
-
-            if (!node.interpreter().isEmpty()) {
-              dynamicNode.setInterpreter((Interpreter<?>) nodeMap.get(node.interpreter()));
-            }
-          }
+    Arrays.stream(aClass.getMethods()).forEach(method -> {
+      PRODUCER_MAP.entrySet().stream()
+              .filter(entry -> method.isAnnotationPresent(entry.getKey()))
+              .findFirst().ifPresent(producerEntry -> {
+        NodeProducer<Annotation> producer = (NodeProducer<Annotation>) producerEntry.getValue();
+        nodeMap.put(producer.getKey(method.getAnnotation(producerEntry.getKey()), method), producer.produce(instance, method));
+      });
+    });
 
 
-          Objects.requireNonNullElse(lastNode, commandNode).addNode(currentNode);
-          if (nodeDeque.isEmpty()) {
-            if (method.isAnnotationPresent(ExecutorNode.class)) {
-              currentNode.setExecutor(new MethodExecutor(instance, method));
-            } else if (method.isAnnotationPresent(RequiredNode.class)) {
-              currentNode.setRequired(new MethodRequired(instance, method));
-            }
-          }
-          lastNode = currentNode;
-        }
-      }
-    }
-    return commandNode;
+    Arrays.stream(aClass.getMethods())
+            .filter(method -> method.isAnnotationPresent(Route.class) && method.isAnnotationPresent(ExecutorNode.class))
+            .forEach(method -> {
+              Deque<Node> nodeDeque = Arrays.stream(method.getAnnotation(Route.class).value())
+                      .collect(Collectors.toCollection(ArrayDeque::new));
+              CommandNode lastNode = rootNode;
+
+              while (!nodeDeque.isEmpty()) {
+                Node node = nodeDeque.pop();
+                CommandNode currentNode;
+
+                if (!node.interpreter().isEmpty() || !node.strategy().isEmpty()) {
+                  currentNode = new DynamicNode(node.value());
+                  DynamicNode dynamicNode = (DynamicNode) currentNode;
+
+                  if (!node.interpreter().isEmpty()) {
+                    Interpreter<?> interpreter = getInterpreter(node.interpreter(), nodeMap);
+                    if (interpreter == null) {
+                      throw new NullPointerException("No interpreter was registered with key " + node.interpreter());
+                    }
+
+                    dynamicNode.setInterpreter(interpreter);
+                  }
+
+                  if (!node.strategy().isEmpty()) {
+                    InterpreterStrategy interpreterStrategy = getInterpreterStrategy(node.strategy(), nodeMap);
+                    if (interpreterStrategy == null) {
+                      throw new NullPointerException("No interpreter strategy was registered with key " + node.strategy());
+                    }
+
+                    dynamicNode.setInterpreterStrategy(interpreterStrategy);
+                  }
+                } else {
+                  currentNode = new StaticNode(node.value());
+                }
+
+                if (!node.executor().isEmpty()) {
+                  Executor executor = (Executor) nodeMap.get(node.executor());
+                  if (executor == null) {
+                    throw new NullPointerException("No executor found with key " + node.executor());
+                  }
+
+                  currentNode.setExecutor(executor);
+                }
+
+                if (!node.required().isEmpty()) {
+                  Predicate<CommandContext<? super Object>> required = (Predicate<CommandContext<? super Object>>) nodeMap.get(node.required());
+                  if (required == null) {
+                    throw new NullPointerException("No required node found with key " + node.required());
+                  }
+
+                  currentNode.setRequired(required);
+                }
+
+                if (nodeDeque.isEmpty()) {
+                  NodeProducer<? extends Annotation> producer = PRODUCER_MAP.get(ExecutorNode.class);
+                  currentNode.setExecutor((Executor) producer.produce(instance, method));
+                }
+
+                lastNode.addNode(currentNode);
+                lastNode = currentNode;
+              }
+            });
+    return rootNode;
   }
+
+  private Interpreter<?> getInterpreter(@NonNull String key, @NonNull Map<String, Object> nodeMap) {
+    Interpreter<?> interpreter = registeredInterpreters.get(key);
+    if (interpreter != null) {
+      return interpreter;
+    } else {
+      return (Interpreter<?>) nodeMap.get(key);
+    }
+  }
+
+  private InterpreterStrategy getInterpreterStrategy(@NonNull String key, @NonNull Map<String, Object> nodeMap) {
+    InterpreterStrategy strategy = registeredInterpreterStrategies.get(key);
+    if (strategy != null) {
+      return strategy;
+    } else {
+      return (InterpreterStrategy) nodeMap.get(key);
+    }
+  }
+
 }

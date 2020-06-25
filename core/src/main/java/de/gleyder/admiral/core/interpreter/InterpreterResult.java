@@ -12,11 +12,11 @@ public class InterpreterResult<T> {
   private final T value;
   private final Throwable throwable;
 
-  public static <V> InterpreterResult<V> createSuccessful(@NonNull V value) {
+  public static <V> InterpreterResult<V> ofValue(@NonNull V value) {
     return new InterpreterResult<>(value, null);
   }
 
-  public static <V> InterpreterResult<V> createError(@NonNull Throwable throwable) {
+  public static <V> InterpreterResult<V> ofError(@NonNull Throwable throwable) {
     return new InterpreterResult<>(null, throwable);
   }
 

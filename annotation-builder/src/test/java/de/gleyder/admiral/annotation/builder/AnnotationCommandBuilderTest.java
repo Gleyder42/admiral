@@ -8,13 +8,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AnnotationCommandBuilderTest {
 
-  private final AnnotationCommandBuilder builder = new AnnotationCommandBuilder()
-          .registerCommand(new TestClass());
-  private final CommandDispatcher dispatcher = new CommandDispatcher();
   private final TestClass testClass = new TestClass();
+  private final AnnotationCommandBuilder builder = new AnnotationCommandBuilder()
+          .registerCommand(testClass);
+  private final CommandDispatcher dispatcher = new CommandDispatcher();
 
   @BeforeEach
   void setup() {
@@ -23,10 +24,10 @@ class AnnotationCommandBuilderTest {
   }
 
   @Test
-  void containsItemNode() {
-    dispatch("test item verify 5.5");
+  void calculateCommand() {
+    dispatch("test calculate sum (10 10)");
 
-    assertContains(testClass, "rn", "node", "5.5");
+    assertContains(testClass, "strategy", "verifier", "mid", "strategy", "sum:20");
   }
 
   void assertContains(TestClass testClass, String... strings) {

@@ -6,7 +6,7 @@ import lombok.NonNull;
 
 import java.lang.reflect.Method;
 
-public class MethodRequiredProducer implements NodeProducer<RequiredNode> {
+public class MethodRequiredProducer implements SimpleNodeProducer<RequiredNode> {
 
   @Override
   public Object produce(@NonNull Object instance, @NonNull Method method) {
@@ -14,7 +14,7 @@ public class MethodRequiredProducer implements NodeProducer<RequiredNode> {
   }
 
   @Override
-  public String getKey(@NonNull RequiredNode annotation) {
+  public String getValue(@NonNull RequiredNode annotation) {
     return annotation.value();
   }
 

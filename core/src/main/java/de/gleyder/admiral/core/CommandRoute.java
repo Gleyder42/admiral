@@ -1,6 +1,5 @@
 package de.gleyder.admiral.core;
 
-import de.gleyder.admiral.core.node.key.NodeKey;
 import de.gleyder.admiral.core.node.CommandNode;
 import lombok.*;
 import org.jetbrains.annotations.TestOnly;
@@ -16,9 +15,9 @@ public class CommandRoute {
 
   @TestOnly
   @Getter(AccessLevel.PUBLIC)
-  private final List<CommandNode<? extends NodeKey>> nodeList;
+  private final List<CommandNode> nodeList;
 
-  public CommandRoute(@NonNull List<CommandNode<? extends NodeKey>> nodeList) {
+  public CommandRoute(@NonNull List<CommandNode> nodeList) {
     this.nodeList = nodeList;
   }
 
@@ -26,7 +25,7 @@ public class CommandRoute {
     this.nodeList = new ArrayList<>();
   }
 
-  public void add(@NonNull CommandNode<? extends NodeKey> node) {
+  public void add(@NonNull CommandNode node) {
     nodeList.add(node);
   }
 
@@ -38,21 +37,21 @@ public class CommandRoute {
     this.nodeList.addAll(route.nodeList);
   }
 
-  public CommandNode<NodeKey> get(int index) {
-    //noinspection unchecked
-    return (CommandNode<NodeKey>) nodeList.get(index);
+  public void invalidate() {
+    nodeList.clear();
+    errorMessages.clear();
   }
 
-  public void clear() {
-    nodeList.clear();
+  public CommandNode get(int index) {
+    return nodeList.get(index);
   }
 
   public boolean isValid() {
-    return !nodeList.isEmpty();
+    return errorMessages.isEmpty() && !nodeList.isEmpty();
   }
 
   public boolean isInvalid() {
-    return nodeList.isEmpty();
+    return !errorMessages.isEmpty();
   }
 
   public CommandRoute duplicate() {

@@ -7,8 +7,8 @@ import lombok.NonNull;
 
 public class DynamicNodeBuilder extends CommandNodeBuilder<DynamicNodeBuilder, DynamicNode> {
 
-  public DynamicNodeBuilder(@NonNull Class<?> aClass, @NonNull String key) {
-    super(new DynamicNode(aClass, key));
+  public DynamicNodeBuilder(@NonNull String key) {
+    super(new DynamicNode(key));
   }
 
   public DynamicNodeBuilder setInterpreterStrategy(@NonNull InterpreterStrategy strategy) {

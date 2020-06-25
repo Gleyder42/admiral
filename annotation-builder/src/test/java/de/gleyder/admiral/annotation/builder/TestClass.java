@@ -2,44 +2,60 @@ package de.gleyder.admiral.annotation.builder;
 
 import de.gleyder.admiral.annotation.*;
 import de.gleyder.admiral.core.ValueBag;
+import de.gleyder.admiral.core.interpreter.Interpreter;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
+import de.gleyder.admiral.core.parser.InputArgument;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Command("test")
 public class TestClass {
 
+  private final static String SUM_STRATEGY_INTERPRETER = "sumStrategyInterpreter";
+
   @Getter
   private final List<String> stringList = new ArrayList<>();
 
+  //test calculate sum (10 10)
   @Route({
-          @Node(name = "item", required = "rn"),
-          @Node(name = "verify"),
-          @Node(name = "doubleBagKey", type = Double.class, interpreter = "doubleNodeKey")
+          @Node(value = "calculate", required = "verifier"),
+          @Node(value = "sum", executor = "midExecutor"),
+          @Node(value = "input", strategy = SUM_STRATEGY_INTERPRETER, interpreter = "Long")
   })
-  @ExecutorNode("itemNode")
-  public void itemNode(Object source, ValueBag bag) {
-    stringList.add("node");
-    stringList.add(bag.get("doubleBagKey").orElseThrow() + "");
+  @ExecutorNode
+  public void executor(Object source, ValueBag bag) {
+    stringList.add("sum:" + bag.get("input").orElseThrow());
   }
 
-  @InterpreterNode("doubleNodeKey")
-  public InterpreterResult<Double> doubleInterpreter(Map<String, Object> map, String argument) {
+  @ExecutorNode
+  public void midExecutor(Object source, ValueBag bag) {
+    stringList.add("mid");
+  }
+
+  @RequiredNode
+  public boolean verifier(Object source, ValueBag bag) {
+    stringList.add("verifier");
+    return true;
+  }
+
+  public InterpreterResult<?> interpreter(String argument) {
     try {
-      return InterpreterResult.createSuccessful(Double.parseDouble(argument));
+      return InterpreterResult.ofValue(Long.parseLong(argument));
     } catch (NumberFormatException exception) {
-      return InterpreterResult.createError(exception);
+      return InterpreterResult.ofError(exception);
     }
   }
 
-  @RequiredNode("rn")
-  public boolean required(Object source, ValueBag bag) {
-    stringList.add("rn");
-    return true;
+  @InterpreterStrategyNode(SUM_STRATEGY_INTERPRETER)
+  public List<InterpreterResult<Object>> strategy(Map<String, Object> map, Interpreter<?> interpreter, InputArgument inputArgument) {
+    stringList.add("strategy");
+    long sum = inputArgument.getInputs().stream()
+            .filter(string -> interpreter(string).succeeded())
+            .mapToLong(Long::parseLong)
+            .sum();
+    return List.of(InterpreterResult.ofValue(sum));
   }
 }

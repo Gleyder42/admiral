@@ -9,9 +9,9 @@ public interface NumberInterpreter<N extends Number> extends SimpleInterpreter<N
   @Override
   default InterpreterResult<N> interpret(@NonNull String argument) {
     try {
-      return InterpreterResult.createSuccessful(parse(argument));
+      return InterpreterResult.ofValue(parse(argument));
     } catch (NumberFormatException exception) {
-      return InterpreterResult.createError(exception);
+      return InterpreterResult.ofError(exception);
     }
   }
 

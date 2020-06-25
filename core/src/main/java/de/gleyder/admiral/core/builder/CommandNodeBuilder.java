@@ -2,7 +2,6 @@ package de.gleyder.admiral.core.builder;
 
 import de.gleyder.admiral.core.CommandContext;
 import de.gleyder.admiral.core.executor.Executor;
-import de.gleyder.admiral.core.node.key.NodeKey;
 import de.gleyder.admiral.core.node.CommandNode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,7 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("rawtypes")
 @RequiredArgsConstructor
-public abstract class CommandNodeBuilder<B extends CommandNodeBuilder, N extends CommandNode<? extends NodeKey>> {
+public abstract class CommandNodeBuilder<B extends CommandNodeBuilder, N extends CommandNode> {
 
   protected final N node;
 

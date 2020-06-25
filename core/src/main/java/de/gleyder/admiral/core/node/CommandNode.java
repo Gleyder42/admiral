@@ -2,28 +2,23 @@ package de.gleyder.admiral.core.node;
 
 import de.gleyder.admiral.core.CommandContext;
 import de.gleyder.admiral.core.executor.Executor;
-import de.gleyder.admiral.core.node.key.NodeKey;
-import de.gleyder.admiral.core.node.key.StringNodeKey;
 import de.gleyder.admiral.core.parser.InputArgument;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Accessors(chain = true)
-public abstract class CommandNode<K extends NodeKey> {
+public abstract class CommandNode {
 
-  private final Map<NodeKey, CommandNode<?>> nodeMap = new HashMap<>();
+  private final Map<String, CommandNode> nodeMap = new HashMap<>();
+  private final List<DynamicNode> dynamicNodeList = new ArrayList<>();
 
   @Getter
-  private final K key;
+  private final String key;
 
   @Setter
   private Predicate<CommandContext<? super Object>> required;
@@ -31,18 +26,22 @@ public abstract class CommandNode<K extends NodeKey> {
   @Setter
   private Executor executor;
 
-  public CommandNode(@NonNull K key) {
+  public CommandNode(@NonNull String key) {
     this.key = key;
   }
 
   public void onCommandProcess(@NonNull CommandContext<?> context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) { }
 
-  public void addNode(@NonNull CommandNode<?> node) {
-    this.nodeMap.put(node.getKey(), node);
+  public void addNode(@NonNull CommandNode node) {
+    if (node instanceof StaticNode) {
+      this.nodeMap.put(node.getKey(), node);
+    } else {
+      dynamicNodeList.add((DynamicNode) node);
+    }
   }
 
   public boolean isLeaf() {
-    return nodeMap.isEmpty();
+    return nodeMap.isEmpty() && dynamicNodeList.isEmpty();
   }
 
   public Optional<Predicate<CommandContext<Object>>> getRequired() {
@@ -54,19 +53,15 @@ public abstract class CommandNode<K extends NodeKey> {
   }
 
   public List<DynamicNode> getDynamicNodes() {
-    return nodeMap.values().stream()
-            .filter(node -> node instanceof DynamicNode)
-            .map(node -> (DynamicNode) node)
-            .collect(Collectors.toUnmodifiableList());
+    return dynamicNodeList;
   }
 
-  public Optional<CommandNode<NodeKey>> getNextNode(@NonNull String key) {
-    //noinspection unchecked
-    return Optional.ofNullable((CommandNode<NodeKey>) nodeMap.get(new StringNodeKey(key)));
+  public Optional<CommandNode> getNextNode(@NonNull String key) {
+    return Optional.ofNullable(nodeMap.get(key));
   }
 
   @Override
   public String toString() {
-    return key.get();
+    return key;
   }
 }

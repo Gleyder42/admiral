@@ -6,14 +6,14 @@ import lombok.NonNull;
 
 import java.lang.reflect.Method;
 
-public class MethodInterpreterProducer implements NodeProducer<InterpreterNode>{
+public class MethodInterpreterProducer implements SimpleNodeProducer<InterpreterNode>{
   @Override
   public Object produce(@NonNull Object instance, @NonNull Method method) {
     return new MethodInterpreter(instance, method);
   }
 
   @Override
-  public String getKey(@NonNull InterpreterNode annotation) {
+  public String getValue(@NonNull InterpreterNode annotation) {
     return annotation.value();
   }
 }

@@ -7,9 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Node {
 
   String required() default "";
-  String interpreter() default "";
-  String strategy() default "merged";
-  String name();
-  Class<?> type() default NoType.class;
+  String executor() default "";
 
+  String interpreter() default "";
+  String strategy() default "";
+  String value();
 }

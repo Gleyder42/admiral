@@ -2,12 +2,11 @@ package de.gleyder.admiral.core;
 
 import de.gleyder.admiral.core.builder.DynamicNodeBuilder;
 import de.gleyder.admiral.core.builder.StaticNodeBuilder;
+import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
+import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
 import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.node.StaticNode;
-import de.gleyder.admiral.core.node.key.NodeKey;
-import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
-import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,12 +31,12 @@ public class CommandDispatcherTest {
           .setRequired(context -> context.getBag().get("int").isPresent())
           .build();
 
-  private final DynamicNode stringLogNode = new DynamicNodeBuilder(String.class, "string")
+  private final DynamicNode stringLogNode = new DynamicNodeBuilder("string")
           .setInterpreterStrategy(new MergedStrategy())
           .setExecutor(context -> log.info("Echo {}", context.getBag().get("string").orElseThrow()))
           .build();
 
-  private final DynamicNode integerLogNode = new DynamicNodeBuilder(Integer.class, "int")
+  private final DynamicNode integerLogNode = new DynamicNodeBuilder("int")
           .setExecutor(context -> log.info("Int Echo: {}", context.getBag().get("int").orElseThrow()))
           .setInterpreter(new IntegerInterpreter())
           .build();
@@ -107,8 +106,14 @@ public class CommandDispatcherTest {
   @Test
   void shouldNotFindTestRoute() {
     CommandRoute actual = dispatcher.findRoute("test");
+    CommandRoute expected = new CommandRoute();
+    expected.add(dispatcher.getRootNode());
+    expected.add(testNode);
 
-    assertEqualsRoute(actual);
+    expected.addError(new CommandDispatcherException("No executor was found for node test"));
+
+    assertEquals(expected.getErrors().get(0).getMessage(), actual.getErrors().get(0).getMessage());
+    assertEquals(expected.getNodeList(), actual.getNodeList());
   }
 
   @Test
@@ -120,18 +125,18 @@ public class CommandDispatcherTest {
 
   @Test
   void shouldThrowCommandSolverException() {
-    assertThrows(CommandDispatcherException.class, () -> dispatcher.findRoute("test echo 10"));
+    assertThrows(AmbiguousCommandRouteException.class, () -> dispatcher.findRoute("test echo 10"));
   }
 
   @Test
-  void shoutRouteWithRequired() {
+  void shouldRouteWithRequired() {
     CommandRoute actual = dispatcher.findRoute("test echo 10 required");
 
     assertEqualsRoute(actual, testNode, echoNode, integerLogNode, requireNode);
   }
 
   @Test
-  void shoutRouteWithoutRequired() {
+  void shouldRouteWithoutRequired() {
     CommandRoute actual = dispatcher.findRoute("test echo required");
 
     assertEqualsRoute(actual, testNode, echoNode, requireNode);
@@ -147,9 +152,8 @@ public class CommandDispatcherTest {
     assertDoesNotThrow(() -> dispatcher.dispatch("test echo 10 required", new Object(), new HashMap<>()));
   }
 
-  @SafeVarargs
-  private void assertEqualsRoute(CommandRoute actual, CommandNode<? extends NodeKey>... nodes) {
-    List<CommandNode<? extends NodeKey>> nodeList = new ArrayList<>(nodes.length + 1);
+  private void assertEqualsRoute(CommandRoute actual, CommandNode... nodes) {
+    List<CommandNode> nodeList = new ArrayList<>(nodes.length + 1);
     if (nodes.length > 0) {
       nodeList.add(dispatcher.getRootNode());
     }
