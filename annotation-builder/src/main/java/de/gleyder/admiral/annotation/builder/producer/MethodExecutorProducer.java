@@ -1,6 +1,7 @@
 package de.gleyder.admiral.annotation.builder.producer;
 
 import de.gleyder.admiral.annotation.ExecutorNode;
+import de.gleyder.admiral.annotation.executor.ExecutableMethod;
 import de.gleyder.admiral.annotation.executor.MethodExecutor;
 import lombok.NonNull;
 
@@ -10,7 +11,7 @@ public class MethodExecutorProducer implements SimpleNodeProducer<ExecutorNode> 
 
   @Override
   public Object produce(@NonNull Object instance, @NonNull Method method) {
-    return new MethodExecutor(instance, method);
+    return new MethodExecutor(new ExecutableMethod(instance, method));
   }
 
   @Override

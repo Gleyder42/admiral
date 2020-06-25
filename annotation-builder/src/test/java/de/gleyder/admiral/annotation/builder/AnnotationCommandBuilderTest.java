@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AnnotationCommandBuilderTest {
 
@@ -28,6 +27,18 @@ class AnnotationCommandBuilderTest {
     dispatch("test calculate sum (10 10)");
 
     assertContains(testClass, "strategy", "verifier", "mid", "strategy", "sum:20");
+  }
+
+  @Test
+  void manyValuesCommand() {
+    dispatch("test many values hallo 10 c");
+
+    assertContains(testClass, "c", "10", "hallo");
+  }
+
+  @Test
+  void noValue() {
+    assertThrows(NullPointerException.class, () -> dispatch("test flemming"));
   }
 
   void assertContains(TestClass testClass, String... strings) {

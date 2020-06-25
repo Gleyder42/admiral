@@ -1,6 +1,7 @@
 package de.gleyder.admiral.annotation.builder.producer;
 
 import de.gleyder.admiral.annotation.InterpreterStrategyNode;
+import de.gleyder.admiral.annotation.executor.ExecutableMethod;
 import de.gleyder.admiral.annotation.executor.MethodInterpreterStrategy;
 import lombok.NonNull;
 
@@ -10,7 +11,7 @@ public class MethodInterpreterStrategyProducer implements SimpleNodeProducer<Int
 
   @Override
   public Object produce(@NonNull Object instance, @NonNull Method method) {
-    return new MethodInterpreterStrategy(instance, method);
+    return new MethodInterpreterStrategy(new ExecutableMethod(instance, method));
   }
 
   @Override

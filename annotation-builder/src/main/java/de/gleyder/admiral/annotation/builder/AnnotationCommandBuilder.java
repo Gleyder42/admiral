@@ -36,17 +36,18 @@ public class AnnotationCommandBuilder {
   private final Map<String, InterpreterStrategy> registeredInterpreterStrategies = new HashMap<>();
 
   public AnnotationCommandBuilder() {
-    registeredInterpreters.put(Byte.class.getSimpleName().toLowerCase(), new ByteInterpreter());
-    registeredInterpreters.put(Short.class.getSimpleName().toLowerCase(), new ShortInterpreter());
-    registeredInterpreters.put(Integer.class.getSimpleName().toLowerCase(), new IntegerInterpreter());
-    registeredInterpreters.put(Long.class.getSimpleName().toLowerCase(), new LongInterpreter());
-    registeredInterpreters.put(Float.class.getSimpleName().toLowerCase(), new FloatInterpreter());
-    registeredInterpreters.put(Double.class.getSimpleName().toLowerCase(), new DoubleInterpreter());
-    registeredInterpreters.put(Character.class.getSimpleName().toLowerCase(), new CharacterInterpreter());
-    registeredInterpreters.put(Boolean.class.getSimpleName().toLowerCase(), new BooleanInterpreter());
+    registeredInterpreters.put("byte", new ByteInterpreter());
+    registeredInterpreters.put("short", new ShortInterpreter());
+    registeredInterpreters.put("int", new IntegerInterpreter());
+    registeredInterpreters.put("long", new LongInterpreter());
+    registeredInterpreters.put("float", new FloatInterpreter());
+    registeredInterpreters.put("double", new DoubleInterpreter());
+    registeredInterpreters.put("char", new CharacterInterpreter());
+    registeredInterpreters.put("boolean", new BooleanInterpreter());
+    registeredInterpreters.put("string", new StringInterpreter());
 
-    registeredInterpreterStrategies.put(SingleStrategy.class.getSimpleName(), new SingleStrategy());
-    registeredInterpreterStrategies.put(MergedStrategy.class.getSimpleName(), new MergedStrategy());
+    registeredInterpreterStrategies.put("single", new SingleStrategy());
+    registeredInterpreterStrategies.put("merged", new MergedStrategy());
   }
 
   public AnnotationCommandBuilder registerInterpreter(@NonNull String key, @NonNull Interpreter<?> interpreter) {
@@ -71,7 +72,6 @@ public class AnnotationCommandBuilder {
             .forEach(dispatcher::registerCommand);
   }
 
-  @SuppressWarnings("unchecked")
   @SneakyThrows
   private StaticNode toNode(Object instance) {
     Class<?> aClass = instance.getClass();
@@ -171,5 +171,4 @@ public class AnnotationCommandBuilder {
       return (InterpreterStrategy) nodeMap.get(key);
     }
   }
-
 }

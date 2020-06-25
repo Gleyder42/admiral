@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Command("test")
@@ -26,17 +27,39 @@ public class TestClass {
           @Node(value = "input", strategy = SUM_STRATEGY_INTERPRETER, interpreter = "long")
   })
   @ExecutorNode
-  public void executor(Object source, ValueBag bag) {
-    stringList.add("sum:" + bag.get("input").orElseThrow());
+  public void executor(Object source, @Bag("input") long sum) {
+    stringList.add("sum:" + sum);
+  }
+
+  @Route({
+          @Node("many"), @Node("values"),
+          @Node(value = "string", interpreter = "string"),
+          @Node(value = "int", interpreter = "int"),
+          @Node(value = "char", interpreter = "char")
+  })
+  @ExecutorNode
+  public void manyValues(Object source, @Bag("char") char character, @Bag("int") int integer,
+                         @Bag("string") String string) {
+    stringList.add(character + "");
+    stringList.add(integer + "");
+    stringList.add(string + "");
+  }
+
+  @Route({
+          @Node("flemming")
+  })
+  @ExecutorNode
+  public void noValue(Object source, @Bag("hot") IntStream intStream) {
+    //Error
   }
 
   @ExecutorNode
-  public void midExecutor(Object source, ValueBag bag) {
+  public void midExecutor(Object source) {
     stringList.add("mid");
   }
 
   @RequiredNode
-  public boolean verifier(Object source, ValueBag bag) {
+  public boolean verifier(Object source) {
     stringList.add("verifier");
     return true;
   }
@@ -50,7 +73,7 @@ public class TestClass {
   }
 
   @InterpreterStrategyNode(SUM_STRATEGY_INTERPRETER)
-  public List<InterpreterResult<Object>> strategy(Map<String, Object> map, Interpreter<?> interpreter, InputArgument inputArgument) {
+  public List<InterpreterResult<Object>> strategy(Interpreter<?> interpreter, InputArgument inputArgument) {
     stringList.add("strategy");
     long sum = inputArgument.getInputs().stream()
             .filter(string -> interpreter(string).succeeded())

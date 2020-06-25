@@ -25,7 +25,6 @@ public abstract class CommandNodeBuilder<B extends CommandNodeBuilder, N extends
   }
 
   private B thisBuilder() {
-    //noinspection unchecked
     return (B) this;
   }
 

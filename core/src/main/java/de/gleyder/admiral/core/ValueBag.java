@@ -1,10 +1,10 @@
 package de.gleyder.admiral.core;
 
-import lombok.NonNull;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 @ToString
 public class ValueBag {
@@ -15,7 +15,6 @@ public class ValueBag {
     getMap(key).add(object);
   }
 
-  @SuppressWarnings("unchecked")
   public <T> Optional<T> get(@NonNull String key) {
     if (!map.containsKey(key)) {
       return Optional.empty();
@@ -31,7 +30,6 @@ public class ValueBag {
     if (!map.containsKey(key)) {
       return Optional.empty();
     }
-    //noinspection unchecked
     return Optional.of((List<T>) getMap(key));
   }
 
@@ -64,5 +62,43 @@ public class ValueBag {
 
   public Set<Map.Entry<String, List<Object>>> entrySet() {
     return map.entrySet();
+  }
+
+  public Set<Map.Entry<String, Object>> objectEntrySet() {
+    return map.entrySet().stream()
+            .map(entry -> {
+              if (entry.getValue().size() == 1) {
+                return new SimpleEntry(entry.getKey(), entry.getValue().get(0));
+              } else {
+                return new SimpleEntry(entry.getKey(), entry.getValue());
+              }
+            })
+            .collect(Collectors.toSet());
+  }
+
+  private static class SimpleEntry implements Map.Entry<String, Object> {
+
+    private final String key;
+    private Object value;
+
+    public SimpleEntry(String key, Object value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    @Override
+    public String getKey() {
+      return key;
+    }
+
+    @Override
+    public Object getValue() {
+      return value;
+    }
+
+    @Override
+    public Object setValue(Object value) {
+      return this.value = value;
+    }
   }
 }
