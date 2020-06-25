@@ -2,9 +2,8 @@ plugins {
     id 'io.freefair.lombok' version '5.1.0' apply false
 }
 
-group 'de.gleyder'
-
 subprojects {
+    apply plugin: 'maven-publish'
     apply plugin: 'io.freefair.lombok'
     apply plugin: 'java-library'
 
@@ -21,5 +20,20 @@ subprojects {
 
     test {
         useJUnitPlatform()
+    }
+
+    group 'de.gleyder.admiral'
+    version '1.0'
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = project.group
+                artifactId = project.name
+                version = project.version
+
+                from components.java
+            }
+        }
     }
 }
