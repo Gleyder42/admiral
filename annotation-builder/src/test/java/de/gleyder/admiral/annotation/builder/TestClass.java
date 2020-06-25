@@ -23,7 +23,7 @@ public class TestClass {
   @Route({
           @Node(value = "calculate", required = "verifier"),
           @Node(value = "sum", executor = "midExecutor"),
-          @Node(value = "input", strategy = SUM_STRATEGY_INTERPRETER, interpreter = "Long")
+          @Node(value = "input", strategy = SUM_STRATEGY_INTERPRETER, interpreter = "long")
   })
   @ExecutorNode
   public void executor(Object source, ValueBag bag) {

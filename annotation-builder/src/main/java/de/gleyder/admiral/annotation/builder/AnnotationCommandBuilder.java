@@ -36,14 +36,14 @@ public class AnnotationCommandBuilder {
   private final Map<String, InterpreterStrategy> registeredInterpreterStrategies = new HashMap<>();
 
   public AnnotationCommandBuilder() {
-    registeredInterpreters.put(Byte.class.getSimpleName(), new ByteInterpreter());
-    registeredInterpreters.put(Short.class.getSimpleName(), new ShortInterpreter());
-    registeredInterpreters.put(Integer.class.getSimpleName(), new IntegerInterpreter());
-    registeredInterpreters.put(Long.class.getSimpleName(), new LongInterpreter());
-    registeredInterpreters.put(Float.class.getSimpleName(), new FloatInterpreter());
-    registeredInterpreters.put(Double.class.getSimpleName(), new DoubleInterpreter());
-    registeredInterpreters.put(Character.class.getSimpleName(), new CharacterInterpreter());
-    registeredInterpreters.put(Boolean.class.getSimpleName(), new BooleanInterpreter());
+    registeredInterpreters.put(Byte.class.getSimpleName().toLowerCase(), new ByteInterpreter());
+    registeredInterpreters.put(Short.class.getSimpleName().toLowerCase(), new ShortInterpreter());
+    registeredInterpreters.put(Integer.class.getSimpleName().toLowerCase(), new IntegerInterpreter());
+    registeredInterpreters.put(Long.class.getSimpleName().toLowerCase(), new LongInterpreter());
+    registeredInterpreters.put(Float.class.getSimpleName().toLowerCase(), new FloatInterpreter());
+    registeredInterpreters.put(Double.class.getSimpleName().toLowerCase(), new DoubleInterpreter());
+    registeredInterpreters.put(Character.class.getSimpleName().toLowerCase(), new CharacterInterpreter());
+    registeredInterpreters.put(Boolean.class.getSimpleName().toLowerCase(), new BooleanInterpreter());
 
     registeredInterpreterStrategies.put(SingleStrategy.class.getSimpleName(), new SingleStrategy());
     registeredInterpreterStrategies.put(MergedStrategy.class.getSimpleName(), new MergedStrategy());
