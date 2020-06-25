@@ -78,14 +78,13 @@ public class AnnotationCommandBuilder {
     StaticNode rootNode = new StaticNode(aClass.getAnnotation(Command.class).value());
     Map<String, Object> nodeMap = new HashMap<>();
 
-    Arrays.stream(aClass.getMethods()).forEach(method -> {
-      PRODUCER_MAP.entrySet().stream()
+    Arrays.stream(aClass.getMethods()).forEach(method ->
+            PRODUCER_MAP.entrySet().stream()
               .filter(entry -> method.isAnnotationPresent(entry.getKey()))
               .findFirst().ifPresent(producerEntry -> {
         NodeProducer<Annotation> producer = (NodeProducer<Annotation>) producerEntry.getValue();
         nodeMap.put(producer.getKey(method.getAnnotation(producerEntry.getKey()), method), producer.produce(instance, method));
-      });
-    });
+      }));
 
 
     Arrays.stream(aClass.getMethods())

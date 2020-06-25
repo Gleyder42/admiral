@@ -98,7 +98,8 @@ public class ValueBag {
 
     @Override
     public Object setValue(Object value) {
-      return this.value = value;
+      this.value = value;
+      return this.value;
     }
   }
 }
