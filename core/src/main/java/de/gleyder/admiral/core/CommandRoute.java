@@ -51,7 +51,7 @@ public class CommandRoute {
   }
 
   public boolean isInvalid() {
-    return !errorMessages.isEmpty();
+    return !errorMessages.isEmpty() || nodeList.isEmpty();
   }
 
   public CommandRoute duplicate() {
