@@ -9,19 +9,24 @@ import de.gleyder.admiral.core.parser.InputParser;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class CommandDispatcher {
+public class CommandDispatcher<S> {
 
   @Getter(value = AccessLevel.PUBLIC)
   private final StaticNode rootNode = new StaticNode("root");
   private final InputParser parser;
+
+  @Setter
+  private Consumer<CommandContext<S>> afterExecute;
 
   public CommandDispatcher(@Nullable InputParser parser) {
     this.parser = AdmiralCommon.standard(parser, new InputParser());
@@ -35,24 +40,21 @@ public class CommandDispatcher {
     rootNode.addNode(node);
   }
 
-  public void dispatch(@NonNull String command, @NonNull Object source, @NonNull Map<String, Object> interpreterMap) {
+  public List<Throwable> dispatch(@NonNull String command, @NonNull S source, @NonNull Map<String, Object> interpreterMap) {
     CommandRoute commandRoute = new CommandRoute();
     ArrayDeque<InputArgument> argumentDeque = new ArrayDeque<>(parser.parse(command));
 
     try {
       route(rootNode, commandRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
     } catch (AmbiguousCommandRouteException exception) {
-      log.error("Ambiguous routes found: {}", exception.getRouteList());
-      return;
+      log.error("Found multiple routes");
+      return List.of(exception);
     }
 
     if (commandRoute.isInvalid()) {
       log.error("No route found");
-      commandRoute.getErrors().forEach(Throwable::printStackTrace);
-      return;
+      return commandRoute.getErrors();
     }
-
-    log.debug("Route found '{}'", commandRoute);
 
     ValueBag valueBag = new ValueBag();
     CommandContext<Object> context = new CommandContext<>(source, valueBag);
@@ -68,9 +70,14 @@ public class CommandDispatcher {
       }
 
       node.getExecutor().ifPresent(executor -> executor.execute(context));
-      log.debug("Processed node {} | {}", node.getKey(), valueBag.getAll());
       index++;
     }
+
+    if (afterExecute != null) {
+      afterExecute.accept((CommandContext<S>) context);
+    }
+
+    return Collections.emptyList();
   }
 
   @TestOnly
