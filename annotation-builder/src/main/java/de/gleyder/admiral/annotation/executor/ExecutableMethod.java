@@ -1,5 +1,6 @@
 package de.gleyder.admiral.annotation.executor;
 
+import de.gleyder.admiral.annotation.supplier.ArgumentSupplier;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -16,7 +17,7 @@ public class ExecutableMethod {
 
   @SneakyThrows
   private Object invoke(@NonNull List<Object> preArguments, @NonNull ArgumentSupplier supplier) {
-    List<Object> objects = supplier.toObjectArgs(preArguments, method.getParameters());
+    List<Object> objects = supplier.toMethodArguments(preArguments, method.getParameters());
     try {
       return method.invoke(instance, objects.toArray());
     } catch (IllegalArgumentException exception) {

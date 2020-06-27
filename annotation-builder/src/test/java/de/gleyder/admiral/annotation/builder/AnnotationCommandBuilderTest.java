@@ -41,6 +41,13 @@ class AnnotationCommandBuilderTest {
     assertThrows(NullPointerException.class, () -> dispatch("test flemming"));
   }
 
+  @Test
+  public void extraBagValue() {
+    dispatch("test bag supply");
+
+    assertContains(testClass, "mid", "100");
+  }
+
   void assertContains(TestClass testClass, String... strings) {
     assertIterableEquals(Arrays.asList(strings), testClass.getStringList());
   }

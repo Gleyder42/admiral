@@ -39,7 +39,7 @@ public class TestClass {
   })
   @ExecutorNode
   public void manyValues(Object source, @Bag("char") char character, @Bag("int") int integer,
-                         @Bag("string") String string) {
+                         @Bag("string") String string, @Bag("self") ValueBag bag) {
     stringList.add(character + "");
     stringList.add(integer + "");
     stringList.add(string + "");
@@ -50,11 +50,22 @@ public class TestClass {
   })
   @ExecutorNode
   public void noValue(Object source, @Bag("hot") IntStream intStream) {
-    //Error
+    //NullPointer because no value was found for IntStream
+  }
+
+  @Route({
+          @Node(value = "bag", executor = "midExecutor"),
+          @Node("supply")
+  })
+  @ExecutorNode
+  public void bagTest(Object source, @Bag("mid") int number) {
+    stringList.add(number + "");
   }
 
   @ExecutorNode
-  public void midExecutor(Object source) {
+  public void midExecutor(Object source, @Bag("self") ValueBag bag) {
+    bag.add("mid", 100);
+
     stringList.add("mid");
   }
 

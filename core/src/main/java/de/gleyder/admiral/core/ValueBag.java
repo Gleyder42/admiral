@@ -15,6 +15,13 @@ public class ValueBag {
     getMap(key).add(object);
   }
 
+  public boolean isMulti(@NonNull String key) {
+    if (!map.containsKey(key)) {
+      return false;
+    }
+    return map.get(key).size() > 1;
+  }
+
   public <T> Optional<T> get(@NonNull String key) {
     if (!map.containsKey(key)) {
       return Optional.empty();

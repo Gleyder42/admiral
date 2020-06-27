@@ -1,12 +1,13 @@
 package de.gleyder.admiral.annotation.executor;
 
+import de.gleyder.admiral.annotation.supplier.ArgumentSupplier;
+import de.gleyder.admiral.annotation.supplier.ValueBagArgumentSupplier;
 import de.gleyder.admiral.core.interpreter.Interpreter;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
 import de.gleyder.admiral.core.interpreter.strategy.InterpreterStrategy;
 import de.gleyder.admiral.core.parser.InputArgument;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
 import java.util.List;
 import java.util.Map;

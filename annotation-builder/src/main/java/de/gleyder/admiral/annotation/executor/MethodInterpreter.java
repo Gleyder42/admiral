@@ -1,5 +1,6 @@
 package de.gleyder.admiral.annotation.executor;
 
+import de.gleyder.admiral.annotation.supplier.ArgumentSupplier;
 import de.gleyder.admiral.core.interpreter.Interpreter;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
 import lombok.NonNull;
