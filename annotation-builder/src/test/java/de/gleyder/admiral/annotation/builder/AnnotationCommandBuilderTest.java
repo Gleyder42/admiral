@@ -14,7 +14,7 @@ class AnnotationCommandBuilderTest {
   private final TestClass testClass = new TestClass();
   private final AnnotationCommandBuilder builder = new AnnotationCommandBuilder()
           .registerCommand(testClass);
-  private final CommandDispatcher dispatcher = new CommandDispatcher();
+  private final CommandDispatcher<Object> dispatcher = new CommandDispatcher<>();
 
   @BeforeEach
   void setup() {
@@ -26,14 +26,14 @@ class AnnotationCommandBuilderTest {
   void calculateCommand() {
     dispatch("test calculate sum (10 10)");
 
-    assertContains(testClass, "strategy", "verifier", "mid", "strategy", "sum:20");
+    assertContains(testClass, "strategy", "root", "verifier", "mid", "strategy", "sum:20");
   }
 
   @Test
   void manyValuesCommand() {
     dispatch("test many values hallo 10 c");
 
-    assertContains(testClass, "c", "10", "hallo");
+    assertContains(testClass, "root", "c", "10", "hallo");
   }
 
   @Test
@@ -45,7 +45,7 @@ class AnnotationCommandBuilderTest {
   public void extraBagValue() {
     dispatch("test bag supply");
 
-    assertContains(testClass, "mid", "100");
+    assertContains(testClass, "root", "mid", "100");
   }
 
   void assertContains(TestClass testClass, String... strings) {

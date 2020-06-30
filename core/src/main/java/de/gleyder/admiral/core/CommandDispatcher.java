@@ -53,7 +53,9 @@ public class CommandDispatcher<S> {
 
     if (commandRoute.isInvalid()) {
       log.error("No route found");
-      return commandRoute.getErrors();
+      List<Throwable> throwableList = new ArrayList<>(commandRoute.getErrors());
+      throwableList.add(new CommandDispatcherException("No route found"));
+      return throwableList;
     }
 
     ValueBag valueBag = new ValueBag();
@@ -139,7 +141,7 @@ public class CommandDispatcher<S> {
                 .filter(CommandRoute::isValid)
                 .collect(Collectors.toUnmodifiableList());
 
-        route.invalidate();
+        route.clearNodes();
         if (alternateRoutes.size() == 1) {
           route.addAll(alternateRoutes.get(0));
         } else if (alternateRoutes.size() > 1) {

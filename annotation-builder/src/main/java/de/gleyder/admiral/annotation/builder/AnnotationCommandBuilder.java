@@ -61,13 +61,16 @@ public class AnnotationCommandBuilder {
   }
 
   public AnnotationCommandBuilder registerCommand(@NonNull Object instance) {
+    if (!instance.getClass().isAnnotationPresent(Node.class)) {
+      throw new IllegalStateException("Class must be annotated with @Node");
+    }
+
     registeredClasses.add(instance);
     return this;
   }
 
-  public void build(@NonNull CommandDispatcher dispatcher) {
+  public void build(@NonNull CommandDispatcher<?> dispatcher) {
     registeredClasses.stream()
-            .filter(object -> object.getClass().isAnnotationPresent(Command.class))
             .map(this::toNode)
             .forEach(dispatcher::registerCommand);
   }
@@ -75,20 +78,27 @@ public class AnnotationCommandBuilder {
   @SneakyThrows
   private StaticNode toNode(Object instance) {
     Class<?> aClass = instance.getClass();
-    StaticNode rootNode = new StaticNode(aClass.getAnnotation(Command.class).value());
+    Node rootAnnotation = aClass.getAnnotation(Node.class);
+    StaticNode rootNode = new StaticNode(rootAnnotation.value());
     Map<String, Object> nodeMap = new HashMap<>();
 
     Arrays.stream(aClass.getMethods()).forEach(method ->
             PRODUCER_MAP.entrySet().stream()
-              .filter(entry -> method.isAnnotationPresent(entry.getKey()))
-              .findFirst().ifPresent(producerEntry -> {
-        NodeProducer<Annotation> producer = (NodeProducer<Annotation>) producerEntry.getValue();
-        nodeMap.put(producer.getKey(method.getAnnotation(producerEntry.getKey()), method), producer.produce(instance, method));
-      }));
+                    .filter(entry -> method.isAnnotationPresent(entry.getKey()))
+                    .findFirst().ifPresent(producerEntry -> {
+              NodeProducer<Annotation> producer = (NodeProducer<Annotation>) producerEntry.getValue();
+              nodeMap.put(
+                      producer.getKey(method.getAnnotation(producerEntry.getKey()), method),
+                      producer.produce(instance, method)
+              );
+            }));
 
+
+    trySetExecutorNode(nodeMap, rootAnnotation, rootNode);
+    trySetRequired(nodeMap, rootAnnotation, rootNode);
 
     Arrays.stream(aClass.getMethods())
-            .filter(method -> method.isAnnotationPresent(Route.class) && method.isAnnotationPresent(ExecutorNode.class))
+            .filter(method -> method.isAnnotationPresent(Route.class))
             .forEach(method -> {
               Deque<Node> nodeDeque = Arrays.stream(method.getAnnotation(Route.class).value())
                       .collect(Collectors.toCollection(ArrayDeque::new));
@@ -102,44 +112,14 @@ public class AnnotationCommandBuilder {
                   currentNode = new DynamicNode(node.value());
                   DynamicNode dynamicNode = (DynamicNode) currentNode;
 
-                  if (!node.interpreter().isEmpty()) {
-                    Interpreter<?> interpreter = getInterpreter(node.interpreter(), nodeMap);
-                    if (interpreter == null) {
-                      throw new NullPointerException("No interpreter was registered with key " + node.interpreter());
-                    }
-
-                    dynamicNode.setInterpreter(interpreter);
-                  }
-
-                  if (!node.strategy().isEmpty()) {
-                    InterpreterStrategy interpreterStrategy = getInterpreterStrategy(node.strategy(), nodeMap);
-                    if (interpreterStrategy == null) {
-                      throw new NullPointerException("No interpreter strategy was registered with key " + node.strategy());
-                    }
-
-                    dynamicNode.setInterpreterStrategy(interpreterStrategy);
-                  }
+                  trySetInterpreterNode(nodeMap, node, dynamicNode);
+                  trySetInterpreterStrategyNode(nodeMap, node, dynamicNode);
                 } else {
                   currentNode = new StaticNode(node.value());
                 }
 
-                if (!node.executor().isEmpty()) {
-                  Executor executor = (Executor) nodeMap.get(node.executor());
-                  if (executor == null) {
-                    throw new NullPointerException("No executor found with key " + node.executor());
-                  }
-
-                  currentNode.setExecutor(executor);
-                }
-
-                if (!node.required().isEmpty()) {
-                  Predicate<CommandContext<? super Object>> required = (Predicate<CommandContext<? super Object>>) nodeMap.get(node.required());
-                  if (required == null) {
-                    throw new NullPointerException("No required node found with key " + node.required());
-                  }
-
-                  currentNode.setRequired(required);
-                }
+                trySetExecutorNode(nodeMap, node, currentNode);
+                trySetRequired(nodeMap, node, currentNode);
 
                 if (nodeDeque.isEmpty()) {
                   NodeProducer<? extends Annotation> producer = PRODUCER_MAP.get(ExecutorNode.class);
@@ -151,6 +131,50 @@ public class AnnotationCommandBuilder {
               }
             });
     return rootNode;
+  }
+
+  private void trySetInterpreterStrategyNode(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull DynamicNode dynamicNode) {
+    if (!node.strategy().isEmpty()) {
+      InterpreterStrategy interpreterStrategy = getInterpreterStrategy(node.strategy(), nodeMap);
+      if (interpreterStrategy == null) {
+        throw new NullPointerException("No interpreter strategy was registered with key " + node.strategy());
+      }
+
+      dynamicNode.setInterpreterStrategy(interpreterStrategy);
+    }
+  }
+
+  private void trySetInterpreterNode(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull DynamicNode dynamicNode) {
+    if (!node.interpreter().isEmpty()) {
+      Interpreter<?> interpreter = getInterpreter(node.interpreter(), nodeMap);
+      if (interpreter == null) {
+        throw new NullPointerException("No interpreter was registered with key " + node.interpreter());
+      }
+
+      dynamicNode.setInterpreter(interpreter);
+    }
+  }
+
+  private void trySetExecutorNode(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
+    if (!node.executor().isEmpty()) {
+      Executor executor = (Executor) nodeMap.get(node.executor());
+      if (executor == null) {
+        throw new NullPointerException("No executor found with key " + node.executor());
+      }
+
+      currentNode.setExecutor(executor);
+    }
+  }
+
+  private void trySetRequired(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
+    if (!node.required().isEmpty()) {
+      Predicate<CommandContext<? super Object>> required = (Predicate<CommandContext<? super Object>>) nodeMap.get(node.required());
+      if (required == null) {
+        throw new NullPointerException("No required node found with key " + node.required());
+      }
+
+      currentNode.setRequired(required);
+    }
   }
 
   private Interpreter<?> getInterpreter(@NonNull String key, @NonNull Map<String, Object> nodeMap) {
@@ -170,4 +194,5 @@ public class AnnotationCommandBuilder {
       return (InterpreterStrategy) nodeMap.get(key);
     }
   }
+
 }

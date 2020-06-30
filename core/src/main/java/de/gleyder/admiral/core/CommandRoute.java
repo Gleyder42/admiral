@@ -37,9 +37,8 @@ public class CommandRoute {
     this.nodeList.addAll(route.nodeList);
   }
 
-  public void invalidate() {
+  public void clearNodes() {
     nodeList.clear();
-    errorMessages.clear();
   }
 
   public CommandNode get(int index) {

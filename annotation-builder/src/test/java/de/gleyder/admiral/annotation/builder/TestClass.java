@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 @Slf4j
-@Command("test")
+@Node(value = "test", executor = "rootExecutor")
 public class TestClass {
 
   private final static String SUM_STRATEGY_INTERPRETER = "sumStrategyInterpreter";
@@ -26,7 +26,6 @@ public class TestClass {
           @Node(value = "sum", executor = "midExecutor"),
           @Node(value = "input", strategy = SUM_STRATEGY_INTERPRETER, interpreter = "long")
   })
-  @ExecutorNode
   public void executor(Object source, @Bag("input") long sum) {
     stringList.add("sum:" + sum);
   }
@@ -37,7 +36,6 @@ public class TestClass {
           @Node(value = "int", interpreter = "int"),
           @Node(value = "char", interpreter = "char")
   })
-  @ExecutorNode
   public void manyValues(Object source, @Bag("char") char character, @Bag("int") int integer,
                          @Bag("string") String string, @Bag("self") ValueBag bag) {
     stringList.add(character + "");
@@ -48,7 +46,6 @@ public class TestClass {
   @Route({
           @Node("flemming")
   })
-  @ExecutorNode
   public void noValue(Object source, @Bag("hot") IntStream intStream) {
     //NullPointer because no value was found for IntStream
   }
@@ -57,7 +54,6 @@ public class TestClass {
           @Node(value = "bag", executor = "midExecutor"),
           @Node("supply")
   })
-  @ExecutorNode
   public void bagTest(Object source, @Bag("mid") int number) {
     stringList.add(number + "");
   }
@@ -91,5 +87,10 @@ public class TestClass {
             .mapToLong(Long::parseLong)
             .sum();
     return List.of(InterpreterResult.ofValue(sum));
+  }
+
+  @ExecutorNode
+  public void rootExecutor(Object source) {
+    stringList.add("root");
   }
 }
