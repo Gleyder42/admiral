@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
@@ -118,28 +119,12 @@ public class CommandDispatcher<S> {
     if (inputArgument.isSingle() && nextNodeOptional.isPresent()) {
       route(nextNodeOptional.get(), route, argumentDeque, interpreterMap);
     } else {
-      List<DynamicNode> dynamicNodeList = node.getDynamicNodes().stream()
-              .filter(filterNode -> {
-                List<InterpreterResult<Object>> interpreterResults =
-                        filterNode.getInterpreterStrategy().test(interpreterMap, filterNode.getInterpreter(), inputArgument);
-                interpreterResults.stream()
-                        .filter(InterpreterResult::failed)
-                        .forEach(result -> route.addError(result.getError().orElseThrow()));
-                return interpreterResults.stream().noneMatch(InterpreterResult::failed);
-              })
-              .collect(Collectors.toUnmodifiableList());
+      List<DynamicNode> dynamicNodeList = getDynamicNodes(node, route, interpreterMap, inputArgument);
 
       if (dynamicNodeList.size() == 1) {
         route(dynamicNodeList.get(0), route, argumentDeque, interpreterMap);
       } else {
-        List<CommandRoute> alternateRoutes = dynamicNodeList.stream()
-                .map(undeterminedNode -> {
-                  CommandRoute copyRoute = route.duplicate();
-                  route(undeterminedNode, copyRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
-                  return copyRoute;
-                })
-                .filter(CommandRoute::isValid)
-                .collect(Collectors.toUnmodifiableList());
+        List<CommandRoute> alternateRoutes = getAlternateRoutes(route, argumentDeque, interpreterMap, dynamicNodeList);
 
         route.clearNodes();
         if (alternateRoutes.size() == 1) {
@@ -149,5 +134,35 @@ public class CommandDispatcher<S> {
         }
       }
     }
+  }
+
+  @NotNull
+  private List<DynamicNode> getDynamicNodes(@NonNull CommandNode node, @NonNull CommandRoute route,
+                                            @NonNull Map<String, Object> interpreterMap,
+                                            @NonNull InputArgument inputArgument) {
+    return node.getDynamicNodes().stream()
+                .filter(filterNode -> {
+                  List<InterpreterResult<Object>> interpreterResults =
+                          filterNode.getInterpreterStrategy().test(interpreterMap, filterNode.getInterpreter(), inputArgument);
+                  interpreterResults.stream()
+                          .filter(InterpreterResult::failed)
+                          .forEach(result -> route.addError(result.getError().orElseThrow()));
+                  return interpreterResults.stream().noneMatch(InterpreterResult::failed);
+                })
+                .collect(Collectors.toUnmodifiableList());
+  }
+
+  @NotNull
+  private List<CommandRoute> getAlternateRoutes(@NonNull CommandRoute route, @NonNull Deque<InputArgument> argumentDeque,
+                                                @NonNull Map<String, Object> interpreterMap,
+                                                @NonNull List<DynamicNode> dynamicNodeList) {
+    return dynamicNodeList.stream()
+                  .map(undeterminedNode -> {
+                    CommandRoute copyRoute = route.duplicate();
+                    route(undeterminedNode, copyRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
+                    return copyRoute;
+                  })
+                  .filter(CommandRoute::isValid)
+                  .collect(Collectors.toUnmodifiableList());
   }
 }
