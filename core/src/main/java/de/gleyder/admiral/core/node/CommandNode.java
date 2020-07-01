@@ -34,7 +34,9 @@ public abstract class CommandNode {
 
   public void addNode(@NonNull CommandNode node) {
     if (node instanceof StaticNode) {
-      this.nodeMap.put(node.getKey(), node);
+      StaticNode staticNode = (StaticNode) node;
+      nodeMap.put(node.getKey(), staticNode);
+      staticNode.getAliases().forEach(alias -> nodeMap.put(alias, staticNode));
     } else {
       dynamicNodeList.add((DynamicNode) node);
     }

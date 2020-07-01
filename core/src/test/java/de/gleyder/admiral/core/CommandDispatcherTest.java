@@ -22,11 +22,15 @@ public class CommandDispatcherTest {
 
   private final CommandDispatcher dispatcher = new CommandDispatcher();
 
-  private final StaticNode testNode = new StaticNode("test");
+  private final StaticNode testNode = new StaticNodeBuilder("test")
+          .addAlias("t")
+          .build();
   private final StaticNode echoNode = new StaticNodeBuilder("echo")
           .setExecutor(context -> log.info("This echo node has an executor but not a value!"))
           .build();
-  private final StaticNode createNode = new StaticNode("create");
+  private final StaticNode createNode = new StaticNodeBuilder("create")
+          .addAlias("c")
+          .build();
   private final StaticNode requireNode = new StaticNodeBuilder("required")
           .setRequired(context -> context.getBag().get("int").isPresent())
           .build();
@@ -68,6 +72,13 @@ public class CommandDispatcherTest {
     stringLogNode.addNode(optionalNode);
 
     dispatcher.registerCommand(testNode);
+  }
+
+  @Test
+  void shouldFindOptionalNodeWihValueAndAlias() {
+    CommandRoute actual = dispatcher.findRoute("t c 10 test optional");
+
+    assertEqualsRoute(actual, testNode, createNode, integerLogNode, stringLogNode, optionalNode);
   }
 
   @Test
