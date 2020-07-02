@@ -22,6 +22,10 @@ public class ValueBag {
     return map.get(key).size() > 1;
   }
 
+  public <T> Optional<T> get(@NonNull String key, @NonNull Class<T> tClass) {
+    return get(key);
+  }
+
   public <T> Optional<T> get(@NonNull String key) {
     if (!map.containsKey(key)) {
       return Optional.empty();
