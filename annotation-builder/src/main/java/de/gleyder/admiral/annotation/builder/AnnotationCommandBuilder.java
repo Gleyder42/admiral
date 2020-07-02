@@ -69,7 +69,7 @@ public class AnnotationCommandBuilder {
     return this;
   }
 
-  public void build(@NonNull CommandDispatcher<?> dispatcher) {
+  public void build(@NonNull CommandDispatcher dispatcher) {
     registeredClasses.stream()
             .map(this::toNode)
             .forEach(dispatcher::registerCommand);
@@ -168,7 +168,7 @@ public class AnnotationCommandBuilder {
 
   private void trySetRequired(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
     if (!node.required().isEmpty()) {
-      Predicate<CommandContext<? super Object>> required = (Predicate<CommandContext<? super Object>>) nodeMap.get(node.required());
+      Predicate<CommandContext> required = (Predicate<CommandContext>) nodeMap.get(node.required());
       if (required == null) {
         throw new NullPointerException("No required node found with key " + node.required());
       }

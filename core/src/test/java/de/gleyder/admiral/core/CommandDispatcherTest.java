@@ -8,8 +8,7 @@ import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.node.StaticNode;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -56,20 +55,20 @@ public class CommandDispatcherTest {
 
   @BeforeEach
   void setup() {
+    integerLogNode.addNode(stringLogNode);
+    integerLogNode.addNode(requireNode);
+
+    stringLogNode.addNode(optionalNode);
+
+    createNode.addNode(optionalNode);
+    createNode.addNode(integerLogNode);
+
     echoNode.addNode(integerLogNode);
     echoNode.addNode(stringLogNode);
     echoNode.addNode(requireNode);
 
     testNode.addNode(echoNode);
     testNode.addNode(createNode);
-
-    createNode.addNode(optionalNode);
-    createNode.addNode(integerLogNode);
-
-    integerLogNode.addNode(stringLogNode);
-    integerLogNode.addNode(requireNode);
-
-    stringLogNode.addNode(optionalNode);
 
     dispatcher.registerCommand(testNode);
   }
@@ -161,6 +160,14 @@ public class CommandDispatcherTest {
   @Test
   void shouldNotThrowExceptionIfRequiredPositive() {
     assertDoesNotThrow(() -> dispatcher.dispatch("test echo 10 required", new Object(), new HashMap<>()));
+  }
+
+  @TestFactory
+  List<DynamicTest> testAllRoutes() {
+    return dispatcher.getAllRoutes().stream()
+            .map(route -> DynamicTest.dynamicTest(route.getNodeList().toString(),
+                    () -> assertTrue(route.isValid()))
+            ).collect(Collectors.toUnmodifiableList());
   }
 
   private void assertEqualsRoute(CommandRoute actual, CommandNode... nodes) {

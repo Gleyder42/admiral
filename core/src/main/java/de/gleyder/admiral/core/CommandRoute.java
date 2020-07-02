@@ -14,7 +14,7 @@ public class CommandRoute {
   private final List<Throwable> errorMessages = new ArrayList<>();
 
   @TestOnly
-  @Getter(AccessLevel.PUBLIC)
+  @Getter
   private final List<CommandNode> nodeList;
 
   public CommandRoute(@NonNull List<CommandNode> nodeList) {

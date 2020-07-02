@@ -5,5 +5,5 @@ import lombok.NonNull;
 
 public interface Executor {
 
-  void execute(@NonNull CommandContext<?> context);
+  void execute(@NonNull CommandContext context);
 }

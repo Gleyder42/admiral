@@ -20,14 +20,14 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class CommandDispatcher<S> {
+public class CommandDispatcher {
 
   @Getter(value = AccessLevel.PUBLIC)
   private final StaticNode rootNode = new StaticNode("root");
   private final InputParser parser;
 
   @Setter
-  private Consumer<CommandContext<S>> afterExecute;
+  private Consumer<CommandContext> afterExecute;
 
   public CommandDispatcher(@Nullable InputParser parser) {
     this.parser = AdmiralCommon.standard(parser, new InputParser());
@@ -41,7 +41,7 @@ public class CommandDispatcher<S> {
     rootNode.addNode(node);
   }
 
-  public List<Throwable> dispatch(@NonNull String command, @NonNull S source, @NonNull Map<String, Object> interpreterMap) {
+  public List<Throwable> dispatch(@NonNull String command, Object source, @NonNull Map<String, Object> interpreterMap) {
     CommandRoute commandRoute = new CommandRoute();
     ArrayDeque<InputArgument> argumentDeque = new ArrayDeque<>(parser.parse(command));
 
@@ -60,7 +60,7 @@ public class CommandDispatcher<S> {
     }
 
     ValueBag valueBag = new ValueBag();
-    CommandContext<Object> context = new CommandContext<>(source, valueBag);
+    CommandContext context = new CommandContext(source, valueBag);
     int index = 1;
     while (!argumentDeque.isEmpty()) {
       InputArgument argument = argumentDeque.pop();
@@ -77,10 +77,25 @@ public class CommandDispatcher<S> {
     }
 
     if (afterExecute != null) {
-      afterExecute.accept((CommandContext<S>) context);
+      afterExecute.accept(context);
     }
 
     return Collections.emptyList();
+  }
+
+  public List<CommandRoute> getAllRoutes() {
+    List<CommandRoute> routeList = new ArrayList<>();
+    findAllRoutes(routeList, new CommandRoute(), rootNode);
+    return routeList;
+  }
+
+  private void findAllRoutes(@NonNull List<CommandRoute> routeList, @NonNull CommandRoute route, @NonNull CommandNode node) {
+    route.add(node);
+    node.getAllNodes().forEach(nextNode -> findAllRoutes(routeList, route.duplicate(), nextNode));
+
+    if (node.isLeaf() || (!node.isLeaf() && node.getExecutor().isPresent())) {
+      routeList.add(route);
+    }
   }
 
   @TestOnly

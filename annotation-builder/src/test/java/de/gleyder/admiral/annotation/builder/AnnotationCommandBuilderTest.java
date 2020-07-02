@@ -14,7 +14,7 @@ class AnnotationCommandBuilderTest {
   private final TestClass testClass = new TestClass();
   private final AnnotationCommandBuilder builder = new AnnotationCommandBuilder()
           .registerCommand(testClass);
-  private final CommandDispatcher<Object> dispatcher = new CommandDispatcher<>();
+  private final CommandDispatcher dispatcher = new CommandDispatcher();
 
   @BeforeEach
   void setup() {

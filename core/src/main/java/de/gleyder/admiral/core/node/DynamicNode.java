@@ -29,7 +29,7 @@ public class DynamicNode extends CommandNode {
   }
 
   @Override
-  public void onCommandProcess(@NonNull CommandContext<?> context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) {
+  public void onCommandProcess(@NonNull CommandContext context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) {
     List<InterpreterResult<Object>> results = interpreterStrategy.test(interpreterMap, interpreter, inputArgument);
 
     results.forEach(result -> {

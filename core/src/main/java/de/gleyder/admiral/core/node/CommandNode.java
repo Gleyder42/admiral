@@ -21,7 +21,7 @@ public abstract class CommandNode {
   private final String key;
 
   @Setter
-  private Predicate<CommandContext<? super Object>> required;
+  private Predicate<CommandContext> required;
 
   @Setter
   private Executor executor;
@@ -30,7 +30,7 @@ public abstract class CommandNode {
     this.key = key;
   }
 
-  public void onCommandProcess(@NonNull CommandContext<?> context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) { }
+  public void onCommandProcess(@NonNull CommandContext context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) { }
 
   public void addNode(@NonNull CommandNode node) {
     if (node instanceof StaticNode) {
@@ -42,11 +42,17 @@ public abstract class CommandNode {
     }
   }
 
+  public Set<CommandNode> getAllNodes() {
+    Set<CommandNode> nodeList = new HashSet<>(nodeMap.values());
+    nodeList.addAll(dynamicNodeList);
+    return nodeList;
+  }
+
   public boolean isLeaf() {
     return nodeMap.isEmpty() && dynamicNodeList.isEmpty();
   }
 
-  public Optional<Predicate<CommandContext<Object>>> getRequired() {
+  public Optional<Predicate<CommandContext>> getRequired() {
     return Optional.ofNullable(required);
   }
 

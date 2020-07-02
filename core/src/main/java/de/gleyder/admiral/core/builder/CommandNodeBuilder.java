@@ -19,7 +19,7 @@ public abstract class CommandNodeBuilder<B extends CommandNodeBuilder, N extends
     return thisBuilder();
   }
 
-  public B setRequired(@NonNull Predicate<CommandContext<? super Object>> required) {
+  public B setRequired(@NonNull Predicate<CommandContext> required) {
     node.setRequired(required);
     return thisBuilder();
   }

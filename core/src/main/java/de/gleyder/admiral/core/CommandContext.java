@@ -3,14 +3,24 @@ package de.gleyder.admiral.core;
 import lombok.Getter;
 import lombok.NonNull;
 
-@Getter
-public class CommandContext<T> {
+public class CommandContext {
 
-  private final T source;
+  private final Object source;
+
+  @Getter
   private final ValueBag bag;
 
-  public CommandContext(@NonNull T source, @NonNull ValueBag bag) {
+  public CommandContext(Object source, @NonNull ValueBag bag) {
     this.source = source;
     this.bag = bag;
   }
+
+  public <T> T getSource(Class<T> tClass) {
+    return (T) source;
+  }
+
+  public <T> T getSource() {
+    return (T) source;
+  }
 }
+

@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @RequiredArgsConstructor
-public class MethodRequired implements Predicate<CommandContext<? super Object>> {
+public class MethodRequired implements Predicate<CommandContext> {
 
   private final ExecutableMethod method;
 
   @Override
-  public boolean test(CommandContext<? super Object> context) {
-    return method.invokeReturn(List.of(context.getSource()), ArgumentSupplier.ofBag(context.getBag()));
+  public boolean test(CommandContext context) {
+    return method.invokeReturn(List.of(context.getSource(Object.class)), ArgumentSupplier.ofBag(context.getBag()));
   }
 }
