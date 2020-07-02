@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CommandDispatcher {
 
-  @Getter(value = AccessLevel.PUBLIC)
+  @Getter
   private final StaticNode rootNode = new StaticNode("root");
   private final InputParser parser;
 
@@ -68,7 +68,7 @@ public class CommandDispatcher {
 
       node.onCommandProcess(context, interpreterMap, argument);
 
-      if (node.getRequired().isPresent() && !node.getRequired().get().test(context)) {
+      if (node.getRequired().isPresent() && !node.getRequired().orElseThrow().test(context)) {
         throw new CommandDispatcherException("Node's '" + node.getKey() + "' required test failed");
       }
 
@@ -133,20 +133,20 @@ public class CommandDispatcher {
 
     if (inputArgument.isSingle() && nextNodeOptional.isPresent()) {
       route(nextNodeOptional.get(), route, argumentDeque, interpreterMap);
+      return;
+    }
+
+    List<DynamicNode> dynamicNodeList = getDynamicNodes(node, route, interpreterMap, inputArgument);
+    if (dynamicNodeList.size() == 1) {
+      route(dynamicNodeList.get(0), route, argumentDeque, interpreterMap);
     } else {
-      List<DynamicNode> dynamicNodeList = getDynamicNodes(node, route, interpreterMap, inputArgument);
+      List<CommandRoute> alternateRoutes = getAlternateRoutes(route, argumentDeque, interpreterMap, dynamicNodeList);
 
-      if (dynamicNodeList.size() == 1) {
-        route(dynamicNodeList.get(0), route, argumentDeque, interpreterMap);
-      } else {
-        List<CommandRoute> alternateRoutes = getAlternateRoutes(route, argumentDeque, interpreterMap, dynamicNodeList);
-
-        route.clearNodes();
-        if (alternateRoutes.size() == 1) {
-          route.addAll(alternateRoutes.get(0));
-        } else if (alternateRoutes.size() > 1) {
-          throw new AmbiguousCommandRouteException("Multiple command routes found", alternateRoutes);
-        }
+      route.clearNodes();
+      if (alternateRoutes.size() == 1) {
+        route.addAll(alternateRoutes.get(0));
+      } else if (alternateRoutes.size() > 1) {
+        throw new AmbiguousCommandRouteException("Multiple command routes found", alternateRoutes);
       }
     }
   }
