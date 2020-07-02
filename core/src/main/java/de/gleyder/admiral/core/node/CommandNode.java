@@ -32,7 +32,7 @@ public abstract class CommandNode {
 
   public void onCommandProcess(@NonNull CommandContext context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) { }
 
-  public void addNode(@NonNull CommandNode node) {
+  public CommandNode addNode(@NonNull CommandNode node) {
     if (node instanceof StaticNode) {
       StaticNode staticNode = (StaticNode) node;
       nodeMap.put(node.getKey(), staticNode);
@@ -40,6 +40,7 @@ public abstract class CommandNode {
     } else {
       dynamicNodeList.add((DynamicNode) node);
     }
+    return node;
   }
 
   public Set<CommandNode> getAllNodes() {

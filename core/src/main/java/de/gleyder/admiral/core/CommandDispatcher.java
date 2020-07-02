@@ -61,20 +61,26 @@ public class CommandDispatcher {
 
     ValueBag valueBag = new ValueBag();
     CommandContext context = new CommandContext(source, valueBag);
+
+
     int index = 1;
     while (!argumentDeque.isEmpty()) {
       InputArgument argument = argumentDeque.pop();
       CommandNode node = commandRoute.get(index);
-
       node.onCommandProcess(context, interpreterMap, argument);
-
-      if (node.getRequired().isPresent() && !node.getRequired().orElseThrow().test(context)) {
-        throw new CommandDispatcherException("Node's '" + node.getKey() + "' required test failed");
-      }
-
-      node.getExecutor().ifPresent(executor -> executor.execute(context));
       index++;
     }
+
+    commandRoute.getNodeList().stream()
+            .filter(node -> node.getRequired().isPresent())
+            .filter(node -> !node.getRequired().get().test(context))
+            .forEach(node -> {
+              throw new CommandDispatcherException("Node's '" + node.getKey() + "' required test failed");
+            });
+
+    commandRoute.getNodeList().stream()
+            .filter(node -> node.getExecutor().isPresent())
+            .forEach(node -> node.getExecutor().get().execute(context));
 
     if (afterExecute != null) {
       afterExecute.accept(context);

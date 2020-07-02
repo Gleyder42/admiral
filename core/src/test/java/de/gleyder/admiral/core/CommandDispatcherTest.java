@@ -2,6 +2,7 @@ package de.gleyder.admiral.core;
 
 import de.gleyder.admiral.core.builder.DynamicNodeBuilder;
 import de.gleyder.admiral.core.builder.StaticNodeBuilder;
+import de.gleyder.admiral.core.interpreter.CommonInterpreter;
 import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
 import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
 import de.gleyder.admiral.core.node.CommandNode;
@@ -33,17 +34,14 @@ public class CommandDispatcherTest {
   private final StaticNode requireNode = new StaticNodeBuilder("required")
           .setRequired(context -> context.getBag().get("int").isPresent())
           .build();
-
   private final DynamicNode stringLogNode = new DynamicNodeBuilder("string")
           .setInterpreterStrategy(new MergedStrategy())
           .setExecutor(context -> log.info("Echo {}", context.getBag().get("string").orElseThrow()))
           .build();
-
   private final DynamicNode integerLogNode = new DynamicNodeBuilder("int")
           .setExecutor(context -> log.info("Int Echo: {}", context.getBag().get("int").orElseThrow()))
           .setInterpreter(new IntegerInterpreter())
           .build();
-
   private final StaticNode optionalNode = new StaticNodeBuilder("optional")
           .setExecutor(context -> {
             Optional<Integer> anInt = context.getBag().get("int");
@@ -52,6 +50,20 @@ public class CommandDispatcherTest {
             log.info("Echo Int: {} String: {}", anInt.orElse(-1), string.orElse("haus"));
           })
           .build();
+  private final StaticNode sumNode = new StaticNodeBuilder("sum")
+          .setExecutor(context -> {
+            int n1 = context.getBag().get("n1", Integer.class).orElseThrow();
+            int n2 = context.getBag().get("n2", Integer.class).orElseThrow();
+
+            log.info("Result: " + (n1 + n2));
+          })
+          .build();
+  private final DynamicNode n1Node = new DynamicNodeBuilder("n1")
+          .setInterpreter(CommonInterpreter.INT)
+          .build();
+  private final DynamicNode n2Node = new DynamicNodeBuilder("n2")
+          .setInterpreter(CommonInterpreter.INT)
+          .build();
 
   @BeforeEach
   void setup() {
@@ -59,6 +71,8 @@ public class CommandDispatcherTest {
     integerLogNode.addNode(requireNode);
 
     stringLogNode.addNode(optionalNode);
+
+    sumNode.addNode(n1Node).addNode(n2Node);
 
     createNode.addNode(optionalNode);
     createNode.addNode(integerLogNode);
@@ -69,6 +83,7 @@ public class CommandDispatcherTest {
 
     testNode.addNode(echoNode);
     testNode.addNode(createNode);
+    testNode.addNode(sumNode);
 
     dispatcher.registerCommand(testNode);
   }
@@ -153,8 +168,20 @@ public class CommandDispatcherTest {
   }
 
   @Test
+  void shouldCalculate() {
+    CommandRoute actual = dispatcher.findRoute("test sum 10 10");
+
+    assertEqualsRoute(actual, testNode, sumNode, n1Node, n2Node);
+  }
+
+  @Test
+  void shouldNotThrowException() {
+    assertDoesNotThrow(() -> dispatcher.dispatch("test sum 10 10", new Object(), Collections.emptyMap()));
+  }
+
+  @Test
   void shouldThrowExceptionIfRequiredNegative() {
-    assertThrows(CommandDispatcherException.class, () -> dispatcher.dispatch("test echo required", new Object(), new HashMap<>()));
+    assertThrows(CommandDispatcherException.class, () -> dispatcher.dispatch("test echo required", new Object(), Collections.emptyMap()));
   }
 
   @Test

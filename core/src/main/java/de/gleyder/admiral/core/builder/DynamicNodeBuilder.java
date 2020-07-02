@@ -1,5 +1,6 @@
 package de.gleyder.admiral.core.builder;
 
+import de.gleyder.admiral.core.interpreter.CommonInterpreter;
 import de.gleyder.admiral.core.interpreter.Interpreter;
 import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.interpreter.strategy.InterpreterStrategy;
@@ -18,6 +19,11 @@ public class DynamicNodeBuilder extends CommandNodeBuilder<DynamicNodeBuilder, D
 
   public DynamicNodeBuilder setInterpreter(@NonNull Interpreter<?> interpreter) {
     node.setInterpreter(interpreter);
+    return this;
+  }
+
+  public DynamicNodeBuilder setInterpreter(@NonNull CommonInterpreter commonInterpreter) {
+    node.setInterpreter(commonInterpreter.get());
     return this;
   }
 }

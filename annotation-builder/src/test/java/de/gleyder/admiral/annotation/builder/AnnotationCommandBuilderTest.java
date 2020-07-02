@@ -26,7 +26,8 @@ class AnnotationCommandBuilderTest {
   void calculateCommand() {
     dispatch("test calculate sum (10 10)");
 
-    assertContains(testClass, "strategy", "root", "verifier", "mid", "strategy", "sum:20");
+    System.out.println(testClass.getStringList());
+    assertContains(testClass, "strategy", "strategy", "verifier", "root", "mid", "sum:20");
   }
 
   @Test
