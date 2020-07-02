@@ -21,6 +21,11 @@ public class ValueBagTest {
   }
 
   @Test
+  void shouldReturnKeys() {
+    assertIterableEquals(List.of("string", "integer"), bag.keySet());
+  }
+
+  @Test
   void shouldReturnList() {
     assertIterableEquals(List.of("hallo", List.of(10, -15)), bag.getAll());
   }
