@@ -14,6 +14,15 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+/**
+ * This simple application is used to demonstrate how to use commands.
+ *
+ * Following commands are created:
+ *
+ * allCommands - Displays all commands
+ * stop, abort - Stops the application
+ * calc sum <int> <int> - Adds two integers
+ */
 public class ExampleCommand {
 
   public static void main(String[] args) {
@@ -24,25 +33,37 @@ public class ExampleCommand {
       boolean running = true;
     };
 
+    //Creates a command node abort.
     StaticNode stopNode = new StaticNodeBuilder("stop")
             .addAlias("abort")
             .setExecutor(context -> booleanWrapper.running = false)
             .build();
 
+    //Adds the stop node to the dispatcher
     dispatcher.registerCommand(stopNode);
     addCommand(dispatcher);
 
     while (booleanWrapper.running) {
       String input = scanner.nextLine();
-      long timeMillis = System.currentTimeMillis();
       List<Throwable> dispatch = dispatcher.dispatch(input, new SenderSource(), Collections.emptyMap());
-      System.out.println(System.currentTimeMillis() - timeMillis);
       dispatch.forEach(System.out::println);
     }
   }
 
+  /**
+   * Adds the commands to the dispatcher. A dedicated method improves code readability here.
+   */
   private static void addCommand(CommandDispatcher dispatcher) {
+    /*
+     * Calculation Nodes
+     */
+
+    //Static nodes calc sum
+    StaticNode calc = new StaticNodeBuilder("calc")
+            .build();
     StaticNode sumNode = new StaticNode("sum");
+
+    // Dynamic nodes <int> <int>
     DynamicNode numberNode = new DynamicNodeBuilder("number")
             .setInterpreter(new IntegerInterpreter())
             .build();
@@ -56,8 +77,8 @@ public class ExampleCommand {
               senderSource.sendMessage("Result: " + (number + otherNumber));
             })
             .build();
-    StaticNode calc = new StaticNodeBuilder("calc")
-            .build();
+
+    //All commands
     StaticNode allCommands = new StaticNodeBuilder("allCommands")
             .setExecutor(context -> {
               List<CommandRoute> routes = dispatcher.getAllRoutes();
@@ -68,10 +89,10 @@ public class ExampleCommand {
             })
             .build();
 
-    numberNode.addNode(otherNumberNode);
-    sumNode.addNode(numberNode);
-    calc.addNode(sumNode);
+    //Add node returns the added node.
+    calc.addNode(sumNode).addNode(numberNode).addNode(otherNumberNode);
 
+    //Calc and allCommands nodes are registerd
     dispatcher.registerCommand(calc);
     dispatcher.registerCommand(allCommands);
   }

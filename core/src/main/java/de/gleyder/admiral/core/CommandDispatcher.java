@@ -90,8 +90,16 @@ public class CommandDispatcher {
   }
 
   public List<CommandRoute> getAllRoutes() {
+    return getAllRoutes(rootNode);
+  }
+
+  public List<CommandRoute> getRoutes(@NonNull CommandNode node) {
+    return getAllRoutes(node);
+  }
+
+  private List<CommandRoute> getAllRoutes(@NonNull CommandNode node) {
     List<CommandRoute> routeList = new ArrayList<>();
-    findAllRoutes(routeList, new CommandRoute(), rootNode);
+    findAllRoutes(routeList, new CommandRoute(), node);
     return routeList;
   }
 
