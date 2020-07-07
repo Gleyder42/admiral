@@ -42,8 +42,8 @@ public class CommandDispatcher {
 
   public List<CommandError> dispatch(@NonNull String command, Object source, @NonNull Map<String, Object> interpreterMap) {
     CommandRoute commandRoute = new CommandRoute();
-    ArrayDeque<InputArgument> argumentDeque = new ArrayDeque<>(parser.parse(command));
-    route(rootNode, commandRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
+    List<InputArgument> argumentList = parser.parse(command);
+    route(rootNode, commandRoute, new ArrayDeque<>(argumentList), interpreterMap);
 
     if (commandRoute.isInvalid()) {
       commandRoute.addError(LiteralCommandError.create().setMessage("Command is invalid"));
@@ -53,14 +53,13 @@ public class CommandDispatcher {
     ValueBag valueBag = new ValueBag();
     CommandContext context = new CommandContext(source, valueBag);
 
-
     int index = 1;
-    while (!argumentDeque.isEmpty()) {
-      InputArgument argument = argumentDeque.pop();
+    for (InputArgument argument : argumentList) {
       CommandNode node = commandRoute.get(index);
       node.onCommandProcess(context, interpreterMap, argument);
       index++;
     }
+
 
     List<CommandError> commandErrors = commandRoute.getNodeList().stream()
             .filter(node -> node.getCheck().isPresent())
