@@ -11,7 +11,7 @@ import java.util.List;
 @ToString
 public class CommandRoute {
 
-  private final List<Throwable> errorMessages = new ArrayList<>();
+  private final List<CommandError> errorMessages = new ArrayList<>();
 
   @TestOnly
   @Getter
@@ -29,7 +29,7 @@ public class CommandRoute {
     nodeList.add(node);
   }
 
-  public void addError(@NonNull Throwable error) {
+  public void addError(@NonNull CommandError error) {
     errorMessages.add(error);
   }
 
@@ -57,7 +57,7 @@ public class CommandRoute {
     return new CommandRoute(new ArrayList<>(nodeList));
   }
 
-  public List<Throwable> getErrors() {
+  public List<CommandError> getErrors() {
     return List.copyOf(errorMessages);
   }
 }

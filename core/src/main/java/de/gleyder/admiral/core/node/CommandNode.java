@@ -1,6 +1,7 @@
 package de.gleyder.admiral.core.node;
 
 import de.gleyder.admiral.core.CommandContext;
+import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.Executor;
 import de.gleyder.admiral.core.parser.InputArgument;
 import lombok.Getter;
@@ -9,7 +10,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 @Accessors(chain = true)
 public abstract class CommandNode {
@@ -21,7 +21,7 @@ public abstract class CommandNode {
   private final String key;
 
   @Setter
-  private Predicate<CommandContext> required;
+  private Check check;
 
   @Setter
   private Executor executor;
@@ -53,8 +53,8 @@ public abstract class CommandNode {
     return nodeMap.isEmpty() && dynamicNodeList.isEmpty();
   }
 
-  public Optional<Predicate<CommandContext>> getRequired() {
-    return Optional.ofNullable(required);
+  public Optional<Check> getCheck() {
+    return Optional.ofNullable(check);
   }
 
   public Optional<Executor> getExecutor() {

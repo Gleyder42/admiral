@@ -6,7 +6,6 @@ import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.node.StaticNode;
 import de.gleyder.admiral.core.parser.InputArgument;
 import de.gleyder.admiral.core.parser.InputParser;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -41,22 +40,14 @@ public class CommandDispatcher {
     rootNode.addNode(node);
   }
 
-  public List<Throwable> dispatch(@NonNull String command, Object source, @NonNull Map<String, Object> interpreterMap) {
+  public List<CommandError> dispatch(@NonNull String command, Object source, @NonNull Map<String, Object> interpreterMap) {
     CommandRoute commandRoute = new CommandRoute();
     ArrayDeque<InputArgument> argumentDeque = new ArrayDeque<>(parser.parse(command));
-
-    try {
-      route(rootNode, commandRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
-    } catch (AmbiguousCommandRouteException exception) {
-      log.error("Found multiple routes");
-      return List.of(exception);
-    }
+    route(rootNode, commandRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
 
     if (commandRoute.isInvalid()) {
-      log.error("No route found");
-      List<Throwable> throwableList = new ArrayList<>(commandRoute.getErrors());
-      throwableList.add(new CommandDispatcherException("No route found"));
-      return throwableList;
+      commandRoute.addError(LiteralCommandError.create().setMessage("Command is invalid"));
+      return commandRoute.getErrors();
     }
 
     ValueBag valueBag = new ValueBag();
@@ -71,12 +62,16 @@ public class CommandDispatcher {
       index++;
     }
 
-    commandRoute.getNodeList().stream()
-            .filter(node -> node.getRequired().isPresent())
-            .filter(node -> !node.getRequired().get().test(context))
-            .forEach(node -> {
-              throw new CommandDispatcherException("Node's '" + node.getKey() + "' required test failed");
-            });
+    List<CommandError> commandErrors = commandRoute.getNodeList().stream()
+            .filter(node -> node.getCheck().isPresent())
+            .map(node -> node.getCheck().get().test(context))
+            .filter(checkResult -> !checkResult.wasSuccessful())
+            .map(checkResult -> checkResult.getError().orElseThrow())
+            .collect(Collectors.toUnmodifiableList());
+
+    if (!commandErrors.isEmpty()) {
+      return commandErrors;
+    }
 
     commandRoute.getNodeList().stream()
             .filter(node -> node.getExecutor().isPresent())
@@ -128,8 +123,11 @@ public class CommandDispatcher {
     route.add(node);
     if (node.isLeaf()) {
       if (!argumentDeque.isEmpty()) {
-        route.addError(new CommandDispatcherException("More arguments were given " + argumentDeque
-                + " but command tree has finished with node " + node.getKey())
+        route.addError(LiteralCommandError.create()
+                .setDetailed("Further arguments remain [%s] but command tree has finished with node %s",
+                        argumentDeque, node.getKey()
+                )
+                .setSimple("No command found")
         );
       }
       return;
@@ -137,7 +135,10 @@ public class CommandDispatcher {
 
     if (argumentDeque.isEmpty()) {
       if (node.getExecutor().isEmpty()) {
-        route.addError(new CommandDispatcherException("No executor was found for node " + node.getKey()));
+        route.addError(LiteralCommandError.create()
+                .setDetailed("No executor was found for node %s", node.getKey())
+                .setSimple("No command found")
+        );
       }
       return;
     }
@@ -160,7 +161,7 @@ public class CommandDispatcher {
       if (alternateRoutes.size() == 1) {
         route.addAll(alternateRoutes.get(0));
       } else if (alternateRoutes.size() > 1) {
-        throw new AmbiguousCommandRouteException("Multiple command routes found", alternateRoutes);
+        route.addError(new AmbiguousCommandError(alternateRoutes));
       }
     }
   }
@@ -170,15 +171,15 @@ public class CommandDispatcher {
                                             @NonNull Map<String, Object> interpreterMap,
                                             @NonNull InputArgument inputArgument) {
     return node.getDynamicNodes().stream()
-                .filter(filterNode -> {
-                  List<InterpreterResult<Object>> interpreterResults =
-                          filterNode.getInterpreterStrategy().test(interpreterMap, filterNode.getInterpreter(), inputArgument);
-                  interpreterResults.stream()
-                          .filter(InterpreterResult::failed)
-                          .forEach(result -> route.addError(result.getError().orElseThrow()));
-                  return interpreterResults.stream().noneMatch(InterpreterResult::failed);
-                })
-                .collect(Collectors.toUnmodifiableList());
+            .filter(filterNode -> {
+              List<InterpreterResult<Object>> interpreterResults =
+                      filterNode.getInterpreterStrategy().test(interpreterMap, filterNode.getInterpreter(), inputArgument);
+              interpreterResults.stream()
+                      .filter(InterpreterResult::failed)
+                      .forEach(result -> route.addError(result.getError().orElseThrow()));
+              return interpreterResults.stream().noneMatch(InterpreterResult::failed);
+            })
+            .collect(Collectors.toUnmodifiableList());
   }
 
   @NotNull
@@ -186,12 +187,13 @@ public class CommandDispatcher {
                                                 @NonNull Map<String, Object> interpreterMap,
                                                 @NonNull List<DynamicNode> dynamicNodeList) {
     return dynamicNodeList.stream()
-                  .map(undeterminedNode -> {
-                    CommandRoute copyRoute = route.duplicate();
-                    route(undeterminedNode, copyRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
-                    return copyRoute;
-                  })
-                  .filter(CommandRoute::isValid)
-                  .collect(Collectors.toUnmodifiableList());
+            .map(undeterminedNode -> {
+              CommandRoute copyRoute = route.duplicate();
+              route(undeterminedNode, copyRoute, new ArrayDeque<>(argumentDeque), interpreterMap);
+              return copyRoute;
+            })
+            .filter(CommandRoute::isValid)
+            .collect(Collectors.toUnmodifiableList());
   }
+
 }

@@ -1,7 +1,9 @@
 package de.gleyder.admiral.annotation.builder;
 
 import de.gleyder.admiral.annotation.*;
+import de.gleyder.admiral.core.LiteralCommandError;
 import de.gleyder.admiral.core.ValueBag;
+import de.gleyder.admiral.core.executor.CheckResult;
 import de.gleyder.admiral.core.interpreter.Interpreter;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
 import de.gleyder.admiral.core.parser.InputArgument;
@@ -65,17 +67,17 @@ public class TestClass {
     stringList.add("mid");
   }
 
-  @RequiredNode
-  public boolean verifier(Object source) {
+  @CheckNode
+  public CheckResult verifier(Object source) {
     stringList.add("verifier");
-    return true;
+    return CheckResult.ofSuccessful();
   }
 
   public InterpreterResult<?> interpreter(String argument) {
     try {
       return InterpreterResult.ofValue(Long.parseLong(argument));
     } catch (NumberFormatException exception) {
-      return InterpreterResult.ofError(exception);
+      return InterpreterResult.ofError(LiteralCommandError.create().setMessage(exception.toString()));
     }
   }
 

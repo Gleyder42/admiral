@@ -10,10 +10,12 @@ import de.gleyder.admiral.core.parser.InputArgument;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class DynamicNode extends CommandNode {
 
   @Setter
@@ -36,7 +38,7 @@ public class DynamicNode extends CommandNode {
       if (result.succeeded()) {
         context.getBag().add(getKey(), result.getValue().orElseThrow());
       } else {
-        result.getError().ifPresent(Throwable::printStackTrace);
+        result.getError().ifPresent(error -> log.info(error.toString()));
       }
     });
   }

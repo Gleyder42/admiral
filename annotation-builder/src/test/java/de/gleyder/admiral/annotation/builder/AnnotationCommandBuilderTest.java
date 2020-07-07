@@ -26,7 +26,6 @@ class AnnotationCommandBuilderTest {
   void calculateCommand() {
     dispatch("test calculate sum (10 10)");
 
-    System.out.println(testClass.getStringList());
     assertContains(testClass, "strategy", "strategy", "verifier", "root", "mid", "sum:20");
   }
 
@@ -43,7 +42,7 @@ class AnnotationCommandBuilderTest {
   }
 
   @Test
-  public void extraBagValue() {
+  void extraBagValue() {
     dispatch("test bag supply");
 
     assertContains(testClass, "root", "mid", "100");

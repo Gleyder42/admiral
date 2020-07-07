@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ValueBagTest {
+class ValueBagTest {
 
   private final ValueBag bag = new ValueBag();
 

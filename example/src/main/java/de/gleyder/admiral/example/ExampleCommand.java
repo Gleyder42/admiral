@@ -1,6 +1,7 @@
 package de.gleyder.admiral.example;
 
 import de.gleyder.admiral.core.CommandDispatcher;
+import de.gleyder.admiral.core.CommandError;
 import de.gleyder.admiral.core.CommandRoute;
 import de.gleyder.admiral.core.builder.DynamicNodeBuilder;
 import de.gleyder.admiral.core.builder.StaticNodeBuilder;
@@ -45,8 +46,8 @@ public class ExampleCommand {
 
     while (booleanWrapper.running) {
       String input = scanner.nextLine();
-      List<Throwable> dispatch = dispatcher.dispatch(input, new SenderSource(), Collections.emptyMap());
-      dispatch.forEach(System.out::println);
+      List<CommandError> dispatch = dispatcher.dispatch(input, new SenderSource(), Collections.emptyMap());
+      dispatch.forEach(error -> System.out.println(error.getDetailed()));
     }
   }
 

@@ -1,12 +1,10 @@
 package de.gleyder.admiral.core.builder;
 
-import de.gleyder.admiral.core.CommandContext;
+import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.Executor;
 import de.gleyder.admiral.core.node.CommandNode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
-import java.util.function.Predicate;
 
 @SuppressWarnings("rawtypes")
 @RequiredArgsConstructor
@@ -19,8 +17,8 @@ public abstract class CommandNodeBuilder<B extends CommandNodeBuilder, N extends
     return thisBuilder();
   }
 
-  public B setRequired(@NonNull Predicate<CommandContext> required) {
-    node.setRequired(required);
+  public B setRequired(@NonNull Check check) {
+    node.setCheck(check);
     return thisBuilder();
   }
 

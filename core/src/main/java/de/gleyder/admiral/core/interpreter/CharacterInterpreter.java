@@ -1,5 +1,6 @@
 package de.gleyder.admiral.core.interpreter;
 
+import de.gleyder.admiral.core.LiteralCommandError;
 import lombok.NonNull;
 
 public class CharacterInterpreter implements SimpleInterpreter<Character> {
@@ -9,7 +10,7 @@ public class CharacterInterpreter implements SimpleInterpreter<Character> {
     if (argument.toCharArray().length == 1) {
       return InterpreterResult.ofValue(argument.toCharArray()[0]);
     } else {
-      return InterpreterResult.ofError(new IllegalStateException("String can only contain one character"));
+      return InterpreterResult.ofError(LiteralCommandError.create().setMessage("String can only contain one character"));
     }
   }
 }

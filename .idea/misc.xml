@@ -5,7 +5,7 @@
       <item index="0" class="java.lang.String" itemvalue="de.gleyder.admiral.annotation.ExecutorNode" />
       <item index="1" class="java.lang.String" itemvalue="de.gleyder.admiral.annotation.InterpreterNode" />
       <item index="2" class="java.lang.String" itemvalue="de.gleyder.admiral.annotation.InterpreterStrategyNode" />
-      <item index="3" class="java.lang.String" itemvalue="de.gleyder.admiral.annotation.RequiredNode" />
+      <item index="3" class="java.lang.String" itemvalue="de.gleyder.admiral.annotation.CheckNode" />
       <item index="4" class="java.lang.String" itemvalue="de.gleyder.admiral.annotation.Route" />
     </list>
   </component>

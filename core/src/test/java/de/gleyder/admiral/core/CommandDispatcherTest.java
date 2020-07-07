@@ -2,6 +2,7 @@ package de.gleyder.admiral.core;
 
 import de.gleyder.admiral.core.builder.DynamicNodeBuilder;
 import de.gleyder.admiral.core.builder.StaticNodeBuilder;
+import de.gleyder.admiral.core.executor.CheckResult;
 import de.gleyder.admiral.core.interpreter.CommonInterpreter;
 import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
 import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-public class CommandDispatcherTest {
+class CommandDispatcherTest {
 
   private final CommandDispatcher dispatcher = new CommandDispatcher();
 
@@ -32,7 +33,13 @@ public class CommandDispatcherTest {
           .addAlias("c")
           .build();
   private final StaticNode requireNode = new StaticNodeBuilder("required")
-          .setRequired(context -> context.getBag().get("int").isPresent())
+          .setRequired(context -> {
+            if (context.getBag().get("int").isPresent()) {
+              return CheckResult.ofSuccessful();
+            } else {
+              return CheckResult.ofError(LiteralCommandError.create().setSimple("int not found"));
+            }
+          })
           .build();
   private final DynamicNode stringLogNode = new DynamicNodeBuilder("string")
           .setInterpreterStrategy(new MergedStrategy())
@@ -117,9 +124,13 @@ public class CommandDispatcherTest {
       Integer.parseInt("Hallo Welt");
     });
 
-    assertIterableEquals(List.of(exception).stream()
-            .map((Function<Exception, Object>) Throwable::getMessage).collect(Collectors.toList()),
-            actual.getErrors().stream().map(Throwable::getMessage).collect(Collectors.toList())
+    assertIterableEquals(
+            List.of(exception).stream()
+                    .map((Function<Exception, Object>) Throwable::toString)
+                    .collect(Collectors.toList()),
+            actual.getErrors().stream()
+                    .map(CommandError::getDetailed)
+                    .collect(Collectors.toList())
     );
 
     assertIterableEquals(
@@ -135,9 +146,11 @@ public class CommandDispatcherTest {
     expected.add(dispatcher.getRootNode());
     expected.add(testNode);
 
-    expected.addError(new CommandDispatcherException("No executor was found for node test"));
+    expected.addError(LiteralCommandError.create()
+            .setDetailed("No executor was found for node test")
+    );
 
-    assertEquals(expected.getErrors().get(0).getMessage(), actual.getErrors().get(0).getMessage());
+    assertEquals(expected.getErrors().get(0).getDetailed(), actual.getErrors().get(0).getDetailed());
     assertEquals(expected.getNodeList(), actual.getNodeList());
   }
 
@@ -150,7 +163,13 @@ public class CommandDispatcherTest {
 
   @Test
   void shouldThrowCommandSolverException() {
-    assertThrows(AmbiguousCommandRouteException.class, () -> dispatcher.findRoute("test echo 10"));
+    CommandRoute actual = dispatcher.findRoute("test echo 10");
+
+    assertIterableEquals(List.of("Multiple commands found"),
+            actual.getErrors().stream()
+                    .map(CommandError::getSimple)
+                    .collect(Collectors.toUnmodifiableList())
+    );
   }
 
   @Test
@@ -181,7 +200,8 @@ public class CommandDispatcherTest {
 
   @Test
   void shouldThrowExceptionIfRequiredNegative() {
-    assertThrows(CommandDispatcherException.class, () -> dispatcher.dispatch("test echo required", new Object(), Collections.emptyMap()));
+    List<CommandError> required = dispatcher.dispatch("test echo required", new Object(), Collections.emptyMap());
+    assertEquals("int not found", required.get(0).getSimple());
   }
 
   @Test

@@ -2,8 +2,8 @@ package de.gleyder.admiral.annotation.builder;
 
 import de.gleyder.admiral.annotation.*;
 import de.gleyder.admiral.annotation.builder.producer.*;
-import de.gleyder.admiral.core.CommandContext;
 import de.gleyder.admiral.core.CommandDispatcher;
+import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.Executor;
 import de.gleyder.admiral.core.interpreter.*;
 import de.gleyder.admiral.core.interpreter.strategy.InterpreterStrategy;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,7 +25,7 @@ public class AnnotationCommandBuilder {
 
   private static final Map<Class<? extends Annotation>, NodeProducer<? extends Annotation>> PRODUCER_MAP = Map.of(
           ExecutorNode.class, new MethodExecutorProducer(),
-          RequiredNode.class, new MethodRequiredProducer(),
+          CheckNode.class, new MethodCheckProducer(),
           InterpreterNode.class, new MethodInterpreterProducer(),
           InterpreterStrategyNode.class, new MethodInterpreterStrategyProducer()
   );
@@ -168,12 +167,12 @@ public class AnnotationCommandBuilder {
 
   private void trySetRequired(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
     if (!node.required().isEmpty()) {
-      Predicate<CommandContext> required = (Predicate<CommandContext>) nodeMap.get(node.required());
-      if (required == null) {
+      Check check = (Check) nodeMap.get(node.required());
+      if (check == null) {
         throw new NullPointerException("No required node found with key " + node.required());
       }
 
-      currentNode.setRequired(required);
+      currentNode.setCheck(check);
     }
   }
 
