@@ -5,6 +5,7 @@ import de.gleyder.admiral.core.CommandError;
 import de.gleyder.admiral.core.CommandRoute;
 import de.gleyder.admiral.core.builder.DynamicNodeBuilder;
 import de.gleyder.admiral.core.builder.StaticNodeBuilder;
+import de.gleyder.admiral.core.interpreter.CommonInterpreter;
 import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
 import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
@@ -43,12 +44,32 @@ public class ExampleCommand {
     //Adds the stop node to the dispatcher
     dispatcher.registerCommand(stopNode);
     addCommand(dispatcher);
+    readmeExample(dispatcher);
 
     while (booleanWrapper.running) {
       String input = scanner.nextLine();
       List<CommandError> dispatch = dispatcher.dispatch(input, new SenderSource(), Collections.emptyMap());
       dispatch.forEach(error -> System.out.println(error.getDetailed()));
     }
+  }
+
+  public static void readmeExample(CommandDispatcher dispatcher) {
+    StaticNode echoNode = new StaticNodeBuilder("echo")
+            .setExecutor(context -> {
+              int amount = context.getBag().get("amount", Integer.class).orElseThrow();
+              String message = context.getBag().get("message", String.class).orElseThrow();
+
+              for (int i = 0; i < amount; i++) {
+                System.out.println("Nr. " + i + " " + message);
+              }
+            })
+            .build();
+    DynamicNode amountNode = new DynamicNodeBuilder("amount").setInterpreter(CommonInterpreter.INT).build();
+    DynamicNode messageNode = new DynamicNodeBuilder("message").build();
+
+    echoNode.addNode(amountNode).addNode(messageNode);
+
+    dispatcher.registerCommand(echoNode);
   }
 
   /**
