@@ -11,11 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Parsed the raw command arguments to a list of input arguments.
- *
- * @author Gleyder
- * @version 1.0
- * @since 1.0
+ * Parses the raw command arguments to a list of input arguments.
  */
 public class InputParser {
 
@@ -70,4 +66,5 @@ public class InputParser {
       }
     }
   }
+
 }

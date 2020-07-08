@@ -7,6 +7,9 @@ import org.jetbrains.annotations.TestOnly;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A route is a potential command.
+ */
 @EqualsAndHashCode
 @ToString
 public class CommandRoute {
@@ -60,4 +63,5 @@ public class CommandRoute {
   public List<CommandError> getErrors() {
     return List.copyOf(errorMessages);
   }
+
 }

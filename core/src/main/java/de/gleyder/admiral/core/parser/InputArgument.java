@@ -8,18 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a sender input
+ * Represents a users inout.
  */
 @ToString
 @EqualsAndHashCode
 public class InputArgument {
 
   @Getter
-  List<String> inputs;
+  private final List<String> inputs;
 
-  /**
-   * Creates an InputArgument
-   */
   public InputArgument() {
     this.inputs = new ArrayList<>();
   }

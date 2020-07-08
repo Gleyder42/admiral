@@ -2,6 +2,10 @@ package de.gleyder.admiral.core;
 
 import lombok.*;
 
+/**
+ * Implementation of {@link CommandError} for the case in
+ * which an error can be easily described via a string.
+ */
 @ToString
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

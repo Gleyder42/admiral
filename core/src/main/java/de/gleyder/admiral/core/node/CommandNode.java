@@ -11,6 +11,9 @@ import lombok.experimental.Accessors;
 
 import java.util.*;
 
+/**
+ * Base class for {@link StaticNode} and {@link DynamicNode}.
+ */
 @Accessors(chain = true)
 public abstract class CommandNode {
 

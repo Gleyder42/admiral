@@ -18,6 +18,10 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * Admirals main class.
+ * Used for command execution and registration
+ */
 @Slf4j
 public class CommandDispatcher {
 
@@ -59,7 +63,6 @@ public class CommandDispatcher {
       node.onCommandProcess(context, interpreterMap, argument);
       index++;
     }
-
 
     List<CommandError> commandErrors = commandRoute.getNodeList().stream()
             .filter(node -> node.getCheck().isPresent())

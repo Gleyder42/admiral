@@ -6,6 +6,11 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+/**
+ * Used in {@link CommandContext}.
+ * Stores provided values by the user or specific implementation during
+ * execution.
+ */
 @ToString
 public class ValueBag {
 

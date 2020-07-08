@@ -5,4 +5,5 @@ public interface CommandError {
   String getSimple();
 
   String getDetailed();
+
 }

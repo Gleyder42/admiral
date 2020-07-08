@@ -6,6 +6,9 @@ import lombok.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Static nodes defines the command structure.
+ */
 public class StaticNode extends CommandNode {
 
   @Getter

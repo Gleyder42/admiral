@@ -5,6 +5,10 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of {@link CommandError} for the case in
+ * which multiple command routes were found.
+ */
 @RequiredArgsConstructor
 public class AmbiguousCommandError implements CommandError {
 
@@ -23,5 +27,4 @@ public class AmbiguousCommandError implements CommandError {
   public String getSimple() {
     return SIMPLE_MESSAGES;
   }
-
 }
