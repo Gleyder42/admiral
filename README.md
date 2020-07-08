@@ -75,7 +75,7 @@ yourself.
 
 When you set everything up and want to execute the command, dispatch the command. 
 The first argument is the command. Normally, arguments are divide by spaces.
-`(Hello World)` would two arguments, if you follow this rule. However, putting surrounding
+`(Hello World)` would be two arguments, if you follow this rule. However, surrounding
 `Hello World` by `(` and `)`. The dispatcher will parse it has one argument. 
 The second argument is the source. The source can
 be any object. The last argument is the interpreter map (`Map<String, Object>`).
