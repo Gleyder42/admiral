@@ -73,8 +73,11 @@ dispatcher.registerCommand(echoNode);
 Because admiral is platform independent, you need to implement it
 yourself. 
 
-When you set everything up and want to execute the command,dispatch the command. 
-The first argument is the command, the second one is the source. The source can
+When you set everything up and want to execute the command, dispatch the command. 
+The first argument is the command. Normally, arguments are divide by spaces.
+`(Hello World)` would two arguments, if you follow this rule. However, putting surrounding
+`Hello World` by `(` and `)`. The dispatcher will parse it has one argument. 
+The second argument is the source. The source can
 be any object. The last argument is the interpreter map (`Map<String, Object>`).
 Via the interpreter map you can carry additional info to the interpreters.
 
