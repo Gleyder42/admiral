@@ -1,15 +1,19 @@
 package de.gleyder.admiral.core.node;
 
-import de.gleyder.admiral.core.CommandContext;
 import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.Executor;
-import de.gleyder.admiral.core.parser.InputArgument;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Base class for {@link StaticNode} and {@link DynamicNode}.
@@ -32,8 +36,6 @@ public abstract class CommandNode {
   public CommandNode(@NonNull String key) {
     this.key = key;
   }
-
-  public void onCommandProcess(@NonNull CommandContext context, @NonNull Map<String, Object> interpreterMap, @NonNull InputArgument inputArgument) { }
 
   public CommandNode addNode(@NonNull CommandNode node) {
     if (node instanceof StaticNode) {
