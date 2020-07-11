@@ -16,6 +16,9 @@
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="ES6" />
   </component>
+  <component name="ProjectResources">
+    <resource url="https://checkstyle.org/dtds/configuration_1_3.dtd" location="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_13" default="false" project-jdk-name="14" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
