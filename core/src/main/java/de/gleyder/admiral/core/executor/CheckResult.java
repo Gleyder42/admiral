@@ -1,11 +1,13 @@
 package de.gleyder.admiral.core.executor;
 
 import de.gleyder.admiral.core.CommandError;
+import de.gleyder.admiral.core.LiteralCommandError;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CheckResult {
@@ -20,7 +22,15 @@ public class CheckResult {
     return new CheckResult(error);
   }
 
-  private CommandError error;
+  public static CheckResult ofSimpleError(@NonNull BooleanSupplier supplier, @NonNull String errorMessage) {
+    if (supplier.getAsBoolean()) {
+      return CheckResult.ofSuccessful();
+    } else {
+      return CheckResult.ofError(LiteralCommandError.create().setMessage(errorMessage));
+    }
+  }
+
+  private final CommandError error;
 
   public Optional<CommandError> getError() {
     return Optional.of(error);

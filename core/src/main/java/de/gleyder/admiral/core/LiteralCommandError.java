@@ -8,6 +8,7 @@ import lombok.*;
  */
 @ToString
 @Getter
+@EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LiteralCommandError implements CommandError {
 

@@ -20,12 +20,19 @@ public class CommandRoute {
   @Getter
   private final List<CommandNode> nodeList;
 
+  @Getter
+  private final ValueBag valueBag = new ValueBag();
+
   public CommandRoute(@NonNull List<CommandNode> nodeList) {
     this.nodeList = nodeList;
   }
 
   public CommandRoute() {
     this.nodeList = new ArrayList<>();
+  }
+
+  public boolean hasExecutor() {
+    return nodeList.stream().anyMatch(node -> node.getExecutor().isPresent());
   }
 
   public void add(@NonNull CommandNode node) {
@@ -42,6 +49,10 @@ public class CommandRoute {
 
   public void clearNodes() {
     nodeList.clear();
+  }
+
+  public void clearErrors() {
+    errorMessages.clear();
   }
 
   public CommandNode get(int index) {

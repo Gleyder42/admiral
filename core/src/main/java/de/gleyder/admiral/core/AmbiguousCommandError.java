@@ -1,5 +1,6 @@
 package de.gleyder.admiral.core;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public class AmbiguousCommandError implements CommandError {
 
   private static final String SIMPLE_MESSAGES = "Multiple commands found";
 
+  @Getter
   private final List<CommandRoute> routeList;
 
   @Override

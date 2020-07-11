@@ -11,10 +11,15 @@ import java.util.stream.Collectors;
  * Stores provided values by the user or specific implementation during
  * execution.
  */
+@EqualsAndHashCode
 @ToString
 public class ValueBag {
 
   private final Map<String, List<Object>> map = new HashMap<>();
+
+  public void addBag(@NonNull ValueBag bag) {
+    map.putAll(bag.map);
+  }
 
   public void add(@NonNull String key, @NonNull Object object) {
     getMap(key).add(object);
@@ -25,6 +30,14 @@ public class ValueBag {
       return false;
     }
     return map.get(key).size() > 1;
+  }
+
+  public boolean contains(@NonNull String key) {
+    if (!map.containsKey(key)) {
+      return false;
+    }
+
+    return !map.get(key).isEmpty();
   }
 
   public <T> Optional<T> get(@NonNull String key, @NonNull Class<T> tClass) {

@@ -4,225 +4,371 @@ import de.gleyder.admiral.core.builder.DynamicNodeBuilder;
 import de.gleyder.admiral.core.builder.StaticNodeBuilder;
 import de.gleyder.admiral.core.executor.CheckResult;
 import de.gleyder.admiral.core.interpreter.CommonInterpreter;
-import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
-import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
 import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.node.StaticNode;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class CommandDispatcherTest {
 
+  private static final String MESSAGE_KEY = "message";
+  private static final String AMOUNT_KEY = "amount";
+  private static final String TYPE_KEY = "type";
+  private static final String NAME_KEY = "name";
+
   private final CommandDispatcher dispatcher = new CommandDispatcher();
 
-  private final StaticNode testNode = new StaticNodeBuilder("test")
-          .addAlias("t")
+  /*
+   * Info Command
+   */
+  private final StaticNode infoNode = new StaticNodeBuilder("info")
+          .setExecutor(context -> log.info("Prints some info"))
           .build();
+
+  /*
+   * Echo Command
+   */
   private final StaticNode echoNode = new StaticNodeBuilder("echo")
-          .setExecutor(context -> log.info("This echo node has an executor but not a value!"))
+          .setRequired(context -> createCheckResult(context, MESSAGE_KEY))
+          .setExecutor(context -> {
+            String message = context.getBag().get(MESSAGE_KEY, String.class).orElseThrow();
+            log.info("Message: {}", message);
+          })
           .build();
+
+  private final DynamicNode messageNode = new DynamicNode("message");
+
+  /*
+   * Item Command
+   */
+  private final StaticNode itemNode = new StaticNodeBuilder("item")
+          .build();
+
   private final StaticNode createNode = new StaticNodeBuilder("create")
-          .addAlias("c")
-          .build();
-  private final StaticNode requireNode = new StaticNodeBuilder("required")
-          .setRequired(context -> {
-            if (context.getBag().get("int").isPresent()) {
-              return CheckResult.ofSuccessful();
-            } else {
-              return CheckResult.ofError(LiteralCommandError.create().setSimple("int not found"));
-            }
-          })
-          .build();
-  private final DynamicNode stringLogNode = new DynamicNodeBuilder("string")
-          .setInterpreterStrategy(new MergedStrategy())
-          .setExecutor(context -> log.info("Echo {}", context.getBag().get("string").orElseThrow()))
-          .build();
-  private final DynamicNode integerLogNode = new DynamicNodeBuilder("int")
-          .setExecutor(context -> log.info("Int Echo: {}", context.getBag().get("int").orElseThrow()))
-          .setInterpreter(new IntegerInterpreter())
-          .build();
-  private final StaticNode optionalNode = new StaticNodeBuilder("optional")
+          .setRequired(context -> createCheckResult(context, TYPE_KEY))
           .setExecutor(context -> {
-            Optional<Integer> anInt = context.getBag().get("int");
-            Optional<String> string = context.getBag().get("string");
+            String type = context.getBag().get(TYPE_KEY, String.class).orElseThrow();
+            int amount = context.getBag().get(AMOUNT_KEY, Integer.class).orElse(1);
+            String name = context.getBag().get(NAME_KEY, String.class).orElse("undefined");
 
-            log.info("Echo Int: {} String: {}", anInt.orElse(-1), string.orElse("haus"));
+            log.info("Item create as {}, {} times with name {}", type, amount, name);
           })
           .build();
-  private final StaticNode sumNode = new StaticNodeBuilder("sum")
+
+  private final StaticNode deleteNode = new StaticNodeBuilder("delete")
+          .setRequired(context -> createCheckResult(context, NAME_KEY))
           .setExecutor(context -> {
-            int n1 = context.getBag().get("n1", Integer.class).orElseThrow();
-            int n2 = context.getBag().get("n2", Integer.class).orElseThrow();
+            String name = context.getBag().get(NAME_KEY, String.class).orElseThrow();
 
-            log.info("Result: " + (n1 + n2));
+            log.info("Item deleted with name {}", name);
           })
           .build();
-  private final DynamicNode n1Node = new DynamicNodeBuilder("n1")
+
+  private final DynamicNode nameNode = new DynamicNode(NAME_KEY);
+
+  private final DynamicNode amountNode = new DynamicNodeBuilder(AMOUNT_KEY)
+          .setRequired(context -> CheckResult.ofSimpleError(
+                  () -> context.getBag().get(AMOUNT_KEY, Integer.class).orElseThrow() > 0,
+                  "Amount needs to be at least 1"
+                  )
+          )
           .setInterpreter(CommonInterpreter.INT)
           .build();
-  private final DynamicNode n2Node = new DynamicNodeBuilder("n2")
+
+  private final DynamicNode typeNode = new DynamicNode(TYPE_KEY);
+
+  private CheckResult createCheckResult(CommandContext context, String key) {
+    return CheckResult.ofSimpleError(
+            () -> context.getBag().contains(key),
+            "Bag does not contains " + key
+    );
+  }
+
+  /*
+   * Double Command
+   */
+  private final StaticNode doubleNode = new StaticNodeBuilder("double")
+          .build();
+
+  private final DynamicNode stringNode = new DynamicNodeBuilder("string")
+          .setExecutor(context -> log.info("String: " + context.getBag().get("string")))
+          .build();
+
+  private final DynamicNode intNode = new DynamicNodeBuilder("int")
           .setInterpreter(CommonInterpreter.INT)
+          .setExecutor(context -> log.info("Int: " + context.getBag().get("int")))
+          .build();
+
+  /*
+   * Group commands
+   */
+  private final List<String> groupList = new ArrayList<>();
+
+  private final StaticNode groupNode = new StaticNode("group");
+  private final StaticNode groupCreateNode = new StaticNodeBuilder("create")
+          .setExecutor(context -> {
+            Optional<String> name = context.getBag().get("name", String.class);
+            log.info("Create group with name {}", name.orElseThrow());
+            groupList.add(name.get());
+          })
+          .build();
+
+  private final StaticNode groupRemoveNode = new StaticNodeBuilder("remove")
+          .setExecutor(context -> {
+            Optional<String> name = context.getBag().get("name", String.class);
+            log.info("Deleted group with name {}", name.orElseThrow());
+            groupList.remove(name.get());
+          })
+          .build();
+
+  private final StaticNode groupAddUserNode = new StaticNodeBuilder("addUser")
+          .setExecutor(context -> {
+            Optional<String> name = context.getBag().get("name", String.class);
+            Optional<String> user = context.getBag().get("user", String.class);
+
+            log.info("Add user {} to group with name {}", user.orElseThrow(), name.orElseThrow());
+          })
+          .build();
+
+  private final DynamicNode groupUserNode = new DynamicNode("user");
+  private final DynamicNode simpleNameNode = new DynamicNodeBuilder("name")
+          .build();
+  private final DynamicNode checkNameNode = new DynamicNodeBuilder("name")
+          .setRequired(context ->
+                  CheckResult.ofSimpleError(
+                          () -> groupList.contains(context.getBag().get("name", String.class).orElseThrow()),
+                          "Group not found"
+                  ))
           .build();
 
   @BeforeEach
   void setup() {
-    integerLogNode.addNode(stringLogNode);
-    integerLogNode.addNode(requireNode);
+    /*
+     * Group commands
+     */
+    groupNode.addNode(groupCreateNode);
+    groupNode.addNode(groupRemoveNode);
+    groupNode.addNode(groupAddUserNode);
 
-    stringLogNode.addNode(optionalNode);
+    groupAddUserNode.addNode(groupUserNode).addNode(checkNameNode);
+    groupRemoveNode.addNode(checkNameNode);
 
-    sumNode.addNode(n1Node).addNode(n2Node);
+    groupCreateNode.addNode(simpleNameNode);
 
-    createNode.addNode(optionalNode);
-    createNode.addNode(integerLogNode);
+    /*
+     * Double command
+     */
+    doubleNode.addNode(stringNode);
+    doubleNode.addNode(intNode);
 
-    echoNode.addNode(integerLogNode);
-    echoNode.addNode(stringLogNode);
-    echoNode.addNode(requireNode);
+    /*
+     * Item Command
+     */
+    itemNode.addNode(createNode);
+    itemNode.addNode(deleteNode);
 
-    testNode.addNode(echoNode);
-    testNode.addNode(createNode);
-    testNode.addNode(sumNode);
+    typeNode.addNode(nameNode).addNode(amountNode);
 
-    dispatcher.registerCommand(testNode);
+    createNode.addNode(typeNode);
+    deleteNode.addNode(typeNode);
+
+    /*
+     * Echo Command
+     */
+    echoNode.addNode(messageNode);
+
+    /*
+     * Register command
+     */
+    dispatcher.registerCommand(groupNode);
+    dispatcher.registerCommand(doubleNode);
+    dispatcher.registerCommand(itemNode);
+    dispatcher.registerCommand(echoNode);
+    dispatcher.registerCommand(infoNode);
   }
 
   @Test
-  void shouldFindOptionalNodeWihValueAndAlias() {
-    CommandRoute actual = dispatcher.findRoute("t c 10 test optional");
+  void shouldFindInfoCommand() {
+    String command = "info";
+    Map<String, Object> map = Collections.emptyMap();
 
-    assertEqualsRoute(actual, testNode, createNode, integerLogNode, stringLogNode, optionalNode);
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, map, infoNode);
+    assertNoCommandError(command);
   }
 
   @Test
-  void shouldFindOptionalNodeWithValue() {
-    CommandRoute actual = dispatcher.findRoute("test create 10 test optional");
+  void shouldFindEchoCommand() {
+    String command = "echo (Hello World)";
+    Map<String, Object> map = Map.of("message", "Hello World");
 
-    assertEqualsRoute(actual, testNode, createNode, integerLogNode, stringLogNode, optionalNode);
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, map, echoNode, messageNode);
+    assertNoCommandError(command);
   }
 
   @Test
-  void shouldFindOptionalNodeWithoutValues() {
-    CommandRoute actual = dispatcher.findRoute("test create optional");
+  void shouldFindItemCreateCommand() {
+    String command = "item create String Name 10";
+    Map<String, Object> map = Map.of(
+            "name", "Name",
+            "amount", 10,
+            "type", "String"
+    );
 
-    assertEqualsRoute(actual, testNode, createNode, optionalNode);
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, map, itemNode, createNode, typeNode, nameNode, amountNode);
+    assertNoCommandError(command);
   }
 
   @Test
-  void shouldFindEchoRoute() {
-    CommandRoute actual = dispatcher.findRoute("test echo (Hallo Welt)");
-    Exception exception = assertThrows(NumberFormatException.class, () -> {
-      //noinspection ResultOfMethodCallIgnored
-      Integer.parseInt("Hallo Welt");
-    });
+  void shouldFindItemDeleteCommand() {
+    String command = "item delete String Name 10";
+    Map<String, Object> map = Map.of(
+            "name", "Name",
+            "amount", 10,
+            "type", "String"
+    );
+
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, map, itemNode, deleteNode, typeNode, nameNode, amountNode);
+    assertNoCommandError(command);
+  }
+
+  @Test
+  void shouldFindItemCreateCommandWithOnlyTypeAndName() {
+    String command = "item create String Name";
+    Map<String, Object> bag = Map.of(
+            "name", "Name",
+            "type", "String"
+    );
+
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, bag, itemNode, createNode, typeNode, nameNode);
+    assertNoCommandError(command);
+  }
+
+  @Test
+  void shouldFindItemCreateCommandWithOnlyType() {
+    String command = "item create String";
+    Map<String, Object> bag = Map.of("type", "String");
+
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, bag, itemNode, createNode, typeNode);
+    assertNoCommandError(command);
+  }
+
+  @Test
+  void shouldReturnError() {
+    List<CommandError> errorList = dispatch("item");
 
     assertIterableEquals(
-            List.of(exception).stream()
-                    .map((Function<Exception, Object>) Throwable::toString)
-                    .collect(Collectors.toList()),
-            actual.getErrors().stream()
-                    .map(CommandError::getDetailed)
-                    .collect(Collectors.toList())
-    );
-
-    assertIterableEquals(
-            List.of(dispatcher.getRootNode(), testNode, echoNode, stringLogNode),
-            actual.getNodeList()
+            List.of(LiteralCommandError
+                    .create()
+                    .setSimple("No command found")
+                    .setDetailed("The route has no executor")),
+            errorList
     );
   }
 
   @Test
-  void shouldNotFindTestRoute() {
-    CommandRoute actual = dispatcher.findRoute("test");
-    CommandRoute expected = new CommandRoute();
-    expected.add(dispatcher.getRootNode());
-    expected.add(testNode);
+  void shouldFindCommandWithString() {
+    String command = "double (Hello World)";
+    Map<String, Object> bag = Map.of("string", "Hello World");
 
-    expected.addError(LiteralCommandError.create()
-            .setDetailed("No executor was found for node test")
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, bag, doubleNode, stringNode);
+    assertNoCommandError(command);
+  }
+
+  @Test
+  void shouldNotFindCommandWithInt() {
+    String command = "double 10";
+
+    CommandRoute actual = dispatcher.findRoute(command);
+    CommandError error = actual.getErrors().get(0);
+
+    assertTrue(error instanceof AmbiguousCommandError);
+    AmbiguousCommandError ambiguousCommandError = (AmbiguousCommandError) error;
+
+    assertEqualsRoute(ambiguousCommandError.getRouteList().get(0), Map.of("string", "10"), doubleNode, stringNode);
+    assertEqualsRoute(ambiguousCommandError.getRouteList().get(1), Map.of("int", 10), doubleNode, intNode);
+  }
+
+  @Test
+  void shouldFindGroupCreateCommand() {
+    String command = "group create (Group Name)";
+    Map<String, Object> bag = Map.of("name", "Group Name");
+
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, bag, groupNode, groupCreateNode, simpleNameNode);
+    assertNoCommandError(command);
+  }
+
+  @Test
+  void shouldFindGroupDeleteCommand() {
+    String command = "group remove (Group Name)";
+    Map<String, Object> bag = Map.of("name", "Group Name");
+    groupList.add("Group Name");
+
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, bag, groupNode, groupRemoveNode, checkNameNode);
+    assertNoCommandError(command);
+  }
+
+  @Test
+  void shouldFindAddUserCommand() {
+    String command = "group addUser Gleyder (Group Name)";
+    Map<String, Object> bag = Map.of(
+            "user", "Gleyder",
+            "name", "Group Name"
     );
+    groupList.add("Group Name");
 
-    assertEquals(expected.getErrors().get(0).getDetailed(), actual.getErrors().get(0).getDetailed());
-    assertEquals(expected.getNodeList(), actual.getNodeList());
+    CommandRoute actual = dispatcher.findRoute(command);
+
+    assertEqualsRoute(actual, bag, groupNode, groupAddUserNode, groupUserNode, checkNameNode);
+    assertNoCommandError(command);
   }
 
-  @Test
-  void shouldFindEchoNode() {
-    CommandRoute actual = dispatcher.findRoute("test echo");
-
-    assertEqualsRoute(actual, testNode, echoNode);
+  private List<CommandError> dispatch(String command) {
+    return dispatcher.dispatch(command, new Object(), emptyMap());
   }
 
-  @Test
-  void shouldThrowCommandSolverException() {
-    CommandRoute actual = dispatcher.findRoute("test echo 10");
-
-    assertIterableEquals(List.of("Multiple commands found"),
-            actual.getErrors().stream()
-                    .map(CommandError::getSimple)
-                    .collect(Collectors.toUnmodifiableList())
-    );
+  private void assertNoCommandError(String command) {
+    List<CommandError> errorList = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    assertIterableEquals(emptyList(), errorList);
   }
 
-  @Test
-  void shouldRouteWithRequired() {
-    CommandRoute actual = dispatcher.findRoute("test echo 10 required");
-
-    assertEqualsRoute(actual, testNode, echoNode, integerLogNode, requireNode);
-  }
-
-  @Test
-  void shouldRouteWithoutRequired() {
-    CommandRoute actual = dispatcher.findRoute("test echo required");
-
-    assertEqualsRoute(actual, testNode, echoNode, requireNode);
-  }
-
-  @Test
-  void shouldCalculate() {
-    CommandRoute actual = dispatcher.findRoute("test sum 10 10");
-
-    assertEqualsRoute(actual, testNode, sumNode, n1Node, n2Node);
-  }
-
-  @Test
-  void shouldNotThrowException() {
-    assertDoesNotThrow(() -> dispatcher.dispatch("test sum 10 10", new Object(), Collections.emptyMap()));
-  }
-
-  @Test
-  void shouldThrowExceptionIfRequiredNegative() {
-    List<CommandError> required = dispatcher.dispatch("test echo required", new Object(), Collections.emptyMap());
-    assertEquals("int not found", required.get(0).getSimple());
-  }
-
-  @Test
-  void shouldNotThrowExceptionIfRequiredPositive() {
-    assertDoesNotThrow(() -> dispatcher.dispatch("test echo 10 required", new Object(), new HashMap<>()));
-  }
-
-  @TestFactory
-  List<DynamicTest> testAllRoutes() {
-    return dispatcher.getAllRoutes().stream()
-            .map(route -> DynamicTest.dynamicTest(route.getNodeList().toString(),
-                    () -> assertTrue(route.isValid()))
-            ).collect(Collectors.toUnmodifiableList());
-  }
-
-  private void assertEqualsRoute(CommandRoute actual, CommandNode... nodes) {
+  private void assertEqualsRoute(CommandRoute actual, Map<String, Object> bag, CommandNode... nodes) {
     List<CommandNode> nodeList = new ArrayList<>(nodes.length + 1);
     if (nodes.length > 0) {
       nodeList.add(dispatcher.getRootNode());
     }
     nodeList.addAll(Arrays.asList(nodes));
-    assertEquals(new CommandRoute(nodeList), actual);
+    ValueBag valueBag = new ValueBag();
+    bag.forEach(valueBag::add);
+    assertIterableEquals(nodeList, actual.getNodeList());
+    assertEquals(valueBag, actual.getValueBag());
   }
+
 }
