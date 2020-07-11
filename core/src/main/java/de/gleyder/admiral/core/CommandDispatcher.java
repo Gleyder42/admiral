@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,30 +39,16 @@ public class CommandDispatcher {
     rootNode.addNode(node);
   }
 
-  public List<CommandError> dispatch(@NonNull String command, @NonNull Object source, @NonNull Map<String, Object> interpreterMap) {
-    CommandRoute route = findRoute(command);
-    List<InputArgument> argumentList = parser.parse(command);
-
-    return dispatch(route, source, argumentList, interpreterMap);
+  public List<CommandError> dispatch(@NonNull String command, @NonNull Object source,
+                                     @NonNull Map<String, Object> interpreterMap) {
+    return dispatch(findRoute(command, interpreterMap), source);
   }
 
-  private List<CommandError> dispatch(@NonNull CommandRoute route, @NonNull Object source,
-                                      @NonNull List<InputArgument> argumentList,
-                                      @NonNull Map<String, Object> interpreterMap) {
-
+  private List<CommandError> dispatch(@NonNull CommandRoute route, @NonNull Object source) {
     if (route.isInvalid()) {
       return route.getErrors();
     }
-
-    ValueBag valueBag = new ValueBag();
-    CommandContext context = new CommandContext(source, valueBag);
-
-    int index = 1;
-    for (InputArgument argument : argumentList) {
-      CommandNode node = route.get(index);
-      node.onCommandProcess(context, interpreterMap, argument);
-      index++;
-    }
+    CommandContext context = new CommandContext(source, route.getValueBag());
 
     List<CommandError> commandErrors = route.getNodeList().stream()
             .filter(node -> node.getCheck().isPresent())
@@ -101,20 +86,19 @@ public class CommandDispatcher {
     route.add(node);
     node.getAllNodes().forEach(nextNode -> findAllRoutes(routeList, route.duplicate(), nextNode));
 
-    if (node.isLeaf() || (!node.isLeaf() && node.getExecutor().isPresent())) {
+    if (node.isLeaf() || (!node.isLeaf() && route.hasExecutor())) {
       routeList.add(route);
     }
   }
 
-  @TestOnly
-  CommandRoute findRoute(@NonNull Deque<InputArgument> argumentDeque) {
+  public CommandRoute findRoute(@NonNull Deque<InputArgument> argumentDeque, @NonNull Map<String, Object> interpreterMap) {
     CommandRoute commandRoute = new CommandRoute();
-    route(rootNode, commandRoute, argumentDeque, new HashMap<>());
+    route(rootNode, commandRoute, argumentDeque, interpreterMap);
     return commandRoute;
   }
 
-  public CommandRoute findRoute(@NonNull String command) {
-    return findRoute(new ArrayDeque<>(parser.parse(command)));
+  public CommandRoute findRoute(@NonNull String command, @NonNull Map<String, Object> interpreterMap) {
+    return findRoute(new ArrayDeque<>(parser.parse(command)), interpreterMap);
   }
 
   private void route(@NonNull CommandNode node, @NonNull CommandRoute route,

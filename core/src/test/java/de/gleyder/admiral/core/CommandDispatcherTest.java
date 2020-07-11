@@ -202,7 +202,7 @@ class CommandDispatcherTest {
     String command = "info";
     Map<String, Object> map = Collections.emptyMap();
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, map, infoNode);
     assertNoCommandError(command);
@@ -213,7 +213,7 @@ class CommandDispatcherTest {
     String command = "echo (Hello World)";
     Map<String, Object> map = Map.of("message", "Hello World");
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, map, echoNode, messageNode);
     assertNoCommandError(command);
@@ -228,7 +228,7 @@ class CommandDispatcherTest {
             "type", "String"
     );
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, map, itemNode, createNode, typeNode, nameNode, amountNode);
     assertNoCommandError(command);
@@ -243,7 +243,8 @@ class CommandDispatcherTest {
             "type", "String"
     );
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
+    System.out.println(actual);
 
     assertEqualsRoute(actual, map, itemNode, deleteNode, typeNode, nameNode, amountNode);
     assertNoCommandError(command);
@@ -257,7 +258,7 @@ class CommandDispatcherTest {
             "type", "String"
     );
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, bag, itemNode, createNode, typeNode, nameNode);
     assertNoCommandError(command);
@@ -268,7 +269,7 @@ class CommandDispatcherTest {
     String command = "item create String";
     Map<String, Object> bag = Map.of("type", "String");
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, bag, itemNode, createNode, typeNode);
     assertNoCommandError(command);
@@ -276,7 +277,7 @@ class CommandDispatcherTest {
 
   @Test
   void shouldReturnError() {
-    List<CommandError> errorList = dispatch("item");
+    List<CommandError> errorList = dispatcher.dispatch("item", new Object(), Collections.emptyMap());
 
     assertIterableEquals(
             List.of(LiteralCommandError
@@ -292,7 +293,7 @@ class CommandDispatcherTest {
     String command = "double (Hello World)";
     Map<String, Object> bag = Map.of("string", "Hello World");
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, bag, doubleNode, stringNode);
     assertNoCommandError(command);
@@ -302,7 +303,7 @@ class CommandDispatcherTest {
   void shouldNotFindCommandWithInt() {
     String command = "double 10";
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
     CommandError error = actual.getErrors().get(0);
 
     assertTrue(error instanceof AmbiguousCommandError);
@@ -317,7 +318,7 @@ class CommandDispatcherTest {
     String command = "group create (Group Name)";
     Map<String, Object> bag = Map.of("name", "Group Name");
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, bag, groupNode, groupCreateNode, simpleNameNode);
     assertNoCommandError(command);
@@ -329,7 +330,7 @@ class CommandDispatcherTest {
     Map<String, Object> bag = Map.of("name", "Group Name");
     groupList.add("Group Name");
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, bag, groupNode, groupRemoveNode, checkNameNode);
     assertNoCommandError(command);
@@ -344,15 +345,16 @@ class CommandDispatcherTest {
     );
     groupList.add("Group Name");
 
-    CommandRoute actual = dispatcher.findRoute(command);
+    CommandRoute actual = findRoute(command);
 
     assertEqualsRoute(actual, bag, groupNode, groupAddUserNode, groupUserNode, checkNameNode);
     assertNoCommandError(command);
   }
 
-  private List<CommandError> dispatch(String command) {
-    return dispatcher.dispatch(command, new Object(), emptyMap());
+  private CommandRoute findRoute(String command) {
+    return dispatcher.findRoute(command, Collections.emptyMap());
   }
+
 
   private void assertNoCommandError(String command) {
     List<CommandError> errorList = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
