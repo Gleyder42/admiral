@@ -50,7 +50,7 @@ public class InputParserTest {
 
   @Test
   void allCombinedTest()  {
-    List<InputArgument> actual = parseCommand("hello world (this is cool) ((now this) (is epic)) ok boys");
+    final List<InputArgument> actual = parseCommand("hello world (this is cool) ((now this) (is epic)) ok boys");
     List<InputArgument> expected = new ArrayList<>();
     expected.addAll(singleLineArguments("hello", "world"));
     expected.add(singleInputArgument("this", "is", "cool"));

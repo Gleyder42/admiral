@@ -10,12 +10,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ValueBagTest {
 
+  public static final int POSITIVE_INT = 10;
+  public static final int NEGATIVE_INT = -15;
   private final ValueBag bag = new ValueBag();
 
   @BeforeEach
   void setup() {
-    bag.add("integer", 10);
-    bag.add("integer", -15);
+    bag.add("integer", POSITIVE_INT);
+    bag.add("integer", NEGATIVE_INT);
 
     bag.add("string", "hallo");
   }
@@ -27,7 +29,7 @@ class ValueBagTest {
 
   @Test
   void shouldReturnList() {
-    assertIterableEquals(List.of("hallo", List.of(10, -15)), bag.getAll());
+    assertIterableEquals(List.of("hallo", List.of(POSITIVE_INT, NEGATIVE_INT)), bag.getAll());
   }
 
   @Test
@@ -47,6 +49,6 @@ class ValueBagTest {
 
   @Test
   void shouldGetIntegers() {
-    assertIterableEquals(List.of(10, -15), bag.getList("integer").orElseThrow());
+    assertIterableEquals(List.of(POSITIVE_INT, NEGATIVE_INT), bag.getList("integer").orElseThrow());
   }
 }

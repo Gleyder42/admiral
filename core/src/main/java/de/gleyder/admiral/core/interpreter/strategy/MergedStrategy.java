@@ -11,8 +11,8 @@ import java.util.Map;
 public class MergedStrategy implements InterpreterStrategy {
 
   @Override
-  public List<InterpreterResult<Object>> test(@NonNull Map<String, Object> map, @NonNull Interpreter<?> interpreter, @NonNull InputArgument inputArgument) {
-    //noinspection unchecked
-    return List.of( (InterpreterResult<Object>) interpreter.interpret(map, inputArgument.getMerged()));
+  public List<InterpreterResult<Object>> test(@NonNull Map<String, Object> map, @NonNull Interpreter<?> interpreter,
+                                              @NonNull InputArgument inputArgument) {
+    return List.of((InterpreterResult<Object>) interpreter.interpret(map, inputArgument.getMerged()));
   }
 }

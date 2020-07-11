@@ -68,12 +68,12 @@ public class CommandDispatcher {
     return Collections.emptyList();
   }
 
-  public List<CommandRoute> getAllRoutes() {
-    return getAllRoutes(rootNode);
-  }
-
   public List<CommandRoute> getRoutes(@NonNull CommandNode node) {
     return getAllRoutes(node);
+  }
+
+  public List<CommandRoute> getAllRoutes() {
+    return getAllRoutes(rootNode);
   }
 
   private List<CommandRoute> getAllRoutes(@NonNull CommandNode node) {

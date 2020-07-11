@@ -12,9 +12,9 @@ import java.util.Map;
 public class SingleStrategy implements InterpreterStrategy {
 
   @Override
-  public List<InterpreterResult<Object>> test(@NonNull Map<String, Object> map, @NonNull Interpreter<?> interpreter, @NonNull InputArgument inputArgument) {
+  public List<InterpreterResult<Object>> test(@NonNull Map<String, Object> map, @NonNull Interpreter<?> interpreter,
+                                              @NonNull InputArgument inputArgument) {
     List<InterpreterResult<Object>> resultList = new ArrayList<>();
-    //noinspection unchecked
     inputArgument.getInputs().forEach(argument -> resultList.add((InterpreterResult<Object>) interpreter.interpret(map, argument)));
     return resultList;
   }

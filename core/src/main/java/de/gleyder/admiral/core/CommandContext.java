@@ -18,7 +18,7 @@ public class CommandContext {
     this.bag = bag;
   }
 
-  public <T> T getSource(Class<T> tClass) {
+  public <T> T getSource(Class<T> clazz) {
     return (T) source;
   }
 

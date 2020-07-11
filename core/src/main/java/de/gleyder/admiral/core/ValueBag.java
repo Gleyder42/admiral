@@ -40,7 +40,7 @@ public class ValueBag {
     return !map.get(key).isEmpty();
   }
 
-  public <T> Optional<T> get(@NonNull String key, @NonNull Class<T> tClass) {
+  public <T> Optional<T> get(@NonNull String key, @NonNull Class<T> clazz) {
     return get(key);
   }
 
