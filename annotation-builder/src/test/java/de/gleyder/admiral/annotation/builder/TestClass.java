@@ -1,6 +1,11 @@
 package de.gleyder.admiral.annotation.builder;
 
-import de.gleyder.admiral.annotation.*;
+import de.gleyder.admiral.annotation.Bag;
+import de.gleyder.admiral.annotation.CheckNode;
+import de.gleyder.admiral.annotation.ExecutorNode;
+import de.gleyder.admiral.annotation.InterpreterStrategyNode;
+import de.gleyder.admiral.annotation.Node;
+import de.gleyder.admiral.annotation.Route;
 import de.gleyder.admiral.core.LiteralCommandError;
 import de.gleyder.admiral.core.ValueBag;
 import de.gleyder.admiral.core.executor.CheckResult;
@@ -10,14 +15,17 @@ import de.gleyder.admiral.core.parser.InputArgument;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 @Slf4j
 @Node(value = "test", executor = "rootExecutor")
 public class TestClass {
 
-  private final static String SUM_STRATEGY_INTERPRETER = "sumStrategyInterpreter";
+  private static final String SUM_STRATEGY_INTERPRETER = "sumStrategyInterpreter";
+  public static final int MID_EXECUTOR_RESULT = 100;
+  public static final String MID = "mid";
 
   @Getter
   private final List<String> stringList = new ArrayList<>();
@@ -56,15 +64,15 @@ public class TestClass {
           @Node(value = "bag", executor = "midExecutor"),
           @Node("supply")
   })
-  public void bagTest(Object source, @Bag("mid") int number) {
+  public void bagTest(Object source, @Bag(MID) int number) {
     stringList.add(number + "");
   }
 
   @ExecutorNode
   public void midExecutor(Object source, @Bag("self") ValueBag bag) {
-    bag.add("mid", 100);
+    bag.add(MID, MID_EXECUTOR_RESULT);
 
-    stringList.add("mid");
+    stringList.add(MID);
   }
 
   @CheckNode

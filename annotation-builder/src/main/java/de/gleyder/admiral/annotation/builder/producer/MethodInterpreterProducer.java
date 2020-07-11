@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 import java.lang.reflect.Method;
 
-public class MethodInterpreterProducer implements SimpleNodeProducer<InterpreterNode>{
+public class MethodInterpreterProducer implements SimpleNodeProducer<InterpreterNode> {
   @Override
   public Object produce(@NonNull Object instance, @NonNull Method method) {
     return new MethodInterpreter(new ExecutableMethod(instance, method));

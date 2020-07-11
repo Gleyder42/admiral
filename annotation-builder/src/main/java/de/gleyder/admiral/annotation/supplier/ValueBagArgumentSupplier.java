@@ -16,7 +16,7 @@ public class ValueBagArgumentSupplier implements ArgumentSupplier {
 
   @Override
   public Object get(@NonNull String key) {
-    return bag.isMulti(key) ? bag.getList(key).orElse(null): bag.get(key).orElse(null);
+    return bag.isMulti(key) ? bag.getList(key).orElse(null) : bag.get(key).orElse(null);
   }
 
 }

@@ -1,11 +1,29 @@
 package de.gleyder.admiral.annotation.builder;
 
-import de.gleyder.admiral.annotation.*;
-import de.gleyder.admiral.annotation.builder.producer.*;
+import de.gleyder.admiral.annotation.CheckNode;
+import de.gleyder.admiral.annotation.ExecutorNode;
+import de.gleyder.admiral.annotation.InterpreterNode;
+import de.gleyder.admiral.annotation.InterpreterStrategyNode;
+import de.gleyder.admiral.annotation.Node;
+import de.gleyder.admiral.annotation.Route;
+import de.gleyder.admiral.annotation.builder.producer.MethodCheckProducer;
+import de.gleyder.admiral.annotation.builder.producer.MethodExecutorProducer;
+import de.gleyder.admiral.annotation.builder.producer.MethodInterpreterProducer;
+import de.gleyder.admiral.annotation.builder.producer.MethodInterpreterStrategyProducer;
+import de.gleyder.admiral.annotation.builder.producer.NodeProducer;
 import de.gleyder.admiral.core.CommandDispatcher;
 import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.Executor;
-import de.gleyder.admiral.core.interpreter.*;
+import de.gleyder.admiral.core.interpreter.BooleanInterpreter;
+import de.gleyder.admiral.core.interpreter.ByteInterpreter;
+import de.gleyder.admiral.core.interpreter.CharacterInterpreter;
+import de.gleyder.admiral.core.interpreter.DoubleInterpreter;
+import de.gleyder.admiral.core.interpreter.FloatInterpreter;
+import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
+import de.gleyder.admiral.core.interpreter.Interpreter;
+import de.gleyder.admiral.core.interpreter.LongInterpreter;
+import de.gleyder.admiral.core.interpreter.ShortInterpreter;
+import de.gleyder.admiral.core.interpreter.StringInterpreter;
 import de.gleyder.admiral.core.interpreter.strategy.InterpreterStrategy;
 import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
 import de.gleyder.admiral.core.interpreter.strategy.SingleStrategy;
@@ -17,7 +35,13 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -76,15 +100,13 @@ public class AnnotationCommandBuilder {
 
   @SneakyThrows
   private StaticNode toNode(Object instance) {
-    Class<?> aClass = instance.getClass();
-    Node rootAnnotation = aClass.getAnnotation(Node.class);
+    Class<?> instanceClass = instance.getClass();
+    Node rootAnnotation = instanceClass.getAnnotation(Node.class);
     StaticNode rootNode = new StaticNode(rootAnnotation.value());
     Map<String, Object> nodeMap = new HashMap<>();
 
-    Arrays.stream(aClass.getMethods()).forEach(method ->
-            PRODUCER_MAP.entrySet().stream()
-                    .filter(entry -> method.isAnnotationPresent(entry.getKey()))
-                    .findFirst().ifPresent(producerEntry -> {
+    Arrays.stream(instanceClass.getMethods()).forEach(method -> PRODUCER_MAP.entrySet().stream()
+            .filter(entry -> method.isAnnotationPresent(entry.getKey())).findFirst().ifPresent(producerEntry -> {
               NodeProducer<Annotation> producer = (NodeProducer<Annotation>) producerEntry.getValue();
               nodeMap.put(
                       producer.getKey(method.getAnnotation(producerEntry.getKey()), method),
@@ -92,11 +114,10 @@ public class AnnotationCommandBuilder {
               );
             }));
 
-
     trySetExecutorNode(nodeMap, rootAnnotation, rootNode);
     trySetRequired(nodeMap, rootAnnotation, rootNode);
 
-    Arrays.stream(aClass.getMethods())
+    Arrays.stream(instanceClass.getMethods())
             .filter(method -> method.isAnnotationPresent(Route.class))
             .forEach(method -> {
               Deque<Node> nodeDeque = Arrays.stream(method.getAnnotation(Route.class).value())

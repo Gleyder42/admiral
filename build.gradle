@@ -6,6 +6,7 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'io.freefair.lombok'
     apply plugin: 'java-library'
+    apply plugin: 'checkstyle'
 
     sourceCompatibility = JavaVersion.VERSION_14
     targetCompatibility = JavaVersion.VERSION_14

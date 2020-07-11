@@ -7,10 +7,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AnnotationCommandBuilderTest {
 
+  public static final String ROOT = "root";
+  public static final String MID = "mid";
   private final TestClass testClass = new TestClass();
   private final AnnotationCommandBuilder builder = new AnnotationCommandBuilder()
           .registerCommand(testClass);
@@ -28,14 +31,14 @@ class AnnotationCommandBuilderTest {
 
     System.out.println(testClass.getStringList());
 
-    assertContains(testClass, "strategy", "verifier", "root", "mid", "sum:20");
+    assertContains(testClass, "strategy", "verifier", ROOT, MID, "sum:20");
   }
 
   @Test
   void manyValuesCommand() {
     dispatch("test many values hallo 10 c");
 
-    assertContains(testClass, "root", "c", "10", "hallo");
+    assertContains(testClass, ROOT, "c", "10", "hallo");
   }
 
   @Test
@@ -47,7 +50,7 @@ class AnnotationCommandBuilderTest {
   void extraBagValue() {
     dispatch("test bag supply");
 
-    assertContains(testClass, "root", "mid", "100");
+    assertContains(testClass, ROOT, MID, "100");
   }
 
   void assertContains(TestClass testClass, String... strings) {
