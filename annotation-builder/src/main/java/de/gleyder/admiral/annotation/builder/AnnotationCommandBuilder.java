@@ -153,7 +153,8 @@ public class AnnotationCommandBuilder {
     return rootNode;
   }
 
-  private void trySetInterpreterStrategyNode(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull DynamicNode dynamicNode) {
+  private void trySetInterpreterStrategyNode(@NonNull Map<String, Object> nodeMap, @NonNull Node node,
+                                             @NonNull DynamicNode dynamicNode) {
     if (!node.strategy().isEmpty()) {
       InterpreterStrategy interpreterStrategy = getInterpreterStrategy(node.strategy(), nodeMap);
       if (interpreterStrategy == null) {
