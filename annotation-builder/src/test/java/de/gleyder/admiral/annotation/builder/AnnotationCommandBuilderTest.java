@@ -1,14 +1,14 @@
 package de.gleyder.admiral.annotation.builder;
 
 import de.gleyder.admiral.core.CommandDispatcher;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AnnotationCommandBuilderTest {
 
@@ -51,6 +51,18 @@ class AnnotationCommandBuilderTest {
     dispatch("test bag supply");
 
     assertContains(testClass, ROOT, MID, "100");
+  }
+
+  @Nested
+  class CommandValidation {
+
+    @TestFactory
+    List<DynamicTest> allCommandsShouldBeValid() {
+      return dispatcher.getAllRoutes().stream()
+          .map(route -> DynamicTest.dynamicTest(route.getNodeList().toString(), () -> assertTrue(route.isValid())))
+          .collect(Collectors.toUnmodifiableList());
+    }
+
   }
 
   void assertContains(TestClass testClass, String... strings) {

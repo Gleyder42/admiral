@@ -15,7 +15,8 @@ public class SingleStrategy implements InterpreterStrategy {
   public List<InterpreterResult<Object>> test(@NonNull Map<String, Object> map, @NonNull Interpreter<?> interpreter,
                                               @NonNull InputArgument inputArgument) {
     List<InterpreterResult<Object>> resultList = new ArrayList<>();
-    inputArgument.getInputs().forEach(argument -> resultList.add((InterpreterResult<Object>) interpreter.interpret(map, argument)));
+    inputArgument.getInputs()
+        .forEach(argument -> resultList.add((InterpreterResult<Object>) interpreter.interpret(map, argument)));
     return resultList;
   }
 

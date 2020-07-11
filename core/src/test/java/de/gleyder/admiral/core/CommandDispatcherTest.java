@@ -8,10 +8,10 @@ import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.node.StaticNode;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -346,6 +346,18 @@ class CommandDispatcherTest {
 
     assertEqualsRoute(actual, bag, groupNode, groupAddUserNode, groupUserNode, checkNameNode);
     assertNoCommandError(command);
+  }
+
+  @Nested
+  class CommandValidation {
+
+    @TestFactory
+    List<DynamicTest> allCommandsShouldBeValid() {
+      return dispatcher.getAllRoutes().stream()
+          .map(route -> DynamicTest.dynamicTest(route.getNodeList().toString(), () -> assertTrue(route.isValid())))
+          .collect(Collectors.toUnmodifiableList());
+    }
+
   }
 
   private CommandRoute findRoute(String command) {

@@ -44,7 +44,7 @@ public class CommandDispatcher {
     return dispatch(findRoute(command, interpreterMap), source);
   }
 
-  private List<CommandError> dispatch(@NonNull CommandRoute route, @NonNull Object source) {
+  List<CommandError> dispatch(@NonNull CommandRoute route, @NonNull Object source) {
     if (route.isInvalid()) {
       return route.getErrors();
     }
@@ -181,7 +181,8 @@ public class CommandDispatcher {
   }
 
   private List<CommandRoute> getAlternateRoutes(@NonNull CommandRoute mainRoute, @NonNull List<CommandRoute> routeList,
-                                                @NonNull Deque<InputArgument> argumentDeque, @NonNull Map<String, Object> interpreterMap) {
+                                                @NonNull Deque<InputArgument> argumentDeque,
+                                                @NonNull Map<String, Object> interpreterMap) {
     return routeList.stream()
             .map(route -> {
               CommandRoute duplicate = mainRoute.duplicate();

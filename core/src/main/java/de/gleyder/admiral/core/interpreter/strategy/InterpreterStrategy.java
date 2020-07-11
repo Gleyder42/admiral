@@ -10,5 +10,6 @@ import java.util.Map;
 
 public interface InterpreterStrategy {
 
-  List<InterpreterResult<Object>> test(@NonNull Map<String, Object> map, @NonNull Interpreter<?> interpreter, @NonNull InputArgument inputArgument);
+  List<InterpreterResult<Object>> test(@NonNull Map<String, Object> map, @NonNull Interpreter<?> interpreter,
+                                       @NonNull InputArgument inputArgument);
 }
