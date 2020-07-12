@@ -1,6 +1,6 @@
 package de.gleyder.admiral.core.interpreter;
 
-import de.gleyder.admiral.core.CommandError;
+import de.gleyder.admiral.core.error.CommandError;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;

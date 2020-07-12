@@ -2,7 +2,7 @@ package de.gleyder.admiral.annotation.executor;
 
 import de.gleyder.admiral.annotation.supplier.ArgumentSupplier;
 import de.gleyder.admiral.core.CommandContext;
-import de.gleyder.admiral.core.LiteralCommandError;
+import de.gleyder.admiral.core.error.LiteralCommandError;
 import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.CheckResult;
 import lombok.NonNull;

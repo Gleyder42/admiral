@@ -1,5 +1,6 @@
 package de.gleyder.admiral.core;
 
+import de.gleyder.admiral.core.error.CommandError;
 import de.gleyder.admiral.core.node.CommandNode;
 import lombok.*;
 import org.jetbrains.annotations.TestOnly;

@@ -6,7 +6,7 @@ import de.gleyder.admiral.annotation.ExecutorNode;
 import de.gleyder.admiral.annotation.InterpreterStrategyNode;
 import de.gleyder.admiral.annotation.Node;
 import de.gleyder.admiral.annotation.Route;
-import de.gleyder.admiral.core.LiteralCommandError;
+import de.gleyder.admiral.core.error.LiteralCommandError;
 import de.gleyder.admiral.core.ValueBag;
 import de.gleyder.admiral.core.executor.CheckResult;
 import de.gleyder.admiral.core.interpreter.Interpreter;

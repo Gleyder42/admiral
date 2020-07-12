@@ -1,5 +1,7 @@
-package de.gleyder.admiral.core;
+package de.gleyder.admiral.core.error;
 
+import de.gleyder.admiral.core.CommandRoute;
+import de.gleyder.admiral.core.error.CommandError;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

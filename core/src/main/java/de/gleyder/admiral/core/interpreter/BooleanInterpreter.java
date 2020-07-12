@@ -1,6 +1,6 @@
 package de.gleyder.admiral.core.interpreter;
 
-import de.gleyder.admiral.core.LiteralCommandError;
+import de.gleyder.admiral.core.error.LiteralCommandError;
 import lombok.NonNull;
 
 public class BooleanInterpreter implements SimpleInterpreter<Boolean> {

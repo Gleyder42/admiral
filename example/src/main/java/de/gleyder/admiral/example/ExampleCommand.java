@@ -1,7 +1,7 @@
 package de.gleyder.admiral.example;
 
 import de.gleyder.admiral.core.CommandDispatcher;
-import de.gleyder.admiral.core.CommandError;
+import de.gleyder.admiral.core.error.CommandError;
 import de.gleyder.admiral.core.CommandRoute;
 import de.gleyder.admiral.core.builder.DynamicNodeBuilder;
 import de.gleyder.admiral.core.builder.StaticNodeBuilder;

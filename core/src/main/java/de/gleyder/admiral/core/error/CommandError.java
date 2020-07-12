@@ -1,4 +1,4 @@
-package de.gleyder.admiral.core;
+package de.gleyder.admiral.core.error;
 
 public interface CommandError {
 

@@ -1,5 +1,8 @@
 package de.gleyder.admiral.core;
 
+import de.gleyder.admiral.core.error.AmbiguousCommandError;
+import de.gleyder.admiral.core.error.CommandError;
+import de.gleyder.admiral.core.error.LiteralCommandError;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
 import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
