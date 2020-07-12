@@ -51,10 +51,6 @@ public class CommandRoute {
     nodeList.clear();
   }
 
-  public void clearErrors() {
-    errorMessages.clear();
-  }
-
   public CommandNode get(int index) {
     return nodeList.get(index);
   }
@@ -64,7 +60,7 @@ public class CommandRoute {
   }
 
   public boolean isInvalid() {
-    return !errorMessages.isEmpty() || nodeList.isEmpty();
+    return !isValid();
   }
 
   public CommandRoute duplicate() {

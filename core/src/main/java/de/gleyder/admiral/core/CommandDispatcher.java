@@ -6,10 +6,12 @@ import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.node.StaticNode;
 import de.gleyder.admiral.core.parser.InputArgument;
 import de.gleyder.admiral.core.parser.InputParser;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,8 +25,10 @@ public class CommandDispatcher {
 
   private static final String NO_COMMAND_FOUND = "No command found";
 
-  @Getter
+  @TestOnly
+  @Getter(AccessLevel.PACKAGE)
   private final StaticNode rootNode = new StaticNode("root");
+
   private final InputParser parser;
 
   public CommandDispatcher(@Nullable InputParser parser) {
@@ -193,5 +197,4 @@ public class CommandDispatcher {
               return duplicate;
             }).collect(Collectors.toUnmodifiableList());
   }
-
 }
