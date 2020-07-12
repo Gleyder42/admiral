@@ -26,8 +26,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CommandDispatcher {
 
-  private static final String NO_COMMAND_FOUND = "No command found";
-
   @TestOnly
   @Getter(AccessLevel.PACKAGE)
   private final StaticNode rootNode = new StaticNode("root");
@@ -114,10 +112,8 @@ public class CommandDispatcher {
     if (node.isLeaf()) {
       if (!argumentDeque.isEmpty()) {
         route.addError(LiteralCommandError.create()
-                .setDetailed("Further arguments remain [%s] but command tree has finished with node %s",
-                        argumentDeque, node.getKey()
-                )
-                .setSimple(NO_COMMAND_FOUND)
+                .setDetailed(Messages.FURTHER_ARGUMENTS_REMAIN.get(argumentDeque, node.getKey()))
+                .setSimple(Messages.NO_COMMAND_FOUND.get())
         );
       }
       return;
@@ -126,8 +122,8 @@ public class CommandDispatcher {
     if (argumentDeque.isEmpty()) {
       if (!route.hasExecutor()) {
         route.addError(LiteralCommandError.create()
-                .setDetailed("The route has no executor")
-                .setSimple(NO_COMMAND_FOUND)
+                .setDetailed(Messages.NO_EXECUTOR_ON_ROUTE.get())
+                .setSimple(Messages.NO_COMMAND_FOUND.get())
         );
       }
       return;
@@ -200,4 +196,5 @@ public class CommandDispatcher {
               return duplicate;
             }).collect(Collectors.toUnmodifiableList());
   }
+
 }
