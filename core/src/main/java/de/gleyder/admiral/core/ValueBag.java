@@ -26,14 +26,14 @@ public class ValueBag {
   }
 
   public boolean isMulti(@NonNull String key) {
-    if (!map.containsKey(key)) {
+    if (isAbsent(key)) {
       return false;
     }
     return map.get(key).size() > 1;
   }
 
   public boolean contains(@NonNull String key) {
-    if (!map.containsKey(key)) {
+    if (isAbsent(key)) {
       return false;
     }
 
@@ -45,7 +45,7 @@ public class ValueBag {
   }
 
   public <T> Optional<T> get(@NonNull String key) {
-    if (!map.containsKey(key)) {
+    if (isAbsent(key)) {
       return Optional.empty();
     }
     List<Object> loadedMap = getMap(key);
@@ -56,7 +56,7 @@ public class ValueBag {
   }
 
   public <T> Optional<List<T>> getList(@NonNull String key) {
-    if (!map.containsKey(key)) {
+    if (isAbsent(key)) {
       return Optional.empty();
     }
     return Optional.of((List<T>) getMap(key));
@@ -95,16 +95,21 @@ public class ValueBag {
 
   public Set<Map.Entry<String, Object>> objectEntrySet() {
     return map.entrySet().stream()
-            .map(entry -> {
-              if (entry.getValue().size() == 1) {
-                return new SimpleEntry(entry.getKey(), entry.getValue().get(0));
-              } else {
-                return new SimpleEntry(entry.getKey(), entry.getValue());
-              }
-            })
-            .collect(Collectors.toSet());
+        .map(entry -> {
+          if (entry.getValue().size() == 1) {
+            return new SimpleEntry(entry.getKey(), entry.getValue().get(0));
+          } else {
+            return new SimpleEntry(entry.getKey(), entry.getValue());
+          }
+        })
+        .collect(Collectors.toSet());
   }
 
+  private boolean isAbsent(@NonNull String key) {
+    return !map.containsKey(key) || map.get(key).isEmpty();
+  }
+
+  @Getter
   private static class SimpleEntry implements Map.Entry<String, Object> {
 
     private final String key;
@@ -113,16 +118,6 @@ public class ValueBag {
     public SimpleEntry(String key, Object value) {
       this.key = key;
       this.value = value;
-    }
-
-    @Override
-    public String getKey() {
-      return key;
-    }
-
-    @Override
-    public Object getValue() {
-      return value;
     }
 
     @Override
