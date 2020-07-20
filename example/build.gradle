@@ -1,3 +1,8 @@
+tasks.generateMetadataFileForMavenPublication.enabled = false
+tasks.generatePomFileForMavenPublication.enabled = false
+tasks.publishMavenPublicationToMavenLocal.enabled = false
+tasks.publishToMavenLocal.enabled = false
+
 dependencies {
     implementation project(":core")
 }

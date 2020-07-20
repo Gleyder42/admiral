@@ -38,6 +38,18 @@ class CommandDispatcherTest {
       .build();
 
   /*
+   * Number command
+   */
+  private final StaticNode numberNode = new StaticNode("number");
+  private final DynamicNode dynamicNumberEchoNode = new DynamicNodeBuilder("int")
+      .setInterpreter(CommonInterpreter.INT)
+      .setExecutor(context -> {
+        Integer integer = context.getBag().get("int", Integer.class).orElseThrow();
+        log.info("Int: {}", integer);
+      })
+      .build();
+
+  /*
    * Echo Command
    */
   private final StaticNode echoNode = new StaticNodeBuilder("echo")
@@ -183,6 +195,11 @@ class CommandDispatcherTest {
     deleteNode.addNode(typeNode);
 
     /*
+     *
+     */
+    numberNode.addNode(dynamicNumberEchoNode);
+
+    /*
      * Echo Command
      */
     echoNode.addNode(messageNode);
@@ -190,11 +207,33 @@ class CommandDispatcherTest {
     /*
      * Register command
      */
+    dispatcher.registerCommand(numberNode);
     dispatcher.registerCommand(groupNode);
     dispatcher.registerCommand(doubleNode);
     dispatcher.registerCommand(itemNode);
     dispatcher.registerCommand(echoNode);
     dispatcher.registerCommand(infoNode);
+  }
+
+  @Test
+  void shouldFindNumberCommand() {
+    String command = "number " + DEFAULT_AMOUNT;
+    Map<String, Object> map = Map.of("int", DEFAULT_AMOUNT);
+
+    CommandRoute actual = findRoute(command);
+
+    assertEqualsRoute(actual, map, numberNode, dynamicNumberEchoNode);
+    assertNoCommandError(command);
+  }
+
+  @Test
+  void shouldNotFindNumberCommandWithStringInput() {
+    String command = "number Test";
+
+    List<CommandError> dispatch = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+
+    assertEquals("java.lang.NumberFormatException: For input string: \"Test\"", dispatch.get(0).getSimple());
+    assertEquals("java.lang.NumberFormatException: For input string: \"Test\"", dispatch.get(0).getDetailed());
   }
 
   @Test
@@ -369,6 +408,7 @@ class CommandDispatcherTest {
 
   private void assertNoCommandError(String command) {
     List<CommandError> errorList = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    System.out.println(errorList);
     assertIterableEquals(emptyList(), errorList);
   }
 

@@ -44,6 +44,10 @@ public class CommandRoute {
     errorMessages.add(error);
   }
 
+  public void addErrors(@NonNull List<CommandError> errorMessages) {
+    this.errorMessages.addAll(errorMessages);
+  }
+
   public void addAll(@NonNull CommandRoute route) {
     this.nodeList.addAll(route.nodeList);
   }
@@ -66,6 +70,10 @@ public class CommandRoute {
 
   public CommandRoute duplicate() {
     return new CommandRoute(new ArrayList<>(nodeList));
+  }
+
+  public boolean hasErrors() {
+    return !errorMessages.isEmpty();
   }
 
   public List<CommandError> getErrors() {
