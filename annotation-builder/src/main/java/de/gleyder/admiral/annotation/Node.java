@@ -8,6 +8,7 @@ public @interface Node {
 
   String required() default "";
   String executor() default "";
+  String[] aliases() default {};
 
   String interpreter() default "";
   String strategy() default "";

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 @Slf4j
-@Node(value = "test", executor = "rootExecutor")
+@Node(value = "test", executor = "rootExecutor", aliases = {"t"})
 public class TestClass {
 
   private static final String SUM_STRATEGY_INTERPRETER = "sumStrategyInterpreter";
@@ -61,8 +61,8 @@ public class TestClass {
   }
 
   @Route({
-          @Node(value = "bag", executor = "midExecutor"),
-          @Node("supply")
+          @Node(value = "bag", executor = "midExecutor", aliases = "b"),
+          @Node(value = "supply", aliases = {"sup", "s"})
   })
   public void bagTest(Object source, @Bag(MID) int number) {
     stringList.add(number + "");

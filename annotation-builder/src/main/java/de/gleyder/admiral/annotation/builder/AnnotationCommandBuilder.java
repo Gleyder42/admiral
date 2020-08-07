@@ -1,29 +1,11 @@
 package de.gleyder.admiral.annotation.builder;
 
-import de.gleyder.admiral.annotation.CheckNode;
-import de.gleyder.admiral.annotation.ExecutorNode;
-import de.gleyder.admiral.annotation.InterpreterNode;
-import de.gleyder.admiral.annotation.InterpreterStrategyNode;
-import de.gleyder.admiral.annotation.Node;
-import de.gleyder.admiral.annotation.Route;
-import de.gleyder.admiral.annotation.builder.producer.MethodCheckProducer;
-import de.gleyder.admiral.annotation.builder.producer.MethodExecutorProducer;
-import de.gleyder.admiral.annotation.builder.producer.MethodInterpreterProducer;
-import de.gleyder.admiral.annotation.builder.producer.MethodInterpreterStrategyProducer;
-import de.gleyder.admiral.annotation.builder.producer.NodeProducer;
+import de.gleyder.admiral.annotation.*;
+import de.gleyder.admiral.annotation.builder.producer.*;
 import de.gleyder.admiral.core.CommandDispatcher;
 import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.Executor;
-import de.gleyder.admiral.core.interpreter.BooleanInterpreter;
-import de.gleyder.admiral.core.interpreter.ByteInterpreter;
-import de.gleyder.admiral.core.interpreter.CharacterInterpreter;
-import de.gleyder.admiral.core.interpreter.DoubleInterpreter;
-import de.gleyder.admiral.core.interpreter.FloatInterpreter;
-import de.gleyder.admiral.core.interpreter.IntegerInterpreter;
-import de.gleyder.admiral.core.interpreter.Interpreter;
-import de.gleyder.admiral.core.interpreter.LongInterpreter;
-import de.gleyder.admiral.core.interpreter.ShortInterpreter;
-import de.gleyder.admiral.core.interpreter.StringInterpreter;
+import de.gleyder.admiral.core.interpreter.*;
 import de.gleyder.admiral.core.interpreter.strategy.InterpreterStrategy;
 import de.gleyder.admiral.core.interpreter.strategy.MergedStrategy;
 import de.gleyder.admiral.core.interpreter.strategy.SingleStrategy;
@@ -35,13 +17,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -103,6 +79,7 @@ public class AnnotationCommandBuilder {
     Class<?> instanceClass = instance.getClass();
     Node rootAnnotation = instanceClass.getAnnotation(Node.class);
     StaticNode rootNode = new StaticNode(rootAnnotation.value());
+    rootNode.getAliases().addAll(Arrays.asList(rootAnnotation.aliases()));
     Map<String, Object> nodeMap = new HashMap<>();
 
     Arrays.stream(instanceClass.getMethods()).forEach(method -> PRODUCER_MAP.entrySet().stream()
@@ -114,8 +91,7 @@ public class AnnotationCommandBuilder {
               );
             }));
 
-    trySetExecutorNode(nodeMap, rootAnnotation, rootNode);
-    trySetRequired(nodeMap, rootAnnotation, rootNode);
+    applyNodeAnnotation(nodeMap, rootAnnotation, rootNode);
 
     Arrays.stream(instanceClass.getMethods())
             .filter(method -> method.isAnnotationPresent(Route.class))
@@ -130,16 +106,11 @@ public class AnnotationCommandBuilder {
 
                 if (!node.interpreter().isEmpty() || !node.strategy().isEmpty()) {
                   currentNode = new DynamicNode(node.value());
-                  DynamicNode dynamicNode = (DynamicNode) currentNode;
-
-                  trySetInterpreterNode(nodeMap, node, dynamicNode);
-                  trySetInterpreterStrategyNode(nodeMap, node, dynamicNode);
                 } else {
                   currentNode = new StaticNode(node.value());
                 }
 
-                trySetExecutorNode(nodeMap, node, currentNode);
-                trySetRequired(nodeMap, node, currentNode);
+                applyNodeAnnotation(nodeMap, node, currentNode);
 
                 if (nodeDeque.isEmpty()) {
                   NodeProducer<? extends Annotation> producer = PRODUCER_MAP.get(ExecutorNode.class);
@@ -153,9 +124,20 @@ public class AnnotationCommandBuilder {
     return rootNode;
   }
 
+  private void trySetAliases(@NonNull Node node, @NonNull CommandNode currentNode) {
+    if (node.aliases().length > 0) {
+      ensureNodeType(currentNode, NodeType.STATIC);
+      var staticNode = (StaticNode) currentNode;
+      staticNode.getAliases().addAll(Arrays.asList(node.aliases()));
+    }
+  }
+
   private void trySetInterpreterStrategyNode(@NonNull Map<String, Object> nodeMap, @NonNull Node node,
-                                             @NonNull DynamicNode dynamicNode) {
+                                             @NonNull CommandNode currentNode) {
     if (!node.strategy().isEmpty()) {
+      ensureNodeType(currentNode, NodeType.DYNAMIC);
+      var dynamicNode = (DynamicNode) currentNode;
+
       InterpreterStrategy interpreterStrategy = getInterpreterStrategy(node.strategy(), nodeMap);
       if (interpreterStrategy == null) {
         throw new NullPointerException("No interpreter strategy was registered with key " + node.strategy());
@@ -165,8 +147,11 @@ public class AnnotationCommandBuilder {
     }
   }
 
-  private void trySetInterpreterNode(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull DynamicNode dynamicNode) {
+  private void trySetInterpreterNode(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
     if (!node.interpreter().isEmpty()) {
+      ensureNodeType(currentNode, NodeType.DYNAMIC);
+      var dynamicNode = (DynamicNode) currentNode;
+
       Interpreter<?> interpreter = getInterpreter(node.interpreter(), nodeMap);
       if (interpreter == null) {
         throw new NullPointerException("No interpreter was registered with key " + node.interpreter());
@@ -216,4 +201,23 @@ public class AnnotationCommandBuilder {
     }
   }
 
+  private void ensureNodeType(@NonNull CommandNode node, @NonNull NodeType nodeType) {
+    if (nodeType == NodeType.DYNAMIC && !(node instanceof DynamicNode)) {
+      throw new IllegalStateException("Node " + node + " is not dynamic");
+    } else if (nodeType == NodeType.STATIC && !(node instanceof StaticNode)) {
+      throw new IllegalStateException("Node " + node + " is not static");
+    }
+  }
+
+  private void applyNodeAnnotation(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
+    trySetExecutorNode(nodeMap, node, currentNode);
+    trySetRequired(nodeMap, node, currentNode);
+    trySetInterpreterNode(nodeMap, node, currentNode);
+    trySetInterpreterStrategyNode(nodeMap, node, currentNode);
+    trySetAliases(node, currentNode);
+  }
+
+  private enum NodeType {
+    DYNAMIC, STATIC
+  }
 }
