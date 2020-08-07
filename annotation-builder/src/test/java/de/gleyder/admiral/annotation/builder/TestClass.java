@@ -1,13 +1,8 @@
 package de.gleyder.admiral.annotation.builder;
 
-import de.gleyder.admiral.annotation.Bag;
-import de.gleyder.admiral.annotation.CheckNode;
-import de.gleyder.admiral.annotation.ExecutorNode;
-import de.gleyder.admiral.annotation.InterpreterStrategyNode;
-import de.gleyder.admiral.annotation.Node;
-import de.gleyder.admiral.annotation.Route;
-import de.gleyder.admiral.core.error.LiteralCommandError;
+import de.gleyder.admiral.annotation.*;
 import de.gleyder.admiral.core.ValueBag;
+import de.gleyder.admiral.core.error.ThrowableCommandError;
 import de.gleyder.admiral.core.executor.CheckResult;
 import de.gleyder.admiral.core.interpreter.Interpreter;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
@@ -85,7 +80,7 @@ public class TestClass {
     try {
       return InterpreterResult.ofValue(Long.parseLong(argument));
     } catch (NumberFormatException exception) {
-      return InterpreterResult.ofError(LiteralCommandError.create().setMessage(exception.toString()));
+      return InterpreterResult.ofError(new ThrowableCommandError(exception));
     }
   }
 
