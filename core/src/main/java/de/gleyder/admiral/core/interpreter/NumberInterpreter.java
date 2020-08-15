@@ -1,6 +1,5 @@
 package de.gleyder.admiral.core.interpreter;
 
-import de.gleyder.admiral.core.error.LiteralCommandError;
 import lombok.NonNull;
 
 public interface NumberInterpreter<N extends Number> extends SimpleInterpreter<N> {
@@ -9,11 +8,6 @@ public interface NumberInterpreter<N extends Number> extends SimpleInterpreter<N
 
   @Override
   default InterpreterResult<N> interpret(@NonNull String argument) {
-    try {
-      return InterpreterResult.ofValue(parse(argument));
-    } catch (NumberFormatException exception) {
-      return InterpreterResult.ofError(LiteralCommandError.create().setMessage(exception.toString()));
-    }
+    return InterpreterResult.from(() -> parse(argument));
   }
-
 }

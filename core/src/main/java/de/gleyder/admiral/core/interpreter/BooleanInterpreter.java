@@ -13,5 +13,4 @@ public class BooleanInterpreter implements SimpleInterpreter<Boolean> {
       return InterpreterResult.ofError(LiteralCommandError.create().setMessage(argument + " is not a boolean"));
     }
   }
-
 }

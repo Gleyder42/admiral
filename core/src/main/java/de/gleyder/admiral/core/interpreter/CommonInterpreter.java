@@ -13,10 +13,9 @@ public enum CommonInterpreter {
   BOOLEAN(new BooleanInterpreter())
   ;
 
-  private Interpreter<Object> interpreter;
+  private final Interpreter<Object> interpreter;
 
   CommonInterpreter(Interpreter<?> interpreter) {
-    //noinspection unchecked
     this.interpreter = (Interpreter<Object>) interpreter;
   }
 

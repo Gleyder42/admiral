@@ -8,5 +8,4 @@ public class ShortInterpreter implements NumberInterpreter<Short> {
   public Short parse(@NonNull String argument) {
     return Short.parseShort(argument);
   }
-
 }

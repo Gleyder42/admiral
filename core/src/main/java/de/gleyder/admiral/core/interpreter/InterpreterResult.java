@@ -1,11 +1,13 @@
 package de.gleyder.admiral.core.interpreter;
 
 import de.gleyder.admiral.core.error.CommandError;
+import de.gleyder.admiral.core.error.ThrowableCommandError;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class InterpreterResult<T> {
@@ -19,6 +21,14 @@ public class InterpreterResult<T> {
 
   public static <V> InterpreterResult<V> ofError(@NonNull CommandError error) {
     return new InterpreterResult<>(null, error);
+  }
+
+  public static <V> InterpreterResult<V> from(@NonNull Supplier<V> supplier) {
+    try {
+      return InterpreterResult.ofValue(supplier.get());
+    } catch (Exception exception) {
+      return InterpreterResult.ofError(new ThrowableCommandError(exception));
+    }
   }
 
   public Optional<T> getValue() {
@@ -37,3 +47,4 @@ public class InterpreterResult<T> {
     return value != null;
   }
 }
+

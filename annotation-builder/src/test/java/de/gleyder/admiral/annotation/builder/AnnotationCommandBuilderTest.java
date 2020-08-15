@@ -47,6 +47,13 @@ class AnnotationCommandBuilderTest {
   }
 
   @Test
+  void extraBagValueWithAlias() {
+    dispatch("t b s");
+
+    assertContains(testClass, ROOT, MID, "100");
+  }
+
+  @Test
   void extraBagValue() {
     dispatch("test bag supply");
 
