@@ -15,8 +15,8 @@ public class ThrowableCommandError implements CommandError {
   public ThrowableCommandError(@NonNull Throwable throwable, @Nullable Function<Throwable, String> simpleMessage,
                                @Nullable Function<Throwable, String> detailedMessage) {
     this.throwable = throwable;
-    this.simpleMessage = Objects.requireNonNullElse(simpleMessage, Throwable::getMessage);
-    this.detailedMessage = Objects.requireNonNullElse(detailedMessage, Throwable::getMessage);
+    this.simpleMessage = Objects.requireNonNullElse(simpleMessage, Throwable::toString);
+    this.detailedMessage = Objects.requireNonNullElse(detailedMessage, Throwable::toString);
   }
 
   public ThrowableCommandError(@NonNull Throwable throwable) {
