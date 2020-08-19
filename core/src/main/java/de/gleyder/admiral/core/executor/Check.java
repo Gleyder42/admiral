@@ -6,5 +6,4 @@ import lombok.NonNull;
 public interface Check {
 
   CheckResult test(@NonNull CommandContext commandContext);
-
 }

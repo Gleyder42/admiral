@@ -79,5 +79,4 @@ public class CommandRoute {
   public List<CommandError> getErrors() {
     return List.copyOf(errorMessages);
   }
-
 }

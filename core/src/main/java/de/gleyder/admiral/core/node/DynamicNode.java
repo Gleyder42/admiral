@@ -26,5 +26,4 @@ public class DynamicNode extends CommandNode {
   public DynamicNode(@NonNull String key) {
     super(key);
   }
-
 }

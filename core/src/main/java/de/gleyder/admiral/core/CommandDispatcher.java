@@ -215,5 +215,4 @@ public class CommandDispatcher {
           return duplicate;
         }).collect(Collectors.toUnmodifiableList());
   }
-
 }

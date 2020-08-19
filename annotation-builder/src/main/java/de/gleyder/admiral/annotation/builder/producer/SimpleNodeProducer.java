@@ -13,5 +13,4 @@ public interface SimpleNodeProducer<A extends Annotation> extends NodeProducer<A
   default String getKey(@NonNull A annotation, @NonNull Method method) {
     return !getValue(annotation).isEmpty() ? getValue(annotation) : method.getName();
   }
-
 }

@@ -11,8 +11,7 @@ public enum Messages {
   NO_EXECUTOR_ON_ROUTE("The route has no executor", "command.no-executor"),
   FURTHER_ARGUMENTS_REMAIN("Further arguments remain [%s] but command tree has finished with node %s",
       "command.arguments-remain"),
-  MULTIPLE_COMMANDS_FOUND("Multiple commands found", "command.multiple-commands")
-  ;
+  MULTIPLE_COMMANDS_FOUND("Multiple commands found", "command.multiple-commands");
 
   @Setter
   private String message;

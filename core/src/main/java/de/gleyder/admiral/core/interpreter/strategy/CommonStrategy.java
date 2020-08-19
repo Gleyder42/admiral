@@ -14,5 +14,4 @@ public enum CommonStrategy {
   public InterpreterStrategy get() {
     return strategy;
   }
-
 }

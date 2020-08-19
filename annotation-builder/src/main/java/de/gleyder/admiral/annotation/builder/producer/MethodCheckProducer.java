@@ -18,5 +18,4 @@ public class MethodCheckProducer implements SimpleNodeProducer<CheckNode> {
   public String getValue(@NonNull CheckNode annotation) {
     return annotation.value();
   }
-
 }

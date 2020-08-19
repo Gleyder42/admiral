@@ -39,5 +39,4 @@ public class CheckResult {
   public boolean wasSuccessful() {
     return error == null;
   }
-
 }

@@ -19,5 +19,4 @@ public class SingleStrategy implements InterpreterStrategy {
         .forEach(argument -> resultList.add((InterpreterResult<Object>) interpreter.interpret(map, argument)));
     return resultList;
   }
-
 }

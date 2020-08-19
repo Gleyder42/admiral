@@ -12,5 +12,4 @@ public interface SimpleInterpreter<T> extends Interpreter<T> {
   default InterpreterResult<T> interpret(@NonNull Map<String, Object> ignored, @NonNull String argument) {
     return interpret(argument);
   }
-
 }

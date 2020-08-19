@@ -34,5 +34,4 @@ public class LiteralCommandError implements CommandError {
     this.detailed = String.format(message, objects);
     return this;
   }
-
 }

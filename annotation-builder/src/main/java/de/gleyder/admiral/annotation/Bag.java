@@ -10,5 +10,6 @@ import java.lang.annotation.Target;
 public @interface Bag {
 
   boolean nullable() default false;
+
   String value();
 }

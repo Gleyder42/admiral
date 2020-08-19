@@ -8,6 +8,5 @@ public class IntegerInterpreter implements NumberInterpreter<Integer> {
   public Integer parse(@NonNull String argument) {
     return Integer.parseInt(argument);
   }
-
 }
 
