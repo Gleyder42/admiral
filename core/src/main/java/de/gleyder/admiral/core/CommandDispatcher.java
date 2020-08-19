@@ -34,7 +34,7 @@ public class CommandDispatcher {
   private final InputParser parser;
 
   public CommandDispatcher(@Nullable InputParser parser) {
-    this.parser = AdmiralCommon.standard(parser, new InputParser());
+    this.parser = Objects.requireNonNullElse(parser, new InputParser());
   }
 
   public CommandDispatcher() {

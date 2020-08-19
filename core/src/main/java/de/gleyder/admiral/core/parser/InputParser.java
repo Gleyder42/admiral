@@ -1,13 +1,9 @@
 package de.gleyder.admiral.core.parser;
 
-import de.gleyder.admiral.core.AdmiralCommon;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,9 +16,9 @@ public class InputParser {
   private final char divider;
 
   public InputParser(@Nullable Character start, @Nullable Character end, @Nullable Character divider) {
-    this.start = AdmiralCommon.standard(start, '(');
-    this.end = AdmiralCommon.standard(end, ')');
-    this.divider = AdmiralCommon.standard(divider, ' ');
+    this.start = Objects.requireNonNullElse(start, '(');
+    this.end = Objects.requireNonNullElse(end, ')');
+    this.divider = Objects.requireNonNullElse(divider, ' ');
   }
 
   public InputParser() {
