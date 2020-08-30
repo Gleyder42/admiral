@@ -16,20 +16,18 @@ class AnnotationCommandBuilderTest {
   public static final String MID = "mid";
   private final TestClass testClass = new TestClass();
   private final AnnotationCommandBuilder builder = new AnnotationCommandBuilder()
-          .registerCommand(testClass);
+      .registerCommand(testClass);
   private final CommandDispatcher dispatcher = new CommandDispatcher();
 
   @BeforeEach
   void setup() {
     builder.registerCommand(testClass)
-            .build(dispatcher);
+        .build(dispatcher);
   }
 
   @Test
   void calculateCommand() {
     dispatch("test calculate sum (10 10)");
-
-    System.out.println(testClass.getStringList());
 
     assertContains(testClass, "strategy", "verifier", ROOT, MID, "sum:20");
   }

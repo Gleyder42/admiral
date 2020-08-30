@@ -27,7 +27,7 @@ public class TestClass {
 
   //test calculate sum (10 10)
   @Route({
-          @Node(value = "calculate", required = "verifier"),
+          @Node(value = "calculate", check = "verifier"),
           @Node(value = "sum", executor = "midExecutor"),
           @Node(value = "input", strategy = SUM_STRATEGY_INTERPRETER, interpreter = "long")
   })

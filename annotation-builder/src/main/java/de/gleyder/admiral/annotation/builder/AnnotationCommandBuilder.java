@@ -33,6 +33,8 @@ public class AnnotationCommandBuilder {
   private final Set<Object> registeredClasses = new HashSet<>();
   private final Map<String, Interpreter<?>> registeredInterpreters = new HashMap<>();
   private final Map<String, InterpreterStrategy> registeredInterpreterStrategies = new HashMap<>();
+  private final Map<String, Check> registeredChecks = new HashMap<>();
+  private final Map<String, Executor> registeredExecutors = new HashMap<>();
 
   public AnnotationCommandBuilder() {
     registeredInterpreters.put("byte", new ByteInterpreter());
@@ -47,6 +49,16 @@ public class AnnotationCommandBuilder {
 
     registeredInterpreterStrategies.put("single", new SingleStrategy());
     registeredInterpreterStrategies.put("merged", new MergedStrategy());
+  }
+
+  public AnnotationCommandBuilder registerExecutor(@NonNull String key, @NonNull Executor executor) {
+    registeredExecutors.put(key, executor);
+    return this;
+  }
+
+  public AnnotationCommandBuilder registerCheck(@NonNull String key, @NonNull Check check) {
+    registeredChecks.put(key, check);
+    return this;
   }
 
   public AnnotationCommandBuilder registerInterpreter(@NonNull String key, @NonNull Interpreter<?> interpreter) {
@@ -165,6 +177,10 @@ public class AnnotationCommandBuilder {
     if (!node.executor().isEmpty()) {
       Executor executor = (Executor) nodeMap.get(node.executor());
       if (executor == null) {
+        executor = registeredExecutors.get(node.executor());
+      }
+
+      if (executor == null) {
         throw new NullPointerException("No executor found with key " + node.executor());
       }
 
@@ -172,11 +188,15 @@ public class AnnotationCommandBuilder {
     }
   }
 
-  private void trySetRequired(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
-    if (!node.required().isEmpty()) {
-      Check check = (Check) nodeMap.get(node.required());
+  private void trySetCheck(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
+    if (!node.check().isEmpty()) {
+      Check check = (Check) nodeMap.get(node.check());
       if (check == null) {
-        throw new NullPointerException("No required node found with key " + node.required());
+        check = registeredChecks.get(node.check());
+      }
+
+      if (check == null) {
+        throw new NullPointerException("No required node found with key " + node.check());
       }
 
       currentNode.setCheck(check);
@@ -211,7 +231,7 @@ public class AnnotationCommandBuilder {
 
   private void applyNodeAnnotation(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
     trySetExecutorNode(nodeMap, node, currentNode);
-    trySetRequired(nodeMap, node, currentNode);
+    trySetCheck(nodeMap, node, currentNode);
     trySetInterpreterNode(nodeMap, node, currentNode);
     trySetInterpreterStrategyNode(nodeMap, node, currentNode);
     trySetAliases(node, currentNode);

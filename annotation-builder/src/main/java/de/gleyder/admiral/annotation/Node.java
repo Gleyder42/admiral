@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Node {
 
-  String required() default "";
+  String check() default "";
 
   String executor() default "";
 
