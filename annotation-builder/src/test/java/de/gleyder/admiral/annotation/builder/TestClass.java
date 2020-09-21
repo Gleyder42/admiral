@@ -2,6 +2,7 @@ package de.gleyder.admiral.annotation.builder;
 
 import de.gleyder.admiral.annotation.*;
 import de.gleyder.admiral.core.ValueBag;
+import de.gleyder.admiral.core.error.LiteralCommandError;
 import de.gleyder.admiral.core.error.ThrowableCommandError;
 import de.gleyder.admiral.core.executor.CheckResult;
 import de.gleyder.admiral.core.interpreter.Interpreter;
@@ -74,6 +75,44 @@ public class TestClass {
   public CheckResult verifier(Object source) {
     stringList.add("verifier");
     return CheckResult.ofSuccessful();
+  }
+
+  @Route({
+      @Node(value = "multipleCheckTest", check = {"trueCheck", "otherTrueCheck"})
+  })
+  public void multipleCheckTest(Object source) {
+    stringList.add("multipleCheckTest");
+  }
+
+  @Route({
+      @Node(value = "falseMultipleCheckTest", check = {"trueCheck", "otherTrueCheck", "falseCheck", "otherFalseCheck"})
+  })
+  public void falseMultipleCheckTest(Object source) {
+    stringList.add("falseMultipleCheckTest");
+  }
+
+  @CheckNode
+  public CheckResult trueCheck(Object source) {
+    stringList.add("trueCheck");
+    return CheckResult.ofSuccessful();
+  }
+
+  @CheckNode
+  public CheckResult otherTrueCheck(Object source) {
+    stringList.add("otherTrueCheck");
+    return CheckResult.ofSuccessful();
+  }
+
+  @CheckNode
+  public CheckResult falseCheck(Object source) {
+    stringList.add("falseCheck");
+    return CheckResult.ofError(LiteralCommandError.create().setMessage("False"));
+  }
+
+  @CheckNode
+  public CheckResult otherFalseCheck(Object source) {
+    stringList.add("otherFalseCheck");
+    return CheckResult.ofError(LiteralCommandError.create().setMessage("Other False"));
   }
 
   public InterpreterResult<?> interpreter(String argument) {

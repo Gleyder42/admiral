@@ -1,6 +1,9 @@
 package de.gleyder.admiral.annotation.builder;
 
 import de.gleyder.admiral.core.CommandDispatcher;
+import de.gleyder.admiral.core.error.CommandError;
+import de.gleyder.admiral.core.error.LiteralCommandError;
+import de.gleyder.admiral.core.error.MultipleCommandError;
 import org.junit.jupiter.api.*;
 
 import java.util.Arrays;
@@ -30,6 +33,27 @@ class AnnotationCommandBuilderTest {
     dispatch("test calculate sum (10 10)");
 
     assertContains(testClass, "strategy", "verifier", ROOT, MID, "sum:20");
+  }
+
+  @Test
+  void multipleTrueCheckTest() {
+    dispatch("test multipleCheckTest");
+
+    assertContains(testClass, "trueCheck", "otherTrueCheck", ROOT, "multipleCheckTest");
+  }
+
+  @Test
+  void falseMultipleCheckTest() {
+    var test = dispatcher.dispatch("test falseMultipleCheckTest", new Object(), new HashMap<>());
+
+    List<CommandError> expected = List.of(
+        LiteralCommandError.create().setMessage("False"),
+        LiteralCommandError.create().setMessage("Other False")
+    );
+
+    MultipleCommandError commandError = (MultipleCommandError) test.get(0);
+
+    assertIterableEquals(expected, commandError.getErrorCollection());
   }
 
   @Test

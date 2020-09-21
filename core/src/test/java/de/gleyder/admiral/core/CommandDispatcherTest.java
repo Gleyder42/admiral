@@ -321,7 +321,7 @@ class CommandDispatcherTest {
     assertIterableEquals(
         List.of(LiteralCommandError
             .create()
-            .setSimple("No command found")
+            .setSimple("No matching command could be found for the specified parameters")
             .setDetailed("The route has no executor")),
         errorList
     );

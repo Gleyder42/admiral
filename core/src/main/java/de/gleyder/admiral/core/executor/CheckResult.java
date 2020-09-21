@@ -33,7 +33,7 @@ public class CheckResult {
   private final CommandError error;
 
   public Optional<CommandError> getError() {
-    return Optional.of(error);
+    return Optional.ofNullable(error);
   }
 
   public boolean wasSuccessful() {

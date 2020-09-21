@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 public class AnnotationCommandBuilder {
 
   private static final Map<Class<? extends Annotation>, NodeProducer<? extends Annotation>> PRODUCER_MAP = Map.of(
-          ExecutorNode.class, new MethodExecutorProducer(),
-          CheckNode.class, new MethodCheckProducer(),
-          InterpreterNode.class, new MethodInterpreterProducer(),
-          InterpreterStrategyNode.class, new MethodInterpreterStrategyProducer()
+      ExecutorNode.class, new MethodExecutorProducer(),
+      CheckNode.class, new MethodCheckProducer(),
+      InterpreterNode.class, new MethodInterpreterProducer(),
+      InterpreterStrategyNode.class, new MethodInterpreterStrategyProducer()
   );
 
   private final Set<Object> registeredClasses = new HashSet<>();
@@ -82,8 +82,8 @@ public class AnnotationCommandBuilder {
 
   public void build(@NonNull CommandDispatcher dispatcher) {
     registeredClasses.stream()
-            .map(this::toNode)
-            .forEach(dispatcher::registerCommand);
+        .map(this::toNode)
+        .forEach(dispatcher::registerCommand);
   }
 
   @SneakyThrows
@@ -95,44 +95,44 @@ public class AnnotationCommandBuilder {
     Map<String, Object> nodeMap = new HashMap<>();
 
     Arrays.stream(instanceClass.getMethods()).forEach(method -> PRODUCER_MAP.entrySet().stream()
-            .filter(entry -> method.isAnnotationPresent(entry.getKey())).findFirst().ifPresent(producerEntry -> {
-              NodeProducer<Annotation> producer = (NodeProducer<Annotation>) producerEntry.getValue();
-              nodeMap.put(
-                      producer.getKey(method.getAnnotation(producerEntry.getKey()), method),
-                      producer.produce(instance, method)
-              );
-            }));
+        .filter(entry -> method.isAnnotationPresent(entry.getKey())).findFirst().ifPresent(producerEntry -> {
+          NodeProducer<Annotation> producer = (NodeProducer<Annotation>) producerEntry.getValue();
+          nodeMap.put(
+              producer.getKey(method.getAnnotation(producerEntry.getKey()), method),
+              producer.produce(instance, method)
+          );
+        }));
 
     applyNodeAnnotation(nodeMap, rootAnnotation, rootNode);
 
     Arrays.stream(instanceClass.getMethods())
-            .filter(method -> method.isAnnotationPresent(Route.class))
-            .forEach(method -> {
-              Deque<Node> nodeDeque = Arrays.stream(method.getAnnotation(Route.class).value())
-                      .collect(Collectors.toCollection(ArrayDeque::new));
-              CommandNode lastNode = rootNode;
+        .filter(method -> method.isAnnotationPresent(Route.class))
+        .forEach(method -> {
+          Deque<Node> nodeDeque = Arrays.stream(method.getAnnotation(Route.class).value())
+              .collect(Collectors.toCollection(ArrayDeque::new));
+          CommandNode lastNode = rootNode;
 
-              while (!nodeDeque.isEmpty()) {
-                Node node = nodeDeque.pop();
-                CommandNode currentNode;
+          while (!nodeDeque.isEmpty()) {
+            Node node = nodeDeque.pop();
+            CommandNode currentNode;
 
-                if (!node.interpreter().isEmpty() || !node.strategy().isEmpty()) {
-                  currentNode = new DynamicNode(node.value());
-                } else {
-                  currentNode = new StaticNode(node.value());
-                }
+            if (!node.interpreter().isEmpty() || !node.strategy().isEmpty()) {
+              currentNode = new DynamicNode(node.value());
+            } else {
+              currentNode = new StaticNode(node.value());
+            }
 
-                applyNodeAnnotation(nodeMap, node, currentNode);
+            applyNodeAnnotation(nodeMap, node, currentNode);
 
-                if (nodeDeque.isEmpty()) {
-                  NodeProducer<? extends Annotation> producer = PRODUCER_MAP.get(ExecutorNode.class);
-                  currentNode.setExecutor((Executor) producer.produce(instance, method));
-                }
+            if (nodeDeque.isEmpty()) {
+              NodeProducer<? extends Annotation> producer = PRODUCER_MAP.get(ExecutorNode.class);
+              currentNode.setExecutor((Executor) producer.produce(instance, method));
+            }
 
-                lastNode.addNode(currentNode);
-                lastNode = currentNode;
-              }
-            });
+            lastNode.addNode(currentNode);
+            lastNode = currentNode;
+          }
+        });
     return rootNode;
   }
 
@@ -189,18 +189,17 @@ public class AnnotationCommandBuilder {
   }
 
   private void trySetCheck(@NonNull Map<String, Object> nodeMap, @NonNull Node node, @NonNull CommandNode currentNode) {
-    if (!node.check().isEmpty()) {
-      Check check = (Check) nodeMap.get(node.check());
-      if (check == null) {
-        check = registeredChecks.get(node.check());
-      }
-
-      if (check == null) {
-        throw new NullPointerException("No required node found with key " + node.check());
-      }
-
-      currentNode.setCheck(check);
-    }
+    currentNode.setCheck(Check.ofMultiple(Arrays.stream(node.check())
+        .map(checkName -> {
+          Check check = (Check) nodeMap.get(checkName);
+          if (check == null) {
+            check = registeredChecks.get(checkName);
+          }
+          if (check == null) {
+            throw new NullPointerException("No required node found with key " + checkName);
+          }
+          return check;
+        }).collect(Collectors.toList())));
   }
 
   private Interpreter<?> getInterpreter(@NonNull String key, @NonNull Map<String, Object> nodeMap) {
