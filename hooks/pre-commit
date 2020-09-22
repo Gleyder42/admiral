@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Verify checkstyle is successful
+checkstyle_error="Checkstyle failed. Your commit will be rejected. Please run checkstyleMain and fix the found errors."
+test_error="Tests failed. Your commit will be rejected. Please run test and fix the found errors-"
+
+if ! ./gradlew checkstyleMain &>/dev/null
+then
+  echo "$checkstyle_error"
+  exit 1
+fi
+
+if ! ./gradlew test &>/dev/null
+then
+  echo "$test_error"
+  exit 1
+fi
+
+exit 0
