@@ -273,11 +273,11 @@
                       default="checkstyle-xpath-suppressions.xml"/>
             <property name="optional" value="true"/>
         </module>
-        <!-- Everything frome here on is edited. -->
+        <!-- Everything from here on is edited. -->
 
         <!-- Parameter should be assigned and declaring parameters with final is often onerous -->
         <module name="ParameterAssignment"/>
-        <!-- Unused imports are redunant code -->
+        <!-- Unused imports are redundant code -->
         <module name="UnusedImports"/>
         <!-- MagicNumber have no meaning itself. -->
         <module name="MagicNumber"/>
