@@ -76,11 +76,19 @@ yourself.
 When you set everything up and want to execute the command, dispatch the command. 
 The first argument is the command. Normally, arguments are divide by spaces.
 `(Hello World)` would be two arguments, if you follow this rule. However, surrounding
-`Hello World` by `(` and `)`. The dispatcher will parse it has one argument. 
+`Hello World` by `(` and `)`. The dispatcher will parse it as one argument. 
 The second argument is the source. The source can
 be any object. The last argument is the interpreter map (`Map<String, Object>`).
 Via the interpreter map you can carry additional info to the interpreters.
 
 ```java
-dispatcher.dispatch("echo 10 (Hello World)", new Object(), Collections.emptyMap());
+List<CommandError> erros = dispatcher.dispatch("echo 10 (Hello World)", new Object(), Collections.emptyMap());
 ```
+
+`dispatcher.dispatch()` returns a `List<CommandError>`. The list is empty, if the command succeeded.
+Otherwise, it contains all errors.
+
+`CommandError` has two methods, `getSimple()` and `getDetailed()`. `getDetailed()` is for the
+programmers, because it should contain detailed information why the command failed. This can be technical. 
+
+`getSimple()` is for those, who just want to use the command.
