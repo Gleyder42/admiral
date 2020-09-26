@@ -6,6 +6,7 @@ import de.gleyder.admiral.core.error.AmbiguousCommandError;
 import de.gleyder.admiral.core.error.CommandError;
 import de.gleyder.admiral.core.error.LiteralCommandError;
 import de.gleyder.admiral.core.executor.CheckResult;
+import de.gleyder.admiral.core.executor.MultipleChecks;
 import de.gleyder.admiral.core.interpreter.CommonInterpreter;
 import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
@@ -53,7 +54,7 @@ class CommandDispatcherTest {
    * Echo Command
    */
   private final StaticNode echoNode = new StaticNodeBuilder("echo")
-      .setRequired(context -> createCheckResult(context, MESSAGE_KEY))
+      .setCheck(context -> createCheckResult(context, MESSAGE_KEY))
       .setExecutor(context -> {
         String message = context.getBag().get(MESSAGE_KEY, String.class).orElseThrow();
         log.info("Message: {}", message);
@@ -69,7 +70,7 @@ class CommandDispatcherTest {
       .build();
 
   private final StaticNode createNode = new StaticNodeBuilder("create")
-      .setRequired(context -> createCheckResult(context, TYPE_KEY))
+      .setCheck(context -> createCheckResult(context, TYPE_KEY))
       .setExecutor(context -> {
         String type = context.getBag().get(TYPE_KEY, String.class).orElseThrow();
         int amount = context.getBag().get(AMOUNT_KEY, Integer.class).orElse(1);
@@ -80,7 +81,7 @@ class CommandDispatcherTest {
       .build();
 
   private final StaticNode deleteNode = new StaticNodeBuilder("delete")
-      .setRequired(context -> createCheckResult(context, NAME_KEY))
+      .setCheck(context -> createCheckResult(context, NAME_KEY))
       .setExecutor(context -> {
         String name = context.getBag().get(NAME_KEY, String.class).orElseThrow();
 
@@ -91,7 +92,7 @@ class CommandDispatcherTest {
   private final DynamicNode nameNode = new DynamicNode(NAME_KEY);
 
   private final DynamicNode amountNode = new DynamicNodeBuilder(AMOUNT_KEY)
-      .setRequired(context -> CheckResult.ofSimpleError(
+      .setCheck(context -> CheckResult.ofSimpleError(
           () -> context.getBag().get(AMOUNT_KEY, Integer.class).orElseThrow() > 0,
           "Amount needs to be at least 1"))
       .setInterpreter(CommonInterpreter.INT)
@@ -156,11 +157,49 @@ class CommandDispatcherTest {
   private final DynamicNode simpleNameNode = new DynamicNodeBuilder("name")
       .build();
   private final DynamicNode checkNameNode = new DynamicNodeBuilder("name")
-      .setRequired(context ->
+      .setCheck(context ->
           CheckResult.ofSimpleError(
               () -> groupList.contains(context.getBag().get("name", String.class).orElseThrow()),
               "Group not found"
           ))
+      .build();
+
+  /*
+   * Checks test
+   */
+  private final StaticNode checksNode = new StaticNodeBuilder("checks")
+      .build();
+
+  private final StaticNode allMultipleChecksNode = new StaticNodeBuilder("multiple-all")
+      .setCheck(new MultipleChecks(List.of(
+          context -> CheckResult.ofSuccessful(), context -> CheckResult.ofSuccessful()
+      ), MultipleChecks.Type.ALL))
+      .build();
+
+  private final StaticNode anyMultipleChecksNode = new StaticNodeBuilder("multiple-any")
+      .setCheck(new MultipleChecks(List.of(
+          context -> CheckResult.ofSuccessful(),
+          context -> CheckResult.ofError(LiteralCommandError.create().setMessage("Error"))
+      ), MultipleChecks.Type.ANY))
+      .build();
+
+  private final StaticNode noneMultipleChecksNode = new StaticNodeBuilder("multiple-none")
+      .setCheck(new MultipleChecks(List.of(
+          context -> CheckResult.ofError(LiteralCommandError.create().setMessage("Error")),
+          context -> CheckResult.ofError(LiteralCommandError.create().setMessage("Error"))
+      ), MultipleChecks.Type.NONE))
+      .build();
+
+  private final StaticNode firstFailCheckNode = new StaticNodeBuilder("firstCheck")
+      .setCheck(context -> CheckResult.ofError(LiteralCommandError.create().setMessage("First Check")))
+      .build();
+
+  private final StaticNode secondFailCheckNode = new StaticNodeBuilder("secondCheck")
+      .setCheck(context -> CheckResult.ofError(LiteralCommandError.create().setMessage("Second Check")))
+      .build();
+
+  private final StaticNode successfulCheckNode = new StaticNodeBuilder("successful")
+      .setCheck(context -> CheckResult.ofSuccessful())
       .build();
 
   @BeforeEach
@@ -195,6 +234,15 @@ class CommandDispatcherTest {
     deleteNode.addNode(typeNode);
 
     /*
+     * Check command
+     */
+    checksNode.addNode(firstFailCheckNode).addNode(secondFailCheckNode);
+    checksNode.addNode(successfulCheckNode).addNode(secondFailCheckNode);
+    checksNode.addNode(allMultipleChecksNode);
+    checksNode.addNode(noneMultipleChecksNode);
+    checksNode.addNode(anyMultipleChecksNode);
+
+    /*
      *
      */
     numberNode.addNode(dynamicNumberEchoNode);
@@ -213,6 +261,47 @@ class CommandDispatcherTest {
     dispatcher.registerCommand(itemNode);
     dispatcher.registerCommand(echoNode);
     dispatcher.registerCommand(infoNode);
+    dispatcher.registerCommand(checksNode);
+  }
+
+  @Test
+  void shouldFailAtFirstNode() {
+    String command = "checks firstCheck secondCheck";
+
+    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    assertIterableEquals(List.of(LiteralCommandError.create().setMessage("First Check")), errors);
+  }
+
+  @Test
+  void shouldFailAtSecondNode() {
+    String command = "checks successful secondCheck";
+
+    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    assertIterableEquals(List.of(LiteralCommandError.create().setMessage("Second Check")), errors);
+  }
+
+  @Test
+  void shouldSuccessWithAll() {
+    String command = "checks multiple-all";
+
+    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    assertIterableEquals(List.of(), errors);
+  }
+
+  @Test
+  void shouldSuccessWithAny() {
+    String command = "checks multiple-any";
+
+    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    assertIterableEquals(List.of(), errors);
+  }
+
+  @Test
+  void shouldSuccessWithNone() {
+    String command = "checks multiple-none";
+
+    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    assertIterableEquals(List.of(), errors);
   }
 
   @Test

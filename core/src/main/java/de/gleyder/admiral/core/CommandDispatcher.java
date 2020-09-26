@@ -3,6 +3,8 @@ package de.gleyder.admiral.core;
 import de.gleyder.admiral.core.error.AmbiguousCommandError;
 import de.gleyder.admiral.core.error.CommandError;
 import de.gleyder.admiral.core.error.LiteralCommandError;
+import de.gleyder.admiral.core.error.ThrowableCommandError;
+import de.gleyder.admiral.core.executor.CheckResult;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
 import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
@@ -56,12 +58,21 @@ public class CommandDispatcher {
     }
     CommandContext context = new CommandContext(source, route.getValueBag());
 
-    List<CommandError> commandErrors = route.getNodeList().stream()
-        .filter(node -> node.getCheck().isPresent())
-        .map(node -> node.getCheck().get().test(context))
-        .filter(checkResult -> !checkResult.wasSuccessful())
-        .map(checkResult -> checkResult.getError().orElseThrow())
-        .collect(Collectors.toUnmodifiableList());
+    List<CommandError> commandErrors = new ArrayList<>();
+    for (CommandNode node : route.getNodeList()) {
+      if (node.getCheck().isPresent()) {
+        try {
+          CheckResult checkResult = node.getCheck().get().test(context);
+          if (checkResult.getError().isPresent()) {
+            commandErrors.add(checkResult.getError().get());
+            break;
+          }
+        } catch (Exception exception) {
+          commandErrors.add(new ThrowableCommandError(exception));
+          break;
+        }
+      }
+    }
 
     if (!commandErrors.isEmpty()) {
       return commandErrors;

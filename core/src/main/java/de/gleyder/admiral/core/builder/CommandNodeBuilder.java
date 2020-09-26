@@ -17,7 +17,7 @@ public abstract class CommandNodeBuilder<B extends CommandNodeBuilder, N extends
     return thisBuilder();
   }
 
-  public B setRequired(@NonNull Check check) {
+  public B setCheck(@NonNull Check check) {
     node.setCheck(check);
     return thisBuilder();
   }
