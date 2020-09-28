@@ -44,11 +44,11 @@ class ValueBagTest {
 
   @Test
   void shouldGetStringAsList() {
-    assertEquals(Optional.of(List.of("hallo")), bag.getList("string"));
+    assertEquals(List.of("hallo"), bag.getList("string"));
   }
 
   @Test
   void shouldGetIntegers() {
-    assertIterableEquals(List.of(POSITIVE_INT, NEGATIVE_INT), bag.getList("integer").orElseThrow());
+    assertIterableEquals(List.of(POSITIVE_INT, NEGATIVE_INT), bag.getList("integer"));
   }
 }
