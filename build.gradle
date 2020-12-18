@@ -37,22 +37,4 @@ subprojects {
     }
 
     group 'de.gleyder.admiral'
-
-    publishing  {
-        publications {
-            maven(MavenPublication) {
-                from components.java
-            }
-        }
-
-        repositories {
-            maven {
-                url = uri('http://maven-server.feste-ip.net:29529/repository/maven-releases/')
-                credentials {
-                    username = project.properties.timonRepUser
-                    password = project.properties.timonRepPw
-                }
-            }
-        }
-    }
 }
