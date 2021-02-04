@@ -1,7 +1,4 @@
 tasks.publish.enabled = false
-tasks.publishMavenPublicationToMavenLocal.enabled = false
-tasks.publishAllPublicationsToMavenRepository.enabled = false
-tasks.publishMavenPublicationToMavenRepository.enabled = false
 tasks.publishToMavenLocal.enabled = false
 
 dependencies {

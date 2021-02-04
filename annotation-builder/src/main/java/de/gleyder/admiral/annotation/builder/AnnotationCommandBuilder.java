@@ -17,7 +17,14 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -203,20 +210,19 @@ public class AnnotationCommandBuilder {
   }
 
   private Interpreter<?> getInterpreter(@NonNull String key, @NonNull Map<String, Object> nodeMap) {
-    Interpreter<?> interpreter = registeredInterpreters.get(key);
-    if (interpreter != null) {
-      return interpreter;
-    } else {
-      return (Interpreter<?>) nodeMap.get(key);
-    }
+    return getInterpreterInternal(key, nodeMap, () -> registeredInterpreters.get(key));
   }
 
   private InterpreterStrategy getInterpreterStrategy(@NonNull String key, @NonNull Map<String, Object> nodeMap) {
-    InterpreterStrategy strategy = registeredInterpreterStrategies.get(key);
-    if (strategy != null) {
-      return strategy;
+    return getInterpreterInternal(key, nodeMap, () -> registeredInterpreterStrategies.get(key));
+  }
+
+  private <T> T getInterpreterInternal(@NonNull String key, @NonNull Map<String, Object> nodeMap, @NonNull Supplier<T> supplier) {
+    T t = supplier.get();
+    if (t != null) {
+      return t;
     } else {
-      return (InterpreterStrategy) nodeMap.get(key);
+      return (T) nodeMap.get(key);
     }
   }
 
