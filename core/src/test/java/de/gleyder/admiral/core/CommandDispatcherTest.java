@@ -372,7 +372,6 @@ class CommandDispatcherTest {
     );
 
     CommandRoute actual = findRoute(command);
-    System.out.println(actual);
 
     assertEqualsRoute(actual, map, itemNode, deleteNode, typeNode, nameNode, amountNode);
     assertNoCommandError(command);
@@ -497,7 +496,6 @@ class CommandDispatcherTest {
 
   private void assertNoCommandError(String command) {
     List<CommandError> errorList = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
-    System.out.println(errorList);
     assertIterableEquals(emptyList(), errorList);
   }
 
