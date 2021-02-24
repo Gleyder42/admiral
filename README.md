@@ -35,8 +35,8 @@ Secondly, create the desired nodes. We want to create `/echo <amount> <message>`
 ```java
 StaticNode echoNode = new StaticNodeBuilder("echo")
     .setExecutor(context -> {
-      int amount = context.getBag().get("amount", Integer.class).orElseThrow();
-      String message = context.getBag().get("message", String.class).orElseThrow();
+      int amount = context.getBag().<Integer>get("amount").orElseThrow();
+      String message = context.getBag().<String>get("message").orElseThrow();
 
       for (int i = 0; i < amount; i++) {
         System.out.println("Nr. " + i + " " + message);

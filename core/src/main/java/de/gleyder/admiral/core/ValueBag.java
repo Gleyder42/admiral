@@ -66,17 +66,6 @@ public class ValueBag {
    * Returns only one value from the provided key.
    *
    * @param key     the key
-   * @param clazz   the class to which the optional should be casted
-   * @return        the value associated with the provided key
-   */
-  public <T> Optional<T> get(@NonNull String key, @NonNull Class<T> clazz) {
-    return get(key);
-  }
-
-  /**
-   * Returns only one value from the provided key.
-   *
-   * @param key     the key
    * @return        the value associated with the provided key
    * @throws        NullPointerException if more than one value is associated with the provided key
    */
