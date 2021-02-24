@@ -18,10 +18,6 @@ public class CommandContext {
     this.bag = bag;
   }
 
-  public <T> T getSource(Class<T> clazz) {
-    return (T) source;
-  }
-
   public <T> T getSource() {
     return (T) source;
   }

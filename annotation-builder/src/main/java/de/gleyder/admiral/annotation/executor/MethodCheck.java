@@ -19,7 +19,7 @@ public class MethodCheck implements Check {
   public CheckResult test(@NonNull CommandContext context) {
     try {
       CheckResult result =
-              method.invokeReturn(List.of(context.getSource(Object.class)), ArgumentSupplier.ofBag(context.getBag()));
+              method.invokeReturn(List.of(context.<Object>getSource()), ArgumentSupplier.ofBag(context.getBag()));
       if (result.wasSuccessful()) {
         return CheckResult.ofSuccessful();
       } else {
