@@ -1,29 +1,46 @@
 package de.gleyder.admiral.annotation.executor;
 
 import de.gleyder.admiral.annotation.supplier.ArgumentSupplier;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.implementation.Implementation;
+import net.bytebuddy.implementation.MethodCall;
+import net.bytebuddy.implementation.bytecode.assign.Assigner;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.lang.reflect.Parameter;
 import java.util.List;
 
-@AllArgsConstructor
 public class ExecutableMethod {
 
-  private final Object instance;
-  private final Method method;
+  private final MethodCaller methodCaller;
+  private final Parameter[] parameters;
+
+  @SneakyThrows
+  public ExecutableMethod(Object instance, Method method) {
+    parameters = method.getParameters();
+    Implementation.Composable composable = MethodCall
+        .invoke(method)
+        .on(instance)
+        .withArgumentArrayElements(0, parameters.length)
+        .withAssigner(Assigner.DEFAULT, Assigner.Typing.DYNAMIC);
+
+    methodCaller = new ByteBuddy().subclass(MethodCaller.class)
+        .method(ElementMatchers.named("call"))
+        .intercept(composable)
+        .make()
+        .load(getClass().getClassLoader())
+        .getLoaded()
+        .getConstructor()
+        .newInstance();
+  }
 
   @SneakyThrows
   private Object invoke(@NonNull List<Object> preArguments, @NonNull ArgumentSupplier supplier) {
-    List<Object> objects = supplier.toMethodArguments(preArguments, method.getParameters());
-    try {
-      return method.invoke(instance, objects.toArray());
-    } catch (IllegalArgumentException exception) {
-      throw new IllegalArgumentException("Method '" + method.getName() + "' in class '" + method.getDeclaringClass().getName()
-          + "'" + " needs following parameters " + Arrays.toString(method.getParameters()) + " but got " + objects, exception);
-    }
+    List<Object> objects = supplier.toMethodArguments(preArguments, parameters);
+    return methodCaller.call(objects.toArray());
   }
 
   public void invokeVoid(@NonNull List<Object> preArguments, @NonNull ArgumentSupplier supplier) {
@@ -33,5 +50,10 @@ public class ExecutableMethod {
   @SneakyThrows
   public <T> T invokeReturn(@NonNull List<Object> preArguments, @NonNull ArgumentSupplier supplier) {
     return (T) invoke(preArguments, supplier);
+  }
+
+  public interface MethodCaller {
+
+    Object call(Object[] array);
   }
 }
