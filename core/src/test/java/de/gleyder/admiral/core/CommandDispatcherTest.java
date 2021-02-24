@@ -45,7 +45,7 @@ class CommandDispatcherTest {
   private final DynamicNode dynamicNumberEchoNode = new DynamicNodeBuilder("int")
       .setInterpreter(CommonInterpreter.INT)
       .setExecutor(context -> {
-        Integer integer = context.getBag().get("int", Integer.class).orElseThrow();
+        Integer integer = context.getBag().<Integer>get("int").orElseThrow();
         log.info("Int: {}", integer);
       })
       .build();
@@ -56,7 +56,7 @@ class CommandDispatcherTest {
   private final StaticNode echoNode = new StaticNodeBuilder("echo")
       .setCheck(context -> createCheckResult(context, MESSAGE_KEY))
       .setExecutor(context -> {
-        String message = context.getBag().get(MESSAGE_KEY, String.class).orElseThrow();
+        String message = context.getBag().<String>get(MESSAGE_KEY).orElseThrow();
         log.info("Message: {}", message);
       })
       .build();
@@ -72,9 +72,9 @@ class CommandDispatcherTest {
   private final StaticNode createNode = new StaticNodeBuilder("create")
       .setCheck(context -> createCheckResult(context, TYPE_KEY))
       .setExecutor(context -> {
-        String type = context.getBag().get(TYPE_KEY, String.class).orElseThrow();
-        int amount = context.getBag().get(AMOUNT_KEY, Integer.class).orElse(1);
-        String name = context.getBag().get(NAME_KEY, String.class).orElse("undefined");
+        String type = context.getBag().<String>get(TYPE_KEY).orElseThrow();
+        int amount = context.getBag().<Integer>get(AMOUNT_KEY).orElse(1);
+        String name = context.getBag().<String>get(NAME_KEY).orElse("undefined");
 
         log.info("Item create as {}, {} times with name {}", type, amount, name);
       })
@@ -83,7 +83,7 @@ class CommandDispatcherTest {
   private final StaticNode deleteNode = new StaticNodeBuilder("delete")
       .setCheck(context -> createCheckResult(context, NAME_KEY))
       .setExecutor(context -> {
-        String name = context.getBag().get(NAME_KEY, String.class).orElseThrow();
+        String name = context.getBag().<String>get(NAME_KEY).orElseThrow();
 
         log.info("Item deleted with name {}", name);
       })
@@ -93,7 +93,7 @@ class CommandDispatcherTest {
 
   private final DynamicNode amountNode = new DynamicNodeBuilder(AMOUNT_KEY)
       .setCheck(context -> CheckResult.ofSimpleError(
-          () -> context.getBag().get(AMOUNT_KEY, Integer.class).orElseThrow() > 0,
+          () -> context.getBag().<Integer>get(AMOUNT_KEY).orElseThrow() > 0,
           "Amount needs to be at least 1"))
       .setInterpreter(CommonInterpreter.INT)
       .build();
@@ -130,7 +130,7 @@ class CommandDispatcherTest {
   private final StaticNode groupNode = new StaticNode("group");
   private final StaticNode groupCreateNode = new StaticNodeBuilder("create")
       .setExecutor(context -> {
-        Optional<String> name = context.getBag().get("name", String.class);
+        Optional<String> name = context.getBag().get("name");
         log.info("Create group with name {}", name.orElseThrow());
         groupList.add(name.get());
       })
@@ -138,7 +138,7 @@ class CommandDispatcherTest {
 
   private final StaticNode groupRemoveNode = new StaticNodeBuilder("remove")
       .setExecutor(context -> {
-        Optional<String> name = context.getBag().get("name", String.class);
+        Optional<String> name = context.getBag().get("name");
         log.info("Deleted group with name {}", name.orElseThrow());
         groupList.remove(name.get());
       })
@@ -146,8 +146,8 @@ class CommandDispatcherTest {
 
   private final StaticNode groupAddUserNode = new StaticNodeBuilder("addUser")
       .setExecutor(context -> {
-        Optional<String> name = context.getBag().get("name", String.class);
-        Optional<String> user = context.getBag().get("user", String.class);
+        Optional<String> name = context.getBag().get("name");
+        Optional<String> user = context.getBag().get("user");
 
         log.info("Add user {} to group with name {}", user.orElseThrow(), name.orElseThrow());
       })
@@ -159,7 +159,7 @@ class CommandDispatcherTest {
   private final DynamicNode checkNameNode = new DynamicNodeBuilder("name")
       .setCheck(context ->
           CheckResult.ofSimpleError(
-              () -> groupList.contains(context.getBag().get("name", String.class).orElseThrow()),
+              () -> groupList.contains(context.getBag().<String>get("name").orElseThrow()),
               "Group not found"
           ))
       .build();
