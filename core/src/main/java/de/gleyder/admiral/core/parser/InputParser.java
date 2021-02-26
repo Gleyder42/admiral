@@ -27,7 +27,7 @@ public class InputParser {
 
   public List<InputArgument> parse(@NonNull String command) {
     ArrayDeque<Character> collect = command.chars()
-        .mapToObj(Character.class::cast)
+        .mapToObj(c -> (char) c)
         .collect(Collectors.toCollection(ArrayDeque::new));
     LinkedList<InputArgument> inputArguments = new LinkedList<>();
     parse(collect, inputArguments);
