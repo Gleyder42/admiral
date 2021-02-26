@@ -20,9 +20,9 @@ public class AmbiguousCommandError implements CommandError {
 
   @Override
   public String getDetailed() {
-    return getSimple() + ": " + String.join("\n", routeList.stream()
+    return getSimple() + ": " + routeList.stream()
             .map(CommandRoute::toString)
-            .collect(Collectors.toUnmodifiableList()));
+            .collect(Collectors.joining("\n"));
   }
 
   @Override

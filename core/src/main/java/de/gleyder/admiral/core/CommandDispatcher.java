@@ -4,6 +4,7 @@ import de.gleyder.admiral.core.error.AmbiguousCommandError;
 import de.gleyder.admiral.core.error.CommandError;
 import de.gleyder.admiral.core.error.LiteralCommandError;
 import de.gleyder.admiral.core.error.ThrowableCommandError;
+import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.CheckResult;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
 import de.gleyder.admiral.core.node.CommandNode;
@@ -15,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
@@ -59,20 +61,12 @@ public class CommandDispatcher {
     CommandContext context = new CommandContext(source, route.getValueBag());
 
     List<CommandError> commandErrors = new ArrayList<>();
-    for (CommandNode node : route.getNodeList()) {
-      if (node.getCheck().isPresent()) {
-        try {
-          CheckResult checkResult = node.getCheck().get().test(context);
-          if (checkResult.getError().isPresent()) {
-            commandErrors.add(checkResult.getError().get());
-            break;
-          }
-        } catch (Exception exception) {
-          commandErrors.add(new ThrowableCommandError(exception));
-          break;
-        }
-      }
-    }
+    route.getNodeList().stream()
+        .map(node -> node.getCheck().map(check -> testCheck(context, check)))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .findFirst()
+        .ifPresent(commandErrors::add);
 
     if (!commandErrors.isEmpty()) {
       return commandErrors;
@@ -89,6 +83,16 @@ public class CommandDispatcher {
     return getAllRoutes(node);
   }
 
+  public CommandRoute findRoute(@NonNull Deque<InputArgument> argumentDeque, @NonNull Map<String, Object> interpreterMap) {
+    CommandRoute commandRoute = new CommandRoute();
+    route(rootNode, commandRoute, argumentDeque, interpreterMap);
+    return commandRoute;
+  }
+
+  public CommandRoute findRoute(@NonNull String command, @NonNull Map<String, Object> interpreterMap) {
+    return findRoute(new ArrayDeque<>(parser.parse(command)), interpreterMap);
+  }
+
   public List<CommandRoute> getAllRoutes() {
     return getAllRoutes(rootNode);
   }
@@ -99,6 +103,16 @@ public class CommandDispatcher {
     return routeList;
   }
 
+  private CommandError testCheck(CommandContext context, Check check) {
+    try {
+      CheckResult checkResult = check.test(context);
+      Optional<CommandError> errorOptional = checkResult.getError();
+      return errorOptional.orElse(null);
+    } catch (Exception exception) {
+      return new ThrowableCommandError(exception);
+    }
+  }
+
   private void findAllRoutes(@NonNull List<CommandRoute> routeList, @NonNull CommandRoute route, @NonNull CommandNode node) {
     route.add(node);
     node.getAllNodes().forEach(nextNode -> findAllRoutes(routeList, route.duplicate(), nextNode));
@@ -106,16 +120,6 @@ public class CommandDispatcher {
     if (node.isLeaf() || (!node.isLeaf() && route.hasExecutor())) {
       routeList.add(route);
     }
-  }
-
-  public CommandRoute findRoute(@NonNull Deque<InputArgument> argumentDeque, @NonNull Map<String, Object> interpreterMap) {
-    CommandRoute commandRoute = new CommandRoute();
-    route(rootNode, commandRoute, argumentDeque, interpreterMap);
-    return commandRoute;
-  }
-
-  public CommandRoute findRoute(@NonNull String command, @NonNull Map<String, Object> interpreterMap) {
-    return findRoute(new ArrayDeque<>(parser.parse(command)), interpreterMap);
   }
 
   private void route(@NonNull CommandNode node, @NonNull CommandRoute route,
@@ -166,25 +170,28 @@ public class CommandDispatcher {
       if (alternateRoutes.size() == 1) {
         route.addAll(alternateRoutes.get(0));
       } else if (alternateRoutes.isEmpty()) {
-        Optional<List<CommandError>> reduce = commandRouteList.stream()
-            .filter(CommandRoute::hasErrors)
-            .map(CommandRoute::getErrors)
-            .reduce((leftErrorList, rightErrorList) -> {
-              rightErrorList.addAll(leftErrorList);
-              return rightErrorList;
-            });
+        addErrors(route, commandRouteList);
+      } else {
+        route.addError(new AmbiguousCommandError(alternateRoutes));
+      }
+    }
+  }
 
-        reduce.ifPresentOrElse(
+  private void addErrors(@NotNull CommandRoute route, List<CommandRoute> commandRouteList) {
+    commandRouteList.stream()
+        .filter(CommandRoute::hasErrors)
+        .map(CommandRoute::getErrors)
+        .reduce((leftErrorList, rightErrorList) -> {
+          rightErrorList.addAll(leftErrorList);
+          return rightErrorList;
+        })
+        .ifPresentOrElse(
             route::addErrors,
             () -> route.addError(LiteralCommandError
                 .create()
                 .setMessage(Messages.NO_COMMAND_FOUND.get())
             )
         );
-      } else {
-        route.addError(new AmbiguousCommandError(alternateRoutes));
-      }
-    }
   }
 
   private List<CommandRoute> getDynamicNodes(@NonNull CommandNode node, @NonNull Map<String, Object> interpreterMap,
@@ -220,9 +227,7 @@ public class CommandDispatcher {
         .map(route -> {
           CommandRoute duplicate = mainRoute.duplicate();
           duplicate.getValueBag().addBag(route.getValueBag());
-
           route(route.getNodeList().get(0), duplicate, new ArrayDeque<>(argumentDeque), interpreterMap);
-
           return duplicate;
         }).collect(Collectors.toUnmodifiableList());
   }

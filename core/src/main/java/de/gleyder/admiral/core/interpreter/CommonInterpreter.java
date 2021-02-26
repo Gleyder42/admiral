@@ -10,8 +10,7 @@ public enum CommonInterpreter {
   DOUBLE(new DoubleInterpreter()),
   CHARACTER(new CharacterInterpreter()),
   STRING(new StringInterpreter()),
-  BOOLEAN(new BooleanInterpreter())
-  ;
+  BOOLEAN(new BooleanInterpreter());
 
   private final Interpreter<Object> interpreter;
 

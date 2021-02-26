@@ -25,7 +25,7 @@ public abstract class CommandNode {
   @Setter
   private Executor executor;
 
-  public CommandNode(@NonNull String key) {
+  protected CommandNode(@NonNull String key) {
     this.key = key;
   }
 

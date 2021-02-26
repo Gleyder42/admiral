@@ -13,6 +13,8 @@ import de.gleyder.admiral.core.node.DynamicNode;
 import de.gleyder.admiral.core.node.StaticNode;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -280,26 +282,9 @@ class CommandDispatcherTest {
     assertIterableEquals(List.of(LiteralCommandError.create().setMessage("Second Check")), errors);
   }
 
-  @Test
-  void shouldSuccessWithAll() {
-    String command = "checks multiple-all";
-
-    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
-    assertIterableEquals(List.of(), errors);
-  }
-
-  @Test
-  void shouldSuccessWithAny() {
-    String command = "checks multiple-any";
-
-    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
-    assertIterableEquals(List.of(), errors);
-  }
-
-  @Test
-  void shouldSuccessWithNone() {
-    String command = "checks multiple-none";
-
+  @ParameterizedTest
+  @ValueSource(strings = {"checks multiple-all", "checks multiple-any", "checks multiple-none"})
+  void shouldSuccess(String command) {
     List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
     assertIterableEquals(List.of(), errors);
   }

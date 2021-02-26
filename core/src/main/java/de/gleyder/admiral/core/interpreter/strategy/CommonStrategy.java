@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 public enum CommonStrategy {
 
   MERGED(new MergedStrategy()),
-  SINGLE(new SingleStrategy())
-  ;
+  SINGLE(new SingleStrategy());
 
   private final InterpreterStrategy strategy;
 
