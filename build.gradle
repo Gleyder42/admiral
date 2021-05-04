@@ -41,6 +41,13 @@ subprojects {
     group 'de.gleyder.admiral'
 
     publishing {
+        repositories {
+            maven {
+                name 'positron'
+                url uri(rootProject.ext.localMavenRepository)
+            }
+        }
+
         publications {
             maven(MavenPublication) {
                 groupId = project.group
