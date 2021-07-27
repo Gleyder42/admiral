@@ -139,6 +139,7 @@ class CommandDispatcherTest {
       .build();
 
   private final StaticNode groupRemoveNode = new StaticNodeBuilder("remove")
+      .setDescription("Removes a user from the group")
       .setExecutor(context -> {
         Optional<String> name = context.getBag().get("name");
         log.info("Deleted group with name {}", name.orElseThrow());
@@ -155,7 +156,9 @@ class CommandDispatcherTest {
       })
       .build();
 
-  private final DynamicNode groupUserNode = new DynamicNode("user");
+  private final DynamicNode groupUserNode = new DynamicNodeBuilder("user")
+      .setDescription("The user")
+      .build();
   private final DynamicNode simpleNameNode = new DynamicNodeBuilder("name")
       .build();
   private final DynamicNode checkNameNode = new DynamicNodeBuilder("name")
@@ -270,7 +273,7 @@ class CommandDispatcherTest {
   void shouldFailAtFirstNode() {
     String command = "checks firstCheck secondCheck";
 
-    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    List<CommandError> errors = dispatcher.dispatch(command, commandSource(), Collections.emptyMap());
     assertIterableEquals(List.of(LiteralCommandError.create().setMessage("First Check")), errors);
   }
 
@@ -278,14 +281,14 @@ class CommandDispatcherTest {
   void shouldFailAtSecondNode() {
     String command = "checks successful secondCheck";
 
-    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    List<CommandError> errors = dispatcher.dispatch(command, commandSource(), Collections.emptyMap());
     assertIterableEquals(List.of(LiteralCommandError.create().setMessage("Second Check")), errors);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {"checks multiple-all", "checks multiple-any", "checks multiple-none"})
   void shouldSuccess(String command) {
-    List<CommandError> errors = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    List<CommandError> errors = dispatcher.dispatch(command, commandSource(), Collections.emptyMap());
     assertIterableEquals(List.of(), errors);
   }
 
@@ -304,7 +307,7 @@ class CommandDispatcherTest {
   void shouldNotFindNumberCommandWithStringInput() {
     String command = "number Test";
 
-    List<CommandError> dispatch = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    List<CommandError> dispatch = dispatcher.dispatch(command, commandSource(), Collections.emptyMap());
 
     assertEquals("java.lang.NumberFormatException: For input string: \"Test\"", dispatch.get(0).getSimple());
     assertEquals("java.lang.NumberFormatException: For input string: \"Test\"", dispatch.get(0).getDetailed());
@@ -389,7 +392,7 @@ class CommandDispatcherTest {
 
   @Test
   void shouldReturnError() {
-    List<CommandError> errorList = dispatcher.dispatch("item", new Object(), Collections.emptyMap());
+    List<CommandError> errorList = dispatcher.dispatch("item", commandSource(), Collections.emptyMap());
 
     assertIterableEquals(
         List.of(LiteralCommandError
@@ -463,6 +466,13 @@ class CommandDispatcherTest {
     assertNoCommandError(command);
   }
 
+  @Test
+  void shouldSendTestCommand() {
+    String command = "group help";
+
+    List<CommandError> dispatch = dispatcher.dispatch(command, commandSource(), Collections.emptyMap());
+  }
+
   @Nested
   class CommandValidation {
 
@@ -480,7 +490,7 @@ class CommandDispatcherTest {
   }
 
   private void assertNoCommandError(String command) {
-    List<CommandError> errorList = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
+    List<CommandError> errorList = dispatcher.dispatch(command, commandSource(), Collections.emptyMap());
     assertIterableEquals(emptyList(), errorList);
   }
 
@@ -496,4 +506,12 @@ class CommandDispatcherTest {
     assertEquals(valueBag, actual.getValueBag());
   }
 
+  private CommandSource commandSource() {
+    return new CommandSource() {
+      @Override
+      public void sendFeedback(String message) {
+        System.out.println(message);
+      }
+    };
+  }
 }

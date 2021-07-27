@@ -1,5 +1,6 @@
 package de.gleyder.admiral.core.node;
 
+import de.gleyder.admiral.core.CommandRoute;
 import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.Executor;
 import lombok.Getter;
@@ -25,13 +26,16 @@ public abstract class CommandNode {
   @Setter
   private Executor executor;
 
+  @Setter
+  private String description;
+
   protected CommandNode(@NonNull String key) {
     this.key = key;
   }
 
   public CommandNode addNode(@NonNull CommandNode node) {
     if (node instanceof StaticNode) {
-      StaticNode staticNode = (StaticNode) node;
+      var staticNode = (StaticNode) node;
       nodeMap.put(node.getKey(), staticNode);
       staticNode.getAliases().forEach(alias -> nodeMap.put(alias, staticNode));
     } else {
@@ -44,6 +48,21 @@ public abstract class CommandNode {
     Set<CommandNode> nodeList = new HashSet<>(nodeMap.values());
     nodeList.addAll(dynamicNodeList);
     return nodeList;
+  }
+
+  public List<CommandRoute> getAllRoutes() {
+    List<CommandRoute> routeList = new ArrayList<>();
+    findAllRoutes(routeList, new CommandRoute(), this);
+    return routeList;
+  }
+
+  private void findAllRoutes(@NonNull List<CommandRoute> routeList, @NonNull CommandRoute route, @NonNull CommandNode node) {
+    route.add(node);
+    node.getAllNodes().forEach(nextNode -> findAllRoutes(routeList, route.duplicate(), nextNode));
+
+    if (node.isLeaf() || (!node.isLeaf() && route.hasExecutor())) {
+      routeList.add(route);
+    }
   }
 
   public boolean isLeaf() {
@@ -60,6 +79,10 @@ public abstract class CommandNode {
 
   public List<DynamicNode> getDynamicNodes() {
     return dynamicNodeList;
+  }
+
+  public Optional<String> getDescription() {
+    return Optional.ofNullable(description);
   }
 
   public Optional<CommandNode> getNextNode(@NonNull String key) {

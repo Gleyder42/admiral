@@ -8,17 +8,17 @@ import lombok.NonNull;
  */
 public class CommandContext {
 
-  private final Object source;
+  private final CommandSource source;
 
   @Getter
   private final ValueBag bag;
 
-  public CommandContext(Object source, @NonNull ValueBag bag) {
+  public CommandContext(CommandSource source, @NonNull ValueBag bag) {
     this.source = source;
     this.bag = bag;
   }
 
-  public <T> T getSource() {
+  public <T extends CommandSource> T getSource() {
     return (T) source;
   }
 }

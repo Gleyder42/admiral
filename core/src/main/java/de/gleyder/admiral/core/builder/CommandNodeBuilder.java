@@ -22,6 +22,11 @@ public abstract class CommandNodeBuilder<B extends CommandNodeBuilder, N extends
     return thisBuilder();
   }
 
+  public B setDescription(@NonNull String description) {
+    node.setDescription(description);
+    return thisBuilder();
+  }
+
   private B thisBuilder() {
     return (B) this;
   }

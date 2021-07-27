@@ -1,6 +1,7 @@
 package de.gleyder.admiral.annotation.builder;
 
 import de.gleyder.admiral.core.CommandDispatcher;
+import de.gleyder.admiral.core.CommandSource;
 import de.gleyder.admiral.core.error.CommandError;
 import de.gleyder.admiral.core.error.LiteralCommandError;
 import de.gleyder.admiral.core.error.MultipleCommandError;
@@ -44,7 +45,7 @@ class AnnotationCommandBuilderTest {
 
   @Test
   void falseMultipleCheckTest() {
-    var test = dispatcher.dispatch("test falseMultipleCheckTest", new Object(), new HashMap<>());
+    var test = dispatcher.dispatch("test falseMultipleCheckTest", commandSource(), new HashMap<>());
 
     List<CommandError> expected = List.of(
         LiteralCommandError.create().setMessage("False"),
@@ -99,6 +100,14 @@ class AnnotationCommandBuilderTest {
   }
 
   void dispatch(String command) {
-    dispatcher.dispatch(command, new Object(), new HashMap<>());
+    dispatcher.dispatch(command, commandSource(), new HashMap<>());
+  }
+
+  private CommandSource commandSource() {
+    return new CommandSource() {
+      @Override
+      public void sendFeedback(String message) {
+      }
+    };
   }
 }

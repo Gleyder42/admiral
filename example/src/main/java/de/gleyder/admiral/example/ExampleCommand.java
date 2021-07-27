@@ -2,6 +2,7 @@ package de.gleyder.admiral.example;
 
 import de.gleyder.admiral.core.CommandDispatcher;
 import de.gleyder.admiral.core.CommandRoute;
+import de.gleyder.admiral.core.CommandSource;
 import de.gleyder.admiral.core.builder.DynamicNodeBuilder;
 import de.gleyder.admiral.core.builder.StaticNodeBuilder;
 import de.gleyder.admiral.core.error.CommandError;
@@ -119,12 +120,16 @@ public class ExampleCommand {
     dispatcher.registerCommand(allCommands);
   }
 
-  static class SenderSource {
+  static class SenderSource implements CommandSource {
 
     private void sendMessage(String message) {
       System.out.println(message);
     }
 
+    @Override
+    public void sendFeedback(String message) {
+      sendMessage(message);
+    }
   }
 
 }

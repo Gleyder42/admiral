@@ -6,6 +6,7 @@ import de.gleyder.admiral.core.error.LiteralCommandError;
 import de.gleyder.admiral.core.error.ThrowableCommandError;
 import de.gleyder.admiral.core.executor.Check;
 import de.gleyder.admiral.core.executor.CheckResult;
+import de.gleyder.admiral.core.help.HelpCommand;
 import de.gleyder.admiral.core.interpreter.InterpreterResult;
 import de.gleyder.admiral.core.node.CommandNode;
 import de.gleyder.admiral.core.node.DynamicNode;
@@ -47,14 +48,15 @@ public class CommandDispatcher {
 
   public void registerCommand(@NonNull StaticNode node) {
     rootNode.addNode(node);
+    new HelpCommand(node);
   }
 
-  public List<CommandError> dispatch(@NonNull String command, @NonNull Object source,
+  public List<CommandError> dispatch(@NonNull String command, @NonNull CommandSource source,
                                      @NonNull Map<String, Object> interpreterMap) {
     return dispatch(findRoute(command, interpreterMap), source);
   }
 
-  List<CommandError> dispatch(@NonNull CommandRoute route, @NonNull Object source) {
+  List<CommandError> dispatch(@NonNull CommandRoute route, @NonNull CommandSource source) {
     if (route.isInvalid()) {
       return route.getErrors();
     }
@@ -79,10 +81,6 @@ public class CommandDispatcher {
     return Collections.emptyList();
   }
 
-  public List<CommandRoute> getRoutes(@NonNull CommandNode node) {
-    return getAllRoutes(node);
-  }
-
   public CommandRoute findRoute(@NonNull Deque<InputArgument> argumentDeque, @NonNull Map<String, Object> interpreterMap) {
     CommandRoute commandRoute = new CommandRoute();
     route(rootNode, commandRoute, argumentDeque, interpreterMap);
@@ -94,13 +92,7 @@ public class CommandDispatcher {
   }
 
   public List<CommandRoute> getAllRoutes() {
-    return getAllRoutes(rootNode);
-  }
-
-  private List<CommandRoute> getAllRoutes(@NonNull CommandNode node) {
-    List<CommandRoute> routeList = new ArrayList<>();
-    findAllRoutes(routeList, new CommandRoute(), node);
-    return routeList;
+    return rootNode.getAllRoutes();
   }
 
   private CommandError testCheck(CommandContext context, Check check) {
@@ -110,15 +102,6 @@ public class CommandDispatcher {
       return errorOptional.orElse(null);
     } catch (Exception exception) {
       return new ThrowableCommandError(exception);
-    }
-  }
-
-  private void findAllRoutes(@NonNull List<CommandRoute> routeList, @NonNull CommandRoute route, @NonNull CommandNode node) {
-    route.add(node);
-    node.getAllNodes().forEach(nextNode -> findAllRoutes(routeList, route.duplicate(), nextNode));
-
-    if (node.isLeaf() || (!node.isLeaf() && route.hasExecutor())) {
-      routeList.add(route);
     }
   }
 
