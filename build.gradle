@@ -52,7 +52,7 @@ subprojects {
             maven(MavenPublication) {
                 groupId = project.group
                 artifactId = project.name
-                version = "SNAPSHOT"
+                version = "1.0.0-SNAPSHOT"
 
                 from components.java
             }
