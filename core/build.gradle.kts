@@ -26,3 +26,9 @@ dependencies {
     api("ch.qos.logback:logback-classic:1.3.0-alpha5")
     api("org.jetbrains:annotations:19.0.0")
 }
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}

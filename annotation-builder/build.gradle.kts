@@ -29,21 +29,20 @@ dependencies {
     implementation("net.bytebuddy:byte-buddy:1.10.20")
 }
 
-//publishing {
-//    repositories {
-//        maven {
-//            name = "positron"
-//            url = uri(rootProject.ext.localMavenRepository)
-//        }
-//    }
-//
-//    publications {
-//        maven(MavenPublication) {
-//            groupId = project.group
-//            artifactId = project.name
-//            version = "1.0.0-SNAPSHOT"
-//
-//            from components.java
-//        }
-//    }
-//}
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "de.gleyder.admiral"
+            artifactId = project.name
+            version = "2.0.0-SNAPSHOT"
+
+            from(components["java"])
+        }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}

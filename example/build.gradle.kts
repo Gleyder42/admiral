@@ -11,3 +11,9 @@ repositories {
 dependencies {
     implementation(project(":core"))
 }
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
