@@ -1,0 +1,5 @@
+rootProject.name = "admiral"
+
+include("core")
+include("annotation-builder")
+include("example")

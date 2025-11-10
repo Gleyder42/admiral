@@ -1,5 +1,26 @@
 ## Overview
 
+## V2 Changelog
+
+### The Gradle root project no longer configures the subprojects,
+
+instead the subprojects configure themselves.
+Essentially, configuration has been moved from the root `build.gradle` to the project's `build.gradle`.
+This has the advantage that all information about the subproject is located in it's `build.gradle` making it clear
+how the subproject is configured.
+With the old approach, it may become hard to track where a configuration is coming from.
+In this case, it is still easy to that, but in larger (more nested Gradle projects), it becomes hard to keep track.
+
+Sharing Gradle project configuration is done through [buildSrc](https://docs.gradle.org/current/userguide/sharing_build_logic_between_subprojects.html) directory.
+However, this is not necessary here, because the project configuration is simple.
+In this case, code duplication is less bad than the added complexity through the `buildSrc` directory.
+
+### Use Kotlin DSL for the Build scripts instead of Groovy DSL.
+
+Nowadays, I am using the Kotlin DSL for build scripts.
+The Tab Completion works way better than with Groovy and Kotlin is more explicit.
+
+
 This project requires Java 14.  
 Methods never return null. If they would, an `Optional` is used. 
 

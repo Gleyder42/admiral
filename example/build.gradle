@@ -1,6 +1,0 @@
-tasks.publish.enabled = false
-tasks.publishToMavenLocal.enabled = false
-
-dependencies {
-    implementation project(":core")
-}
