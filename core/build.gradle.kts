@@ -11,6 +11,10 @@ repositories {
     mavenCentral()
 }
 
+checkstyle {
+    toolVersion = "12.1.1"
+}
+
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.1")
     testImplementation("org.junit.jupiter:junit-jupiter-params:6.0.1")

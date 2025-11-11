@@ -1,7 +1,6 @@
 plugins {
     id("io.freefair.lombok")
     id("java-library")
-    id("checkstyle")
 }
 
 repositories {

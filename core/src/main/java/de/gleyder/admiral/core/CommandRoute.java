@@ -2,7 +2,10 @@ package de.gleyder.admiral.core;
 
 import de.gleyder.admiral.core.error.CommandError;
 import de.gleyder.admiral.core.node.CommandNode;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.ToString;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.ArrayList;

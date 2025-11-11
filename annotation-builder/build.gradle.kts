@@ -2,13 +2,17 @@ plugins {
     id("maven-publish")
     id("io.freefair.lombok")
     id("java-library")
-    id("checkstyle")
+    checkstyle
 }
 
 project.version = "1.3.0"
 
 repositories {
     mavenCentral()
+}
+
+checkstyle {
+    toolVersion = "12.1.1"
 }
 
 dependencies {

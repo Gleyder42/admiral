@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/annotation-builder/admiral.annotation-builder.main.iml" filepath="$PROJECT_DIR$/.idea/modules/annotation-builder/admiral.annotation-builder.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/annotation-builder/admiral.annotation-builder.test.iml" filepath="$PROJECT_DIR$/.idea/modules/annotation-builder/admiral.annotation-builder.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/admiral.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/admiral.core.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/admiral.core.test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/admiral.core.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/example/admiral.example.main.iml" filepath="$PROJECT_DIR$/.idea/modules/example/admiral.example.main.iml" />
     </modules>
   </component>
