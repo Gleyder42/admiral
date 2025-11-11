@@ -1,0 +1,20 @@
+package com.github.gleyder42.annotation;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Node {
+
+  String[] check() default {};
+
+  String executor() default "";
+
+  String[] aliases() default {};
+
+  String interpreter() default "";
+
+  String strategy() default "";
+
+  String value();
+}
