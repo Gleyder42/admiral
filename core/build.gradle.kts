@@ -1,11 +1,10 @@
 plugins {
-    id("maven-publish")
     id("io.freefair.lombok")
-    id("java-library")
-    id("checkstyle")
+    `java-library`
+    checkstyle
 }
 
-project.version = "1.2.0"
+project.version = "2.0.0"
 
 repositories {
     mavenCentral()
@@ -27,8 +26,8 @@ tasks.test {
 }
 
 dependencies {
-    api("ch.qos.logback:logback-classic:1.3.0-alpha5")
-    api("org.jetbrains:annotations:19.0.0")
+    api("ch.qos.logback:logback-classic:1.5.21")
+    api("org.jetbrains:annotations:26.0.2")
 }
 
 java {

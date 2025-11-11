@@ -1,11 +1,11 @@
 plugins {
-    id("maven-publish")
+    `maven-publish`
     id("io.freefair.lombok")
-    id("java-library")
+    `java-library`
     checkstyle
 }
 
-project.version = "1.3.0"
+project.version = "2.0.0"
 
 repositories {
     mavenCentral()
@@ -30,7 +30,7 @@ group = "de.gleyder.admiral"
 
 dependencies {
     implementation(project(":core"))
-    implementation("net.bytebuddy:byte-buddy:1.10.20")
+    implementation("net.bytebuddy:byte-buddy:1.17.8")
 }
 
 publishing {
