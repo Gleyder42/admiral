@@ -61,20 +61,26 @@ public class CommandDispatcher {
     CommandContext context = new CommandContext(source, route.getValueBag());
 
     List<CommandError> commandErrors = new ArrayList<>();
-    route.getNodeList().stream()
-        .map(node -> node.getCheck().map(check -> testCheck(context, check)))
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .findFirst()
-        .ifPresent(commandErrors::add);
+
+    for (CommandNode node : route.getNodeList()) {
+      if (node.getCheck() != null) {
+        var checkResult = testCheck(context, node.getCheck());
+        if (checkResult != null) {
+          commandErrors.add(checkResult);
+          break; // Stop on the first error
+        }
+      }
+    }
 
     if (!commandErrors.isEmpty()) {
       return commandErrors;
     }
 
-    route.getNodeList().stream()
-        .filter(node -> node.getExecutor().isPresent())
-        .forEach(node -> node.getExecutor().get().execute(context));
+    for (CommandNode node : route.getNodeList()) {
+      if (node.getExecutor() != null) {
+        node.getExecutor().execute(context);
+      }
+    }
 
     return Collections.emptyList();
   }
@@ -103,11 +109,11 @@ public class CommandDispatcher {
     return routeList;
   }
 
+  @Nullable
   private CommandError testCheck(CommandContext context, Check check) {
     try {
       CheckResult checkResult = check.test(context);
-      Optional<CommandError> errorOptional = checkResult.getError();
-      return errorOptional.orElse(null);
+      return checkResult.getError();
     } catch (Exception exception) {
       return new ThrowableCommandError(exception);
     }
@@ -146,17 +152,17 @@ public class CommandDispatcher {
     }
 
     InputArgument inputArgument = argumentDeque.pop();
-    Optional<CommandNode> nextNodeOptional = node.getNextNode(inputArgument.getMerged());
+    CommandNode nextNode = node.getNextNode(inputArgument.getMerged());
 
-    if (inputArgument.isSingle() && nextNodeOptional.isPresent()) {
-      route(nextNodeOptional.get(), route, argumentDeque, interpreterMap);
+    if (inputArgument.isSingle() && nextNode != null) {
+      route(nextNode, route, argumentDeque, interpreterMap);
       return;
     }
 
     List<CommandRoute> commandRouteList = getDynamicNodes(node, interpreterMap, inputArgument);
     List<CommandRoute> succeedRoutes = commandRouteList.stream()
         .filter(Predicate.not(CommandRoute::hasErrors))
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
 
     if (succeedRoutes.size() == 1) {
       CommandRoute nextRoute = succeedRoutes.get(0);
@@ -213,11 +219,11 @@ public class CommandDispatcher {
 
     interpreterResults.stream()
         .filter(InterpreterResult::failed)
-        .forEach(result -> route.addError(result.getError().orElseThrow()));
+        .forEach(result -> route.addError(Objects.requireNonNull(result.getError())));
 
     interpreterResults.stream()
         .filter(InterpreterResult::succeeded)
-        .forEach(result -> route.getValueBag().add(node.getKey(), result.getValue().orElseThrow()));
+        .forEach(result -> route.getValueBag().add(node.getKey(), Objects.requireNonNull(result.getValue())));
   }
 
   private List<CommandRoute> getAlternateRoutes(@NonNull CommandRoute mainRoute, @NonNull List<CommandRoute> routeList,
@@ -229,6 +235,6 @@ public class CommandDispatcher {
           duplicate.getValueBag().addBag(route.getValueBag());
           route(route.getNodeList().get(0), duplicate, new ArrayDeque<>(argumentDeque), interpreterMap);
           return duplicate;
-        }).collect(Collectors.toUnmodifiableList());
+        }).toList();
   }
 }

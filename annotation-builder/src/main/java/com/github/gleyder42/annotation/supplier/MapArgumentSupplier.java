@@ -2,6 +2,7 @@ package com.github.gleyder42.annotation.supplier;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -12,7 +13,7 @@ public class MapArgumentSupplier implements ArgumentSupplier {
   private final Map<String, Object> map;
 
   @Override
-  public Object get(@NonNull String key) {
+  public @Nullable Object get(@NonNull String key) {
     return map.get(key);
   }
 }

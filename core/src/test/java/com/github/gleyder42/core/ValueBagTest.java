@@ -39,7 +39,7 @@ class ValueBagTest {
 
   @Test
   void shouldGetString() {
-    assertEquals(Optional.of("hallo"), bag.get("string"));
+    assertEquals("hallo", bag.get("string"));
   }
 
   @Test

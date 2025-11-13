@@ -3,6 +3,7 @@ package com.github.gleyder42.annotation.supplier;
 import com.github.gleyder42.core.ValueBag;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 @RequiredArgsConstructor
 public class ValueBagArgumentSupplier implements ArgumentSupplier {
@@ -15,7 +16,7 @@ public class ValueBagArgumentSupplier implements ArgumentSupplier {
   }
 
   @Override
-  public Object get(@NonNull String key) {
-    return bag.isMulti(key) ? bag.getList(key) : bag.get(key).orElse(null);
+  public @Nullable Object get(@NonNull String key) {
+    return bag.isMulti(key) ? bag.getList(key) : bag.get(key);
   }
 }

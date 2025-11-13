@@ -5,6 +5,7 @@ import com.github.gleyder42.core.error.MultipleCommandError;
 import lombok.NonNull;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public interface Check {
@@ -12,9 +13,8 @@ public interface Check {
   static Check ofMultiple(@NonNull Collection<Check> collection) {
     return context -> {
       var errorList = collection.stream()
-          .map(check -> check.test(context))
-          .filter(checkResult -> checkResult.getError().isPresent())
-          .map(checkResult -> checkResult.getError().get())
+          .map(check -> check.test(context).getError())
+          .filter(Objects::nonNull)
           .collect(Collectors.toList());
       if (errorList.isEmpty()) {
         return CheckResult.ofSuccessful();

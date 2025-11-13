@@ -13,6 +13,7 @@ import com.github.gleyder42.core.node.StaticNode;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -56,8 +57,8 @@ public class ExampleCommand {
   public static void readmeExample(CommandDispatcher dispatcher) {
     StaticNode echoNode = new StaticNodeBuilder("echo")
         .setExecutor(context -> {
-          int amount = context.getBag().<Integer>get("amount").orElseThrow();
-          String message = context.getBag().<String>get("message").orElseThrow();
+          int amount = Objects.requireNonNullElse(context.getBag().get("amount"), 0);
+          String message = context.getBag().get("message");
 
           for (int i = 0; i < amount; i++) {
             System.out.println("Nr. " + i + " " + message);
@@ -80,7 +81,7 @@ public class ExampleCommand {
      * Calculation Nodes
      */
 
-    //Static nodes calc sum
+    // Static nodes calc sum
     StaticNode calc = new StaticNodeBuilder("calc")
         .build();
     StaticNode sumNode = new StaticNode("sum");
@@ -92,29 +93,29 @@ public class ExampleCommand {
     DynamicNode otherNumberNode = new DynamicNodeBuilder("otherNumber")
         .setInterpreter(new IntegerInterpreter())
         .setExecutor(context -> {
-          int number = context.getBag().<Integer>get("number").orElseThrow();
-          int otherNumber = context.getBag().<Integer>get("otherNumber").orElseThrow();
+          int number = Objects.requireNonNull(context.getBag().<Integer>get("number"));
+          int otherNumber = Objects.requireNonNull(context.getBag().<Integer>get("otherNumber"));
 
           SenderSource senderSource = context.getSource();
           senderSource.sendMessage("Result: " + (number + otherNumber));
         })
         .build();
 
-    //All commands
+    // All commands
     StaticNode allCommands = new StaticNodeBuilder("allCommands")
         .setExecutor(context -> {
           List<CommandRoute> routes = dispatcher.getAllRoutes();
 
           routes.forEach(route -> System.out.println(String.join(" ", route.getNodeList().stream()
               .map(CommandNode::getKey)
-              .collect(Collectors.toUnmodifiableList()))));
+              .toList())));
         })
         .build();
 
-    //Add node returns the added node.
+    // Add node returns the added node.
     calc.addNode(sumNode).addNode(numberNode).addNode(otherNumberNode);
 
-    //Calc and allCommands nodes are registered
+    // Calc and allCommands nodes are registered
     dispatcher.registerCommand(calc);
     dispatcher.registerCommand(allCommands);
   }

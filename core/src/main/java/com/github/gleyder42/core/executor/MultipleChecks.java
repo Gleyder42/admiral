@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -53,7 +54,7 @@ public class MultipleChecks implements Check {
 
     private static CheckResult toError(@NonNull List<CheckResult> results) {
       return CheckResult.ofError(new MultipleCommandError(results.stream()
-          .map(checkResult -> checkResult.getError().orElseThrow())
+          .map(checkResult -> Objects.requireNonNull(checkResult.getError()))
           .collect(Collectors.toList())
       ));
     }

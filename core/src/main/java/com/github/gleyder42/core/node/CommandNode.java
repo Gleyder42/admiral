@@ -5,8 +5,10 @@ import com.github.gleyder42.core.executor.Executor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+
 
 /**
  * Base class for {@link StaticNode} and {@link DynamicNode}.
@@ -19,9 +21,13 @@ public abstract class CommandNode {
   @Getter
   private final String key;
 
+  @Nullable
+  @Getter
   @Setter
   private Check check;
 
+  @Nullable
+  @Getter
   @Setter
   private Executor executor;
 
@@ -50,20 +56,13 @@ public abstract class CommandNode {
     return nodeMap.isEmpty() && dynamicNodeList.isEmpty();
   }
 
-  public Optional<Check> getCheck() {
-    return Optional.ofNullable(check);
-  }
-
-  public Optional<Executor> getExecutor() {
-    return Optional.ofNullable(executor);
-  }
-
   public List<DynamicNode> getDynamicNodes() {
     return dynamicNodeList;
   }
 
-  public Optional<CommandNode> getNextNode(@NonNull String key) {
-    return Optional.ofNullable(nodeMap.get(key));
+  @Nullable
+  public CommandNode getNextNode(@NonNull String key) {
+    return nodeMap.get(key);
   }
 
   @Override

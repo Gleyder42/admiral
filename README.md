@@ -4,6 +4,7 @@
 
 ### The Gradle root project no longer configures the subprojects,
 
+
 instead the subprojects configure themselves.
 Essentially, configuration has been moved from the root `build.gradle` to the project's `build.gradle`.
 This has the advantage that all information about the subproject is located in it's `build.gradle` making it clear
@@ -15,14 +16,22 @@ Sharing Gradle project configuration is done through [buildSrc](https://docs.gra
 However, this is not necessary here, because the project configuration is simple.
 In this case, code duplication is less bad than the added complexity through the `buildSrc` directory.
 
+This project requires Java 21, instead of 14.
+
+Methods that might return null, ar tagged with `@Nullable`.
+Before, they would return an Optional.
+
+On the typesafe side, this is great since it forces the developer to check if the value is present.
+However, this has a performance and memory impact.
+Everytime a new nullable is created, a new object has to be allocated.
+To combat NPEs, the `@Nullable` annotation is used. 
+It is checked by IntelliJ, so it will give a hint that a maybe-null object is accessed, if not checked before.
+Perhaps, using Optional widely becomes useful once Project Valhalla is done.
+
 ### Use Kotlin DSL for the Build scripts instead of Groovy DSL.
 
 Nowadays, I am using the Kotlin DSL for build scripts.
 The Tab Completion works way better than with Groovy and Kotlin is more explicit.
-
-
-This project requires Java 14.  
-Methods never return null. If they would, an `Optional` is used. 
 
 Admiral is a platform independent command framework. A command is build in tree-based way.
 

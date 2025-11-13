@@ -36,7 +36,7 @@ public class CommandRoute {
   }
 
   public boolean hasExecutor() {
-    return nodeList.stream().anyMatch(node -> node.getExecutor().isPresent());
+    return nodeList.stream().anyMatch(node -> node.getExecutor() != null);
   }
 
   public void add(@NonNull CommandNode node) {

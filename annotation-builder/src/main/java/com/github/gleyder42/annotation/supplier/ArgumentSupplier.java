@@ -3,6 +3,7 @@ package com.github.gleyder42.annotation.supplier;
 import com.github.gleyder42.annotation.Bag;
 import com.github.gleyder42.core.ValueBag;
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public interface ArgumentSupplier {
     return new MapArgumentSupplier(map);
   }
 
+  @Nullable
   Object get(@NonNull String key);
 
   default Object selfSupply(@NonNull String key) {

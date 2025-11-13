@@ -1,6 +1,7 @@
 package com.github.gleyder42.core;
 
 import lombok.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -69,15 +70,16 @@ public class ValueBag {
    * @return        the value associated with the provided key
    * @throws        NullPointerException if more than one value is associated with the provided key
    */
-  public <T> Optional<T> get(@NonNull String key) {
+  @Nullable
+  public <T> T get(@NonNull String key) {
     if (isAbsent(key)) {
-      return Optional.empty();
+      return null;
     }
     List<Object> loadedMap = getValues(key);
     if (loadedMap.size() > 1) {
       throw new IllegalStateException("More than one value is associated with '" + key + "'");
     }
-    return Optional.ofNullable((T) loadedMap.get(0));
+    return (T) loadedMap.getFirst();
   }
 
   /**

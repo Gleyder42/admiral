@@ -4,15 +4,21 @@ import com.github.gleyder42.core.error.CommandError;
 import com.github.gleyder42.core.error.ThrowableCommandError;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class InterpreterResult<T> {
 
+  @Getter
+  @Nullable
   private final T value;
+
+  @Getter
+  @Nullable
   private final CommandError error;
 
   public static <V> InterpreterResult<V> ofValue(@NonNull V value) {
@@ -29,14 +35,6 @@ public class InterpreterResult<T> {
     } catch (Exception exception) {
       return InterpreterResult.ofError(new ThrowableCommandError(exception));
     }
-  }
-
-  public Optional<T> getValue() {
-    return Optional.ofNullable(value);
-  }
-
-  public Optional<CommandError> getError() {
-    return Optional.of(error);
   }
 
   public boolean failed() {
