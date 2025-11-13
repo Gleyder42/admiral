@@ -69,25 +69,25 @@ class InputParserTest {
     return Arrays.stream(stringList)
         .map(list -> {
           InputArgument inputArgument = new InputArgument();
-          inputArgument.getInputs().addAll(list);
+          inputArgument.inputs().addAll(list);
           return inputArgument;
         })
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private List<InputArgument> singleLineArguments(String... stringArray) {
     return Arrays.stream(stringArray)
         .map(string -> {
           InputArgument inputArgument = new InputArgument();
-          inputArgument.getInputs().add(string);
+          inputArgument.inputs().add(string);
           return inputArgument;
         })
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private InputArgument singleInputArgument(String... stingArray) {
     InputArgument inputArgument = new InputArgument();
-    inputArgument.getInputs().addAll(Arrays.asList(stingArray));
+    inputArgument.inputs().addAll(Arrays.asList(stingArray));
     return inputArgument;
   }
 }

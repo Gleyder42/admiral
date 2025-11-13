@@ -60,7 +60,7 @@ public class InputParser {
         parse(characterDeque, insideArgumentList);
 
         InputArgument inputArgument = new InputArgument();
-        insideArgumentList.forEach(inside -> inputArgument.getInputs().add(inside.getMerged()));
+        insideArgumentList.forEach(inside -> inputArgument.inputs().add(inside.getMerged()));
         argumentLinkedList.addLast(inputArgument);
       } else if (currentChar == end) {
         return;

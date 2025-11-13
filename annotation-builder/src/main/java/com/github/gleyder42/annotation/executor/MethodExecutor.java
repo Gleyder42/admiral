@@ -16,6 +16,6 @@ public class MethodExecutor implements Executor {
 
   @Override
   public void execute(@NonNull CommandContext context) {
-    method.invokeVoid(List.of(context.<Object>getSource()), ArgumentSupplier.ofBag(context.getBag()));
+    method.invokeVoid(List.of(context.source()), ArgumentSupplier.ofBag(context.bag()));
   }
 }

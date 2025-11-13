@@ -57,8 +57,8 @@ public class ExampleCommand {
   public static void readmeExample(CommandDispatcher dispatcher) {
     StaticNode echoNode = new StaticNodeBuilder("echo")
         .setExecutor(context -> {
-          int amount = Objects.requireNonNullElse(context.getBag().get("amount"), 0);
-          String message = context.getBag().get("message");
+          int amount = Objects.requireNonNullElse(context.bag().get("amount"), 0);
+          String message = context.bag().get("message");
 
           for (int i = 0; i < amount; i++) {
             System.out.println("Nr. " + i + " " + message);
@@ -93,8 +93,8 @@ public class ExampleCommand {
     DynamicNode otherNumberNode = new DynamicNodeBuilder("otherNumber")
         .setInterpreter(new IntegerInterpreter())
         .setExecutor(context -> {
-          int number = Objects.requireNonNull(context.getBag().<Integer>get("number"));
-          int otherNumber = Objects.requireNonNull(context.getBag().<Integer>get("otherNumber"));
+          int number = Objects.requireNonNull(context.bag().<Integer>get("number"));
+          int otherNumber = Objects.requireNonNull(context.bag().<Integer>get("otherNumber"));
 
           SenderSource senderSource = context.getSource();
           senderSource.sendMessage("Result: " + (number + otherNumber));

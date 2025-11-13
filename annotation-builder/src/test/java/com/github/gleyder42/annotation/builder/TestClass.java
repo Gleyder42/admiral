@@ -126,7 +126,7 @@ public class TestClass {
   @InterpreterStrategyNode(SUM_STRATEGY_INTERPRETER)
   public List<InterpreterResult<Object>> strategy(Interpreter<?> interpreter, InputArgument inputArgument) {
     stringList.add("strategy");
-    long sum = inputArgument.getInputs().stream()
+    long sum = inputArgument.inputs().stream()
             .filter(string -> interpreter(string).succeeded())
             .mapToLong(Long::parseLong)
             .sum();

@@ -11,13 +11,20 @@ import com.github.gleyder42.core.interpreter.CommonInterpreter;
 import com.github.gleyder42.core.node.CommandNode;
 import com.github.gleyder42.core.node.DynamicNode;
 import com.github.gleyder42.core.node.StaticNode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +54,7 @@ class CommandDispatcherTest {
   private final DynamicNode dynamicNumberEchoNode = new DynamicNodeBuilder("int")
       .setInterpreter(CommonInterpreter.INT)
       .setExecutor(context -> {
-        Integer integer = context.getBag().<Integer>get("int");
+        Integer integer = context.bag().<Integer>get("int");
         log.info("Int: {}", integer);
       })
       .build();
@@ -58,7 +65,7 @@ class CommandDispatcherTest {
   private final StaticNode echoNode = new StaticNodeBuilder("echo")
       .setCheck(context -> createCheckResult(context, MESSAGE_KEY))
       .setExecutor(context -> {
-        String message = context.getBag().<String>get(MESSAGE_KEY);
+        String message = context.bag().<String>get(MESSAGE_KEY);
         log.info("Message: {}", message);
       })
       .build();
@@ -74,9 +81,9 @@ class CommandDispatcherTest {
   private final StaticNode createNode = new StaticNodeBuilder("create")
       .setCheck(context -> createCheckResult(context, TYPE_KEY))
       .setExecutor(context -> {
-        String type = context.getBag().<String>get(TYPE_KEY);
-        int amount = Objects.requireNonNullElse(context.getBag().<Integer>get(AMOUNT_KEY), 1);
-        String name = Objects.requireNonNullElse(context.getBag().<String>get(NAME_KEY), "undefined");
+        String type = context.bag().get(TYPE_KEY);
+        int amount = Objects.requireNonNullElse(context.bag().<Integer>get(AMOUNT_KEY), 1);
+        String name = Objects.requireNonNullElse(context.bag().<String>get(NAME_KEY), "undefined");
 
         log.info("Item create as {}, {} times with name {}", type, amount, name);
       })
@@ -85,7 +92,7 @@ class CommandDispatcherTest {
   private final StaticNode deleteNode = new StaticNodeBuilder("delete")
       .setCheck(context -> createCheckResult(context, NAME_KEY))
       .setExecutor(context -> {
-        String name = context.getBag().<String>get(NAME_KEY);
+        String name = context.bag().<String>get(NAME_KEY);
 
         log.info("Item deleted with name {}", name);
       })
@@ -95,7 +102,7 @@ class CommandDispatcherTest {
 
   private final DynamicNode amountNode = new DynamicNodeBuilder(AMOUNT_KEY)
       .setCheck(context -> CheckResult.ofSimpleError(
-          () -> Objects.requireNonNullElse(context.getBag().<Integer>get(AMOUNT_KEY), 0) > 0,
+          () -> Objects.requireNonNullElse(context.bag().<Integer>get(AMOUNT_KEY), 0) > 0,
           "Amount needs to be at least 1"))
       .setInterpreter(CommonInterpreter.INT)
       .build();
@@ -104,7 +111,7 @@ class CommandDispatcherTest {
 
   private CheckResult createCheckResult(CommandContext context, String key) {
     return CheckResult.ofSimpleError(
-        () -> context.getBag().contains(key),
+        () -> context.bag().contains(key),
         "Bag does not contains " + key
     );
   }
@@ -116,12 +123,12 @@ class CommandDispatcherTest {
       .build();
 
   private final DynamicNode stringNode = new DynamicNodeBuilder("string")
-      .setExecutor(context -> log.info("String: " + context.getBag().get("string")))
+      .setExecutor(context -> log.info("String: " + context.bag().get("string")))
       .build();
 
   private final DynamicNode intNode = new DynamicNodeBuilder("int")
       .setInterpreter(CommonInterpreter.INT)
-      .setExecutor(context -> log.info("Int: " + context.getBag().get("int")))
+      .setExecutor(context -> log.info("Int: " + context.bag().get("int")))
       .build();
 
   /*
@@ -132,7 +139,7 @@ class CommandDispatcherTest {
   private final StaticNode groupNode = new StaticNode("group");
   private final StaticNode groupCreateNode = new StaticNodeBuilder("create")
       .setExecutor(context -> {
-        String name = context.getBag().get("name");
+        String name = context.bag().get("name");
         log.info("Create group with name {}", name);
         groupList.add(name);
       })
@@ -140,7 +147,7 @@ class CommandDispatcherTest {
 
   private final StaticNode groupRemoveNode = new StaticNodeBuilder("remove")
       .setExecutor(context -> {
-        String name = context.getBag().get("name");
+        String name = context.bag().get("name");
         log.info("Deleted group with name {}", name);
         groupList.remove(name);
       })
@@ -148,8 +155,8 @@ class CommandDispatcherTest {
 
   private final StaticNode groupAddUserNode = new StaticNodeBuilder("addUser")
       .setExecutor(context -> {
-        String name = context.getBag().get("name");
-        String user = context.getBag().get("user");
+        String name = context.bag().get("name");
+        String user = context.bag().get("user");
 
         log.info("Add user {} to group with name {}", user, name);
       })
@@ -161,7 +168,7 @@ class CommandDispatcherTest {
   private final DynamicNode checkNameNode = new DynamicNodeBuilder("name")
       .setCheck(context ->
           CheckResult.ofSimpleError(
-              () -> groupList.contains(context.getBag().<String>get("name")),
+              () -> groupList.contains(context.bag().<String>get("name")),
               "Group not found"
           ))
       .build();
@@ -306,8 +313,8 @@ class CommandDispatcherTest {
 
     List<CommandError> dispatch = dispatcher.dispatch(command, new Object(), Collections.emptyMap());
 
-    assertEquals("java.lang.NumberFormatException: For input string: \"Test\"", dispatch.get(0).getSimple());
-    assertEquals("java.lang.NumberFormatException: For input string: \"Test\"", dispatch.get(0).getDetailed());
+    assertEquals("java.lang.NumberFormatException: For input string: \"Test\"", dispatch.getFirst().getSimple());
+    assertEquals("java.lang.NumberFormatException: For input string: \"Test\"", dispatch.getFirst().getDetailed());
   }
 
   @Test
@@ -416,9 +423,9 @@ class CommandDispatcherTest {
     String command = "double 10";
 
     CommandRoute actual = findRoute(command);
-    CommandError error = actual.getErrors().get(0);
+    CommandError error = actual.getErrors().getFirst();
 
-    assertTrue(error instanceof AmbiguousCommandError);
+    assertInstanceOf(AmbiguousCommandError.class, error);
     AmbiguousCommandError ambiguousCommandError = (AmbiguousCommandError) error;
 
     assertEqualsRoute(ambiguousCommandError.getRouteList().get(0), Map.of("string", "10"), doubleNode, stringNode);
