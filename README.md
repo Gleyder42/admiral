@@ -11,7 +11,7 @@ The relevant code in [here](annotation-builder/src/main/java/com/github/gleyder4
 
 ## Origin
 
-I created `admiral` in February 2021 as a command library that I can use in my  Minecraft plugins using [PaperMc](https://papermc.io/).
+I created `admiral` in February 2021 ([Version 1](https://github.com/Gleyder42/admiral/tree/v1)) as a command library that I can use in my  Minecraft plugins using [PaperMc](https://papermc.io/).
 Back in 2021, PaperMc didn't ship with [Mojang's brigadier](https://github.com/Mojang/brigadier) library to create commands, and
 `brigadier` wasn't that wildly adopted.
 Therefore, I decide to create my own command libray by adopting the "command tree" from brigadier.
