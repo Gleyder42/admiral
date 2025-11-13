@@ -1,0 +1,27 @@
+package com.github.gleyder42.core.executor;
+
+import com.github.gleyder42.core.CommandContext;
+import com.github.gleyder42.core.error.MultipleCommandError;
+import lombok.NonNull;
+
+import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+public interface Check {
+
+  static Check ofMultiple(@NonNull Collection<Check> collection) {
+    return context -> {
+      var errorList = collection.stream()
+          .map(check -> check.test(context).getError())
+          .filter(Objects::nonNull)
+          .collect(Collectors.toList());
+      if (errorList.isEmpty()) {
+        return CheckResult.ofSuccessful();
+      }
+      return CheckResult.ofError(new MultipleCommandError(errorList));
+    };
+  }
+
+  CheckResult test(@NonNull CommandContext commandContext);
+}

@@ -6,16 +6,29 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.20/18bcea7d5df4d49227b4a0743a536208ce4825bb/lombok-1.18.20.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.42/8365263844ebb62398e0dc33057ba10ba472d3b8/lombok-1.18.42.jar" />
         </processorPath>
         <module name="admiral.core.test" />
         <module name="admiral.annotation-builder.main" />
         <module name="admiral.annotation-builder.test" />
-        <module name="admiral.example.test" />
         <module name="admiral.example.main" />
+        <module name="admiral.example.test" />
         <module name="admiral.core.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="14" />
+    <bytecodeTargetLevel target="21" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="admiral.annotation-builder" options="-Xlint:-processing" />
+      <module name="admiral.annotation-builder.main" options="-Xlint:-processing" />
+      <module name="admiral.annotation-builder.test" options="-Xlint:-processing" />
+      <module name="admiral.core" options="-Xlint:-processing" />
+      <module name="admiral.core.main" options="-Xlint:-processing" />
+      <module name="admiral.core.test" options="-Xlint:-processing" />
+      <module name="admiral.example" options="-Xlint:-processing --enable-preview" />
+      <module name="admiral.example.main" options="-Xlint:-processing --enable-preview" />
+      <module name="admiral.example.test" options="-Xlint:-processing --enable-preview" />
+    </option>
   </component>
 </project>

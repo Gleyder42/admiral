@@ -1,0 +1,34 @@
+package com.github.gleyder42.core.error;
+
+import java.util.Objects;
+import java.util.function.Function;
+import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
+
+public class ThrowableCommandError implements CommandError {
+
+  private final Throwable throwable;
+  private final Function<Throwable, String> simpleMessage;
+  private final Function<Throwable, String> detailedMessage;
+
+  public ThrowableCommandError(@NonNull Throwable throwable, @Nullable Function<Throwable, String> simpleMessage,
+                               @Nullable Function<Throwable, String> detailedMessage) {
+    this.throwable = throwable;
+    this.simpleMessage = Objects.requireNonNullElse(simpleMessage, Throwable::toString);
+    this.detailedMessage = Objects.requireNonNullElse(detailedMessage, Throwable::toString);
+  }
+
+  public ThrowableCommandError(@NonNull Throwable throwable) {
+    this(throwable, null, null);
+  }
+
+  @Override
+  public String getSimple() {
+    return simpleMessage.apply(throwable);
+  }
+
+  @Override
+  public String getDetailed() {
+    return detailedMessage.apply(throwable);
+  }
+}
