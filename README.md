@@ -1,13 +1,14 @@
 # Overview
 
 Admiral is a command library designed to be used within in Minecraft plugins.
-
-It is now considered outdatew, since [PaperMc](https://papermc.io/) now ships with [Mojang's brigadier](https://docs.papermc.io/paper/dev/command-api/basics/introduction/) library.
-
-Despite that, admiral has one cool feature: 
+The project consists of two projects: `core` and `annotation-builder`. The `core` implements the    
+functionality, while providing a simple command node builder to create `CommandNode`s.
+The `annotation-builder` gives you the possibility to create commands completely via annotations.
 Admiral does not use reflections in the `annotation-builder`.
 Instead, it uses [ByteBuddy](https://bytebuddy.net/#/) to generate JVM Bytecode at runtime to avoid reflections.
 The relevant code in [here](annotation-builder/src/main/java/com/github/gleyder42/annotation/executor/ExecutableMethod.java).
+
+Admiral is now considered outdated, since [PaperMc](https://papermc.io/) now ships with [Mojang's brigadier](https://docs.papermc.io/paper/dev/command-api/basics/introduction/) library.
 
 ## Origin
 
@@ -76,12 +77,6 @@ Perhaps, using Optional widely becomes useful once Project Valhalla is done.
 
 Nowadays, I am using the Kotlin DSL for build scripts.
 The Tab Completion works way better than with Groovy and Kotlin is more explicit.
-
-Admiral is a platform independent command framework. A command is build in tree-based way.
-
-The project consists of two projects: `core` and `annotation-builder`. The `core` implements the    
-functionality, while providing a simple command node builder to create `CommandNode`s.
-The `annotation-builder` gives you the possibility to create commands completely via annotations.
 
 ## Usage
 
