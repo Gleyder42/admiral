@@ -8,7 +8,7 @@ import lombok.NonNull;
 /**
  * Static nodes defines the command structure.
  */
-public class StaticNode extends CommandNode {
+public final class StaticNode extends CommandNode {
 
   @Getter
   private final List<String> aliases = new ArrayList<>();

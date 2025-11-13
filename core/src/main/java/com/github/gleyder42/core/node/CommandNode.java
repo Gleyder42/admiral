@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Base class for {@link StaticNode} and {@link DynamicNode}.
  */
-public abstract class CommandNode {
+public abstract sealed class CommandNode permits DynamicNode, StaticNode {
 
   private final Map<String, CommandNode> nodeMap = new HashMap<>();
   private final List<DynamicNode> dynamicNodeList = new ArrayList<>();
@@ -41,13 +41,16 @@ public abstract class CommandNode {
   }
 
   public CommandNode addNode(@NonNull CommandNode node) {
-    if (node instanceof StaticNode) {
-      StaticNode staticNode = (StaticNode) node;
-      nodeMap.put(node.getKey(), staticNode);
-      staticNode.getAliases().forEach(alias -> nodeMap.put(alias, staticNode));
-    } else {
-      dynamicNodeList.add((DynamicNode) node);
+    switch (node) {
+      case StaticNode staticNode -> {
+        nodeMap.put(node.getKey(), staticNode);
+        staticNode.getAliases().forEach(alias -> nodeMap.put(alias, staticNode));
+      }
+      case DynamicNode dynamicNode -> {
+        dynamicNodeList.add(dynamicNode);
+      }
     }
+
     return node;
   }
 

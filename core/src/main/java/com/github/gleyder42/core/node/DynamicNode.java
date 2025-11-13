@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
  * A dynamic node is the point, where the user can input data.
  */
 @Slf4j
-public class DynamicNode extends CommandNode {
+public final class DynamicNode extends CommandNode {
 
   @Setter
   @Getter

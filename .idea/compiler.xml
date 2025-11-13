@@ -26,9 +26,9 @@
       <module name="admiral.core" options="-Xlint:-processing" />
       <module name="admiral.core.main" options="-Xlint:-processing" />
       <module name="admiral.core.test" options="-Xlint:-processing" />
-      <module name="admiral.example" options="-Xlint:-processing" />
-      <module name="admiral.example.main" options="-Xlint:-processing" />
-      <module name="admiral.example.test" options="-Xlint:-processing" />
+      <module name="admiral.example" options="-Xlint:-processing --enable-preview" />
+      <module name="admiral.example.main" options="-Xlint:-processing --enable-preview" />
+      <module name="admiral.example.test" options="-Xlint:-processing --enable-preview" />
     </option>
   </component>
 </project>
