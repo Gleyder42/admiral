@@ -1,6 +1,11 @@
 package com.github.gleyder42.core.error;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.ToString;
 
 /**
  * Implementation of {@link CommandError} for the case in

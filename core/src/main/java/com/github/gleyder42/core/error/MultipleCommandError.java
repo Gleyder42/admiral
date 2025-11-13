@@ -1,11 +1,10 @@
 package com.github.gleyder42.core.error;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.jetbrains.annotations.TestOnly;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 @ToString
 @RequiredArgsConstructor

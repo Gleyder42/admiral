@@ -3,10 +3,9 @@ package com.github.gleyder42.core.interpreter.strategy;
 import com.github.gleyder42.core.interpreter.Interpreter;
 import com.github.gleyder42.core.interpreter.InterpreterResult;
 import com.github.gleyder42.core.parser.InputArgument;
-import lombok.NonNull;
-
 import java.util.List;
 import java.util.Map;
+import lombok.NonNull;
 
 public interface InterpreterStrategy {
 

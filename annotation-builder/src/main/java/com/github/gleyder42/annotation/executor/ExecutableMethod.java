@@ -1,6 +1,9 @@
 package com.github.gleyder42.annotation.executor;
 
 import com.github.gleyder42.annotation.supplier.ArgumentSupplier;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.List;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import net.bytebuddy.ByteBuddy;
@@ -8,10 +11,6 @@ import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.implementation.bytecode.assign.Assigner;
 import net.bytebuddy.matcher.ElementMatchers;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.List;
 
 public class ExecutableMethod {
 

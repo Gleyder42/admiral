@@ -2,12 +2,16 @@ package com.github.gleyder42.core.node;
 
 import com.github.gleyder42.core.executor.Check;
 import com.github.gleyder42.core.executor.Executor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 
 
 /**
@@ -23,6 +27,7 @@ public abstract class CommandNode {
 
   @Nullable
   @Getter
+
   @Setter
   private Check check;
 

@@ -1,21 +1,35 @@
 package com.github.gleyder42.annotation.builder;
 
-import com.github.gleyder42.annotation.*;
-import com.github.gleyder42.annotation.builder.producer.*;
-import com.github.gleyder42.core.interpreter.*;
+import com.github.gleyder42.annotation.CheckNode;
+import com.github.gleyder42.annotation.ExecutorNode;
+import com.github.gleyder42.annotation.InterpreterNode;
+import com.github.gleyder42.annotation.InterpreterStrategyNode;
+import com.github.gleyder42.annotation.Node;
+import com.github.gleyder42.annotation.Route;
+import com.github.gleyder42.annotation.builder.producer.MethodCheckProducer;
+import com.github.gleyder42.annotation.builder.producer.MethodExecutorProducer;
+import com.github.gleyder42.annotation.builder.producer.MethodInterpreterProducer;
+import com.github.gleyder42.annotation.builder.producer.MethodInterpreterStrategyProducer;
+import com.github.gleyder42.annotation.builder.producer.NodeProducer;
 import com.github.gleyder42.core.CommandDispatcher;
 import com.github.gleyder42.core.executor.Check;
 import com.github.gleyder42.core.executor.Executor;
+import com.github.gleyder42.core.interpreter.BooleanInterpreter;
+import com.github.gleyder42.core.interpreter.ByteInterpreter;
+import com.github.gleyder42.core.interpreter.CharacterInterpreter;
+import com.github.gleyder42.core.interpreter.DoubleInterpreter;
+import com.github.gleyder42.core.interpreter.FloatInterpreter;
+import com.github.gleyder42.core.interpreter.IntegerInterpreter;
+import com.github.gleyder42.core.interpreter.Interpreter;
+import com.github.gleyder42.core.interpreter.LongInterpreter;
+import com.github.gleyder42.core.interpreter.ShortInterpreter;
+import com.github.gleyder42.core.interpreter.StringInterpreter;
 import com.github.gleyder42.core.interpreter.strategy.InterpreterStrategy;
 import com.github.gleyder42.core.interpreter.strategy.MergedStrategy;
 import com.github.gleyder42.core.interpreter.strategy.SingleStrategy;
 import com.github.gleyder42.core.node.CommandNode;
 import com.github.gleyder42.core.node.DynamicNode;
 import com.github.gleyder42.core.node.StaticNode;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -26,6 +40,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AnnotationCommandBuilder {

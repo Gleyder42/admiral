@@ -2,12 +2,11 @@ package com.github.gleyder42.core.executor;
 
 import com.github.gleyder42.core.error.CommandError;
 import com.github.gleyder42.core.error.LiteralCommandError;
+import java.util.function.BooleanSupplier;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.BooleanSupplier;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CheckResult {

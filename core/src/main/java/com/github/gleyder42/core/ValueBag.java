@@ -1,11 +1,18 @@
 package com.github.gleyder42.core;
 
-import lombok.*;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.ToString;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Stores key value entries. One key can hold multiple values.
@@ -158,7 +165,7 @@ public class ValueBag {
     return map.entrySet().stream()
         .map(entry -> {
           if (entry.getValue().size() == 1) {
-            return new SimpleEntry(entry.getKey(), entry.getValue().get(0));
+            return new SimpleEntry(entry.getKey(), entry.getValue().getFirst());
           } else {
             return new SimpleEntry(entry.getKey(), entry.getValue());
           }

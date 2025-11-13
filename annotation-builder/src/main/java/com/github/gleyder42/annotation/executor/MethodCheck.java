@@ -5,10 +5,9 @@ import com.github.gleyder42.core.CommandContext;
 import com.github.gleyder42.core.error.ThrowableCommandError;
 import com.github.gleyder42.core.executor.Check;
 import com.github.gleyder42.core.executor.CheckResult;
+import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 public class MethodCheck implements Check {

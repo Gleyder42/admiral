@@ -1,9 +1,8 @@
 package com.github.gleyder42.core.builder;
 
 import com.github.gleyder42.core.node.StaticNode;
-import lombok.NonNull;
-
 import java.util.Arrays;
+import lombok.NonNull;
 
 public class StaticNodeBuilder extends CommandNodeBuilder<StaticNodeBuilder, StaticNode> {
 

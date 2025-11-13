@@ -1,10 +1,9 @@
 package com.github.gleyder42.core.node;
 
-import lombok.Getter;
-import lombok.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.NonNull;
 
 /**
  * Static nodes defines the command structure.

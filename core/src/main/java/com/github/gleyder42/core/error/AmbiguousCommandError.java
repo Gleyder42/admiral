@@ -2,11 +2,10 @@ package com.github.gleyder42.core.error;
 
 import com.github.gleyder42.core.CommandRoute;
 import com.github.gleyder42.core.Messages;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Implementation of {@link CommandError} for the case in

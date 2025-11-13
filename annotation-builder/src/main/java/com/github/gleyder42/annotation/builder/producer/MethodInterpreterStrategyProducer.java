@@ -3,9 +3,8 @@ package com.github.gleyder42.annotation.builder.producer;
 import com.github.gleyder42.annotation.InterpreterStrategyNode;
 import com.github.gleyder42.annotation.executor.ExecutableMethod;
 import com.github.gleyder42.annotation.executor.MethodInterpreterStrategy;
-import lombok.NonNull;
-
 import java.lang.reflect.Method;
+import lombok.NonNull;
 
 public class MethodInterpreterStrategyProducer implements SimpleNodeProducer<InterpreterStrategyNode> {
 

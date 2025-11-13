@@ -1,10 +1,9 @@
 package com.github.gleyder42.annotation.supplier;
 
+import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
 
 @RequiredArgsConstructor
 public class MapArgumentSupplier implements ArgumentSupplier {

@@ -1,10 +1,9 @@
 package com.github.gleyder42.core.error;
 
-import lombok.NonNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Objects;
 import java.util.function.Function;
+import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ThrowableCommandError implements CommandError {
 

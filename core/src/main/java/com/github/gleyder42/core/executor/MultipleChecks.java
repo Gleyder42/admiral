@@ -2,15 +2,14 @@ package com.github.gleyder42.core.executor;
 
 import com.github.gleyder42.core.CommandContext;
 import com.github.gleyder42.core.error.MultipleCommandError;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class MultipleChecks implements Check {

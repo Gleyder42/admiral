@@ -2,13 +2,12 @@ package com.github.gleyder42.core.interpreter;
 
 import com.github.gleyder42.core.error.CommandError;
 import com.github.gleyder42.core.error.ThrowableCommandError;
+import java.util.function.Supplier;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Supplier;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class InterpreterResult<T> {

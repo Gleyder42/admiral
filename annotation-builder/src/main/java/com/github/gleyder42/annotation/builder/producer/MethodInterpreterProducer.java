@@ -3,9 +3,8 @@ package com.github.gleyder42.annotation.builder.producer;
 import com.github.gleyder42.annotation.InterpreterNode;
 import com.github.gleyder42.annotation.executor.ExecutableMethod;
 import com.github.gleyder42.annotation.executor.MethodInterpreter;
-import lombok.NonNull;
-
 import java.lang.reflect.Method;
+import lombok.NonNull;
 
 public class MethodInterpreterProducer implements SimpleNodeProducer<InterpreterNode> {
   @Override

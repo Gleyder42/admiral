@@ -2,14 +2,13 @@ package com.github.gleyder42.core;
 
 import com.github.gleyder42.core.error.CommandError;
 import com.github.gleyder42.core.node.CommandNode;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 import org.jetbrains.annotations.TestOnly;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A route is a potential command.

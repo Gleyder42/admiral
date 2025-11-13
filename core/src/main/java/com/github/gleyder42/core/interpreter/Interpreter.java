@@ -1,8 +1,7 @@
 package com.github.gleyder42.core.interpreter;
 
-import lombok.NonNull;
-
 import java.util.Map;
+import lombok.NonNull;
 
 public interface Interpreter<T> {
 

@@ -2,8 +2,8 @@ package com.github.gleyder42.core.builder;
 
 import com.github.gleyder42.core.interpreter.CommonInterpreter;
 import com.github.gleyder42.core.interpreter.Interpreter;
-import com.github.gleyder42.core.node.DynamicNode;
 import com.github.gleyder42.core.interpreter.strategy.InterpreterStrategy;
+import com.github.gleyder42.core.node.DynamicNode;
 import lombok.NonNull;
 
 public class DynamicNodeBuilder extends CommandNodeBuilder<DynamicNodeBuilder, DynamicNode> {

@@ -12,6 +12,14 @@ import com.github.gleyder42.core.node.DynamicNode;
 import com.github.gleyder42.core.node.StaticNode;
 import com.github.gleyder42.core.parser.InputArgument;
 import com.github.gleyder42.core.parser.InputParser;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -19,10 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Admirals main class.
@@ -208,7 +212,7 @@ public class CommandDispatcher {
           parseInterpreter(nextNode, duplicate, interpreterMap, argument);
           return duplicate;
         })
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   private void parseInterpreter(@NonNull DynamicNode node, @NonNull CommandRoute route,
@@ -233,7 +237,7 @@ public class CommandDispatcher {
         .map(route -> {
           CommandRoute duplicate = mainRoute.duplicate();
           duplicate.getValueBag().addBag(route.getValueBag());
-          route(route.getNodeList().get(0), duplicate, new ArrayDeque<>(argumentDeque), interpreterMap);
+          route(route.getNodeList().getFirst(), duplicate, new ArrayDeque<>(argumentDeque), interpreterMap);
           return duplicate;
         }).toList();
   }

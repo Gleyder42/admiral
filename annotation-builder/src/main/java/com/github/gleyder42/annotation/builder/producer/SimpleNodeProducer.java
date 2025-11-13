@@ -1,9 +1,8 @@
 package com.github.gleyder42.annotation.builder.producer;
 
-import lombok.NonNull;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import lombok.NonNull;
 
 public interface SimpleNodeProducer<A extends Annotation> extends NodeProducer<A> {
 

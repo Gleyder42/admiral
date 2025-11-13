@@ -5,11 +5,10 @@ import com.github.gleyder42.core.interpreter.Interpreter;
 import com.github.gleyder42.core.interpreter.InterpreterResult;
 import com.github.gleyder42.core.interpreter.strategy.InterpreterStrategy;
 import com.github.gleyder42.core.parser.InputArgument;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 import java.util.Map;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class MethodInterpreterStrategy implements InterpreterStrategy {
