@@ -2,12 +2,12 @@
 
 Admiral is a command library designed to be used within in Minecraft plugins.
 
-It is now considered outdate, since [PaperMc](https://papermc.io/) now ships with [Mojang's brigadier](https://docs.papermc.io/paper/dev/command-api/basics/introduction/) library.
+It is now considered outdatew, since [PaperMc](https://papermc.io/) now ships with [Mojang's brigadier](https://docs.papermc.io/paper/dev/command-api/basics/introduction/) library.
 
-Despite that, admiral has one cool feature.
+Despite that, admiral has one cool feature: 
 Admiral does not use reflections in the `annotation-builder`.
 Instead, it uses [ByteBuddy](https://bytebuddy.net/#/) to generate JVM Bytecode at runtime to avoid reflections.
-The relevant code in [here](annotation-builder/src/main/java/com/github/gleyder42/annotation/executor/ExecutableMethod.java)
+The relevant code in [here](annotation-builder/src/main/java/com/github/gleyder42/annotation/executor/ExecutableMethod.java).
 
 ## Origin
 
